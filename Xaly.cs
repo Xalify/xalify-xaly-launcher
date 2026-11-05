@@ -375,8 +375,9 @@ namespace Xaly
         }
 
         // ---- itch.io API (the key stays on the C# side; the page only sees the API's answers)
-        // The key is never stored in the source code. Order: the player's own key (Settings > Downloads),
-        // then itchkey.txt shipped next to the .exe in official release downloads.
+        // Public key from a throwaway itch.io account, so installs work out of the box.
+        // Order: the player's own key (Settings > Downloads), then itchkey.txt next to the .exe, then this one.
+        const string DefaultItchKey = "9cF1xD1Ssn1EMXAZFYWonRHPIE4ZNhfZcRWTDiPX";
         string ItchKey()
         {
             try
@@ -387,7 +388,7 @@ namespace Xaly
                 if (File.Exists(b)) { string k2 = File.ReadAllText(b).Trim(); if (k2.Length > 0) return k2; }
             }
             catch (Exception) { }
-            return "";
+            return DefaultItchKey;
         }
         public string SetItchKey(string key)
         {
@@ -408,10 +409,9 @@ namespace Xaly
                 string p = Path.Combine(f.DataDir, "itch.key");
                 if (File.Exists(p) && File.ReadAllText(p).Trim().Length > 0) return "custom";
                 string b = Path.Combine(f.AppDir, "itchkey.txt");
-                if (File.Exists(b) && File.ReadAllText(b).Trim().Length > 0) return "built-in";
             }
             catch (Exception) { }
-            return "none";
+            return "built-in";
         }
         static string JsonStr(string s)
         {

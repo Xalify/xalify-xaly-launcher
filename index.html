@@ -642,7 +642,7 @@ select::-ms-expand{display:none}
 var X=window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
 var VER="1.4.0";
 var NOTES=[
- {v:"1.4.0",d:"5 Nov 2026",t:["Xaly now updates itself: new versions are published on GitHub, and the launcher offers to install them with one click","Check for updates in Settings \u203A About","The itch.io key is no longer stored in the source code"]},
+ {v:"1.4.0",d:"5 Nov 2026",t:["Xaly now updates itself: new versions are published on GitHub, and the launcher offers to install them with one click","Check for updates in Settings \u203A About","Installs from itch.io use a new built-in key"]},
  {v:"1.3.0",d:"5 Nov 2026",t:["New profiles: your picture, level and XP, badges you earn by playing, a favourite-game showcase, recent activity with hours played in the past 2 weeks, and stats","Edit profile: real name, country, About me, favourite game, background and featured badge","Friends can see each other\u2019s profiles and pictures (shared privately, end-to-end encrypted). Open one from a chat or from your profile\u2019s friends list"]},
  {v:"1.2.0",d:"5 Nov 2026",t:["The store now grows to thousands of free games: it reads itch.io\u2019s game feeds and keeps paging deeper in the background","Give feedback no longer freezes the launcher and explains what to do if sending fails, with a Send with my email app option","Recently played menu now shows above the page","Messages look like iMessage: blue bubbles on the right, grey on the left, with Delivered and Read receipts","Create accounts with your Gmail address and a password, and sign in with them"]},
  {v:"1.1.0",d:"5 Nov 2026",t:["The store now pulls free Windows games from itch.io by itself and updates every 6 hours: popular, new, top rated, horror, platformers, action, RPG and more","Genre buttons under the series filters, \u201CLoad more from itch.io\u201D at the bottom of every list, and search now looks through all of itch.io","Friends panel now sits beside the page instead of covering it","New slim scrollbars and nicer drop-downs","Settings \u203A General: switch between the new Sidebar layout and the Classic layout"]},
@@ -3008,7 +3008,7 @@ function renderSettings(){
     var ksrc=T(function(){return X.ItchKeySource();},"none"),cust=ksrc==="custom";ki.setAttribute("placeholder",cust?"Your key is saved (type to replace)":ksrc==="built-in"?"Using the key that came with Xaly":"Paste your itch.io API key");kd.appendChild(ki);
     kd.appendChild(btn("Save","btn",function(){var v=trim(ki.value),r=T(function(){return X.SetItchKey(v);});toast(r==="ok"?(v?"itch.io key saved":"Your key was removed"):"Couldn\u2019t save: "+r.replace("ERR:",""));renderSettings();}));
     kd.appendChild(btn("Test","btn",testKey));
-    b.appendChild(srow("itch.io API key","Used to install games from itch.io. If installs say itch.io refused the request, create your own key at itch.io/user/settings/api-keys, paste it here and press Test. Official Xaly downloads come with a key; builds you compile yourself need your own.",kd));
+    b.appendChild(srow("itch.io API key","Used to install games from itch.io. If installs say itch.io refused the request, create your own key at itch.io/user/settings/api-keys, paste it here and press Test. Xaly comes with a built-in key; paste your own here to use it instead.",kd));
   }else if(tab==="storage"){
     renderStorageTab(b);
   }else if(tab==="cache"){

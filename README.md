@@ -23,7 +23,7 @@ After that the launcher updates itself: when a new release is published here it 
 
 Double-click `Build.bat`. It compiles `Xaly Launcher.exe` next to the source and starts it.
 
-Installing games from itch.io needs an itch.io API key. Official releases include one. For your own builds, either paste your key in **Settings › Downloads**, or put it in a file called `itchkey.txt` next to the `.exe`. `itchkey.txt` is in `.gitignore` so it never ends up on GitHub.
+Installing games from itch.io uses an itch.io API key. A public key from a throwaway itch.io account is built into `Xaly.cs`, so installs work out of the box. Players can use their own key instead in **Settings › Downloads** (or an `itchkey.txt` file next to the `.exe`).
 
 ## Publishing a new version
 
@@ -32,9 +32,7 @@ Installing games from itch.io needs an itch.io API key. Official releases includ
 3. Commit and push to `main`.
 4. On GitHub open **Actions › Release › Run workflow**. Or push a tag such as `v1.4.1`.
 
-The workflow builds the `.exe` on Windows, packs it with `index.html`, `xaly.ico` and the itch.io key from the `ITCH_KEY` secret, publishes the release with a SHA256 checksum, and every running launcher offers the update within a few hours (or straight away via **Settings › About › Check for updates**).
-
-One-time setup: add the itch.io key as a secret under **Settings › Secrets and variables › Actions › New repository secret**, name `ITCH_KEY`.
+The workflow builds the `.exe` on Windows, packs it with `index.html` and `xaly.ico`, publishes the release with a SHA256 checksum, and every running launcher offers the update within a few hours (or straight away via **Settings › About › Check for updates**).
 
 ## Data and privacy
 

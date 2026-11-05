@@ -3107,7 +3107,7 @@ function init(){
 function selfTest(){   // run by the build server: proves both directions of the page <-> app bridge work
   var r={engine:ENGINE,ua:navigator.userAgent,ok:false,checks:{}};
   function c(n,f){try{var v=f();r.checks[n]=String(v).substr(0,80);}catch(e){r.checks[n]="ERR "+e.message;}}
-  c("paths",function(){return X.Paths();});c("hash",function(){return X.Hash("a","b");});c("ecnew",function(){return X.EcNew().length;});
+  c("paths",function(){return X.Paths();});c("hash",function(){return X.Hash("a1730000000000","pw1234").length;});c("ecnew",function(){return X.EcNew().length;});
   c("seal",function(){var k=X.RandHex("32"),t=X.Seal(k,"h\u00e9llo\n\"x\"");return X.Unseal(k,t);});
   c("save",function(){return X.Save("selftest.json","{\"a\":1}")+" "+X.Data("selftest.json");});
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});

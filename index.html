@@ -757,8 +757,9 @@ select::-ms-expand{display:none}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.3";
+var VER="1.5.4";
 var NOTES=[
+ {v:"1.5.4",d:"5 Nov 2026",t:["New sounds: a chime when a game finishes downloading or updating, and a fanfare when you unlock an achievement. You hear them even while you\u2019re in a game","Turn sounds off or listen to them in Settings \u203A General"]},
  {v:"1.5.3",d:"5 Nov 2026",t:["New achievements for every game: First Launch, Night Shift, Marathon, Week Streak, Legend and more. Unlocking one pops up a little trophy","Each game\u2019s page shows its achievements with progress bars, and your profile shows your latest ones to friends. Achievements also give XP","Crash reports: if something goes wrong, the details are sent to the developer automatically so it can be fixed. You can turn this off in Settings \u203A About"]},
  {v:"1.5.2",d:"5 Nov 2026",t:["Download queue: install as many games as you like and they download one after another. Pause, resume, reorder or cancel them on the Downloads page","Downloads now continue where they stopped if your internet drops, and after you restart Xaly","Xaly now installs updates by itself when it starts, with a progress screen that shows your download speed","A What\u2019s new popup shows the changes after each update. Tick Don\u2019t show again to turn it off"]},
  {v:"1.5.1",d:"5 Nov 2026",t:["TV mode: a full-screen, controller-friendly view for playing on a TV. Open it from the sidebar or press Start on a controller","Game updates: Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. Updating keeps your saves","Settings \u203A General has switches for game updates and TV mode"]},
@@ -2894,6 +2895,7 @@ function checkAch(g,silent){
 }
 var achQ=0;
 function achPop(a,g){
+  playSnd("achievement");
   var focused=!document.hasFocus||document.hasFocus();
   notes().unshift({id:rid(),k:"ok",title:"Achievement unlocked: "+a[1],msg:g.name+" \u2014 "+a[2],gid:g.id,img:gArt(g),t:now(),read:0});if(S.notes.length>30)S.notes.length=30;paintBell();
   if(!focused||ovOn){T(function(){return X.Notify("Achievement unlocked: "+a[1],g.name+" \u2014 "+a[2],g.id);});}
@@ -3133,7 +3135,7 @@ function finishUpdate(j,dest){
     var r2=T(function(){return X.ReplaceFile(dest,g.path||"");});
     if(r2.indexOf("ERR")===0)msg=r2.replace("ERR:","");else ok=true;
   }else{T(function(){return X.Launch("",dest,"");});ok=true;}
-  if(ok){g.up=j.up||g.updAvail;delete g.updAvail;g.updT=now();save();sizeQ[g.id]=0;notify("ok","Updated",g.name+" is now up to date.",g,it.image);}
+  if(ok){g.up=j.up||g.updAvail;delete g.updAvail;g.updT=now();save();sizeQ[g.id]=0;playSnd("download");notify("ok","Updated",g.name+" is now up to date.",g,it.image);}
   else notify("err","Couldn’t update "+g.name,msg||"Something went wrong while installing the new version.",g,it.image);
   render();if(tvOn)tvRender();
 }
@@ -3255,6 +3257,8 @@ function reportError(kind,msg,where,stack){
   }catch(e){}
 }
 window.onerror=function(msg,src,line,col,err){reportError("Script error",String(msg),"line "+line+":"+(col||0),err&&err.stack?String(err.stack).substr(0,3000):"");return false;};
+/* ---------- sounds ---------- */
+function playSnd(n){if(!S||S.set.sounds===0)return;T(function(){return X.PlaySound(n);});}
 /* ---------- notifications ---------- */
 function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function notes(){return S.notes||(S.notes=[]);}
@@ -3262,6 +3266,7 @@ function unreadN(){var n=0;notes().forEach(function(x){if(!x.read)n++;});return 
 function paintBell(){var c=$("bellc"),n=S?unreadN():0;c.textContent=n>9?"9+":String(n);c.style.display=n?"block":"none";}
 function doneNote(it,g){
   if(!g){toast(it.name+" is already in your library");return;}
+  playSnd("download");
   notify("ok","Ready to play",it.name+" finished downloading and is installed.",g,it.image);
 }
 function notify(kind,title,msg,g,img){
@@ -3589,6 +3594,11 @@ function renderSettings(){
     b.appendChild(srow("Game updates","Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. "+(updCount()?updCount()+" update"+(updCount()===1?"":"s")+" waiting. ":"")+(S.guT?"Last checked "+ago(S.guT)+".":""),gu));
     b.appendChild(srow("TV mode","A full-screen view made for controllers and TVs. Open it from the sidebar or press Start on a controller.",btn("Open TV mode","btn",function(){enterTV();})));
     b.appendChild(srow("Start Xaly in TV mode",null,sw(!!S.set.tvStart,function(v){S.set.tvStart=v?1:0;save();})));
+    var snd=el("div");snd.style.cssText="display:flex;align-items:center";
+    snd.appendChild(btn("\u25B6 Download","btn",function(){T(function(){return X.PlaySound("download");});}));
+    snd.appendChild(btn("\u25B6 Achievement","btn",function(){T(function(){return X.PlaySound("achievement");});}));snd.lastChild.style.marginLeft="8px";
+    snd.appendChild(sw(S.set.sounds!==0,function(v){S.set.sounds=v?1:0;save();}));snd.lastChild.style.marginLeft="14px";
+    b.appendChild(srow("Sounds","A chime when a game finishes downloading and a fanfare when you unlock an achievement. Press the buttons to hear them.",snd));
     b.appendChild(srow("Notify me when a download finishes","Shows a card in the launcher with a Play button, and keeps a list under the bell.",sw(S.set.notify!==0,function(v){S.set.notify=v?1:0;save();})));
     b.appendChild(srow("Windows notifications","Also pop up a Windows notification when the launcher is in the background or in the tray.",sw(S.set.winNotify!==0,function(v){S.set.winNotify=v?1:0;save();})));
     b.appendChild(srow("Opening animation",null,sw(AC.intro!==0,function(v){S.set.intro=v?1:0;AC.intro=v?1:0;save();saveAcc();})));
@@ -3705,6 +3715,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("fullscreen",function(){return X.SetFullscreen("1")+" "+X.SetFullscreen("0");});
   c("pad",function(){return X.PadNative("1")+" "+X.PadNative("0");});
   c("tv",function(){enterTV();var n=document.getElementById("tvrows").childNodes.length;exitTV();return n+" rows";});
+  c("sound",function(){return X.PlaySound("download")+" "+X.PlaySound("achievement");});
   c("crashlog",function(){return X.CrashLog("page","self-test entry (not a real crash)");});
   c("ach",function(){var g={id:"t",name:"T",plays:12,seconds:3*3600+60,sess:[[new Date(2026,0,3,1,0).getTime(),11000],[new Date(2026,0,4,20,0).getTime(),600],[new Date(2026,0,5,20,0).getTime(),600]]};checkAch(g,true);var k,l=[];for(k in g.ach)l.push(k);return l.sort().join(",");});
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});

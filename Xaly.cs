@@ -962,6 +962,23 @@ namespace Xaly
         // ---- notifications (shown by Windows when the launcher isn't the active window)
         public string Notify(string title, string msg, string tag) { return f.ShowNote(title, msg, tag); }
 
+        // ---- sounds: short .wav files in the sounds folder next to the app, played by Windows (heard even while a game is focused)
+        static System.Media.SoundPlayer player;
+        public string PlaySound(string name)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(name) || !System.Text.RegularExpressions.Regex.IsMatch(name, "^[a-z0-9_-]+$")) return "ERR:bad name";
+                string p = Path.Combine(Path.Combine(f.AppDir, "sounds"), name + ".wav");
+                if (!File.Exists(p)) return "ERR:missing";
+                if (player != null) { try { player.Stop(); player.Dispose(); } catch (Exception) { } }
+                player = new System.Media.SoundPlayer(p);
+                player.Play();
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
         // ---- display engine
         public string Engine() { return f.Modern ? "webview2" : "ie"; }
         public string UseEngine(string name)

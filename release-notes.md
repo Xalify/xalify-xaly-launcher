@@ -1,4 +1,2 @@
-- **Achievements:** every game now has 12 milestones: First Launch, Getting Into It (1 hour), Regular (10 launches), Night Shift (play between midnight and 5 AM), On a Roll (3 days in a row), Weekend Warrior, Dedicated (10 hours), Marathon (3 hours in one go), Week Streak (7 days in a row), Devoted (25 hours), Can't Stop (50 launches) and Legend (100 hours). Unlocking one pops up a trophy, and you get a Windows notification if you're in a game.
-- Each game's page shows its achievements with progress bars. Your profile shows your latest ones, and friends can see them too. Achievements also give XP.
-- Games you already played get the achievements they've earned straight away.
-- **Crash reports:** if something goes wrong in Xaly, the details are sent to the developer automatically so it can be fixed. Only the error, the Xaly and Windows versions and the screen you were on are sent: no names, emails or files. Turn it off in Settings › About.
+- **Sounds:** a soft chime plays when a game finishes downloading or updating, and a little fanfare plays when you unlock an achievement. You hear them even while you're in a game.
+- Turn sounds off, or press the buttons to hear them, in Settings › General.

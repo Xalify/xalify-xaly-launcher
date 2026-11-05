@@ -85,6 +85,7 @@ jobs:
           New-Item -ItemType Directory -Force XalyLauncher | Out-Null
           Copy-Item "Xaly Launcher.exe","index.html","xaly.ico","webview2/Microsoft.Web.WebView2.Core.dll","webview2/Microsoft.Web.WebView2.WinForms.dll" XalyLauncher/
           foreach ($a in "x64","x86","arm64") { if (Test-Path "webview2/$a") { Copy-Item "webview2/$a" "XalyLauncher/$a" -Recurse } }
+          Copy-Item "sounds" "XalyLauncher/sounds" -Recurse
           if ($env:ITCH_KEY) { [IO.File]::WriteAllText("$PWD/XalyLauncher/itchkey.txt", $env:ITCH_KEY.Trim()) } else { Write-Host "Using the itch.io key built into Xaly.cs" }
           Compress-Archive -Path XalyLauncher -DestinationPath "XalyLauncher-$v.zip"
           $h = (Get-FileHash "XalyLauncher-$v.zip" -Algorithm SHA256).Hash.ToLower()

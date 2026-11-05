@@ -1,0 +1,14 @@
+commit a75e2a30f906e43cd682b4763439e530454475a0 on webview2
+Downloading https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2
+WebView2 SDK ready in D:\a\xalify-xaly-launcher\xalify-xaly-launcher\webview2 (lib net462)
+WebView2 SDK 1.0.4314.35
+== compile: legacy ==
+exit 0
+== compile: webview2 ==
+exit 0
+== self-test: webview2 build ==
+{"engine":"webview2","ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0","ok":true,"checks":{"paths":"C:\\Users\\runneradmin\\Downloads\\Xaly Launcher|C:\\Users\\runneradmin\\AppData\\Roamin","hash":"ERR:Salt is not at least eight bytes.","ecnew":"237","seal":"héllo\n\"x\"","save":"ok {\"a\":1}","ui":"13 buttons, login block","http":"ok","callback":"ok=true status=200 bytes=5864"}}
+== self-test: webview2 build forced to legacy engine ==
+{"engine":"ie","ua":"Mozilla/5.0 (Windows NT 6.2; Win64; x64; Trident/7.0; rv:11.0) like Gecko","ok":true,"checks":{"paths":"C:\\Users\\runneradmin\\Downloads\\Xaly Launcher|C:\\Users\\runneradmin\\AppData\\Roamin","hash":"ERR:Salt is not at least eight bytes.","ecnew":"237","seal":"héllo\n\"x\"","save":"ok {\"a\":1}","ui":"13 buttons, login block","http":"ok","callback":"ok=true status=200 bytes=5864"}}
+== self-test: legacy-only build ==
+{"engine":"ie","ua":"Mozilla/5.0 (Windows NT 6.2; Win64; x64; Trident/7.0; rv:11.0) like Gecko","ok":true,"checks":{"paths":"C:\\Users\\runneradmin\\Downloads\\Xaly Launcher|C:\\Users\\runneradmin\\AppData\\Roamin","hash":"ERR:Salt is not at least eight bytes.","ecnew":"237","seal":"héllo\n\"x\"","save":"ok {\"a\":1}","ui":"13 buttons, login block","http":"ok","callback":"ok=true status=200 bytes=5864"}}

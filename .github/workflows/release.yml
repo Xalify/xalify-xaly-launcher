@@ -1,8 +1,8 @@
 name: Release
 
 # Builds "Xaly Launcher.exe" on Windows and publishes it as a GitHub release.
-# Runs by itself whenever main gets a version number (var VER="x.y.z" in index.html)
-# that hasn't been released yet. Can also be started from the Actions tab or with a v* tag.
+# Every push to main is released: a new version number in index.html is used as-is,
+# otherwise the patch number goes up by itself. Can also be started from the Actions tab or with a v* tag.
 on:
   workflow_dispatch:
   push:
@@ -17,19 +17,54 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # Works out which version to publish. If main changed but the version in index.html was
+      # already released, the next patch version is created automatically (1.5.0 -> 1.5.1), with
+      # patch notes taken from the commit messages since the last release.
       - name: Read version
         id: ver
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          $m = Select-String -Path index.html -Pattern 'var VER="([^"]+)"'
-          $v = $m.Matches[0].Groups[1].Value
+          $utf8 = New-Object System.Text.UTF8Encoding $false
+          $html = [IO.File]::ReadAllText("$PWD/index.html")
+          $v = [regex]::Match($html, 'var VER="([^"]+)"').Groups[1].Value
+          if (-not $v) { throw "Couldn't find var VER in index.html" }
           if ("${{ github.ref_type }}" -eq "tag" -and "${{ github.ref_name }}".TrimStart('v') -ne $v) { throw "index.html says $v but the tag is ${{ github.ref_name }}" }
-          "v=$v" >> $env:GITHUB_OUTPUT
-          $env:GH_TOKEN = "${{ github.token }}"
           gh release view "v$v" -R "${{ github.repository }}" *> $null
-          if ($LASTEXITCODE -eq 0) { Write-Host "v$v is already released, nothing to do"; "skip=true" >> $env:GITHUB_OUTPUT } else { "skip=false" >> $env:GITHUB_OUTPUT }
-          exit 0
+          $released = ($LASTEXITCODE -eq 0); $global:LASTEXITCODE = 0
+          $sha = "${{ github.sha }}"
+          if ($released) {
+            if ("${{ github.event_name }}" -ne "push" -or "${{ github.ref }}" -ne "refs/heads/main") { Write-Host "v$v is already released"; "skip=true" >> $env:GITHUB_OUTPUT; exit 0 }
+            $subjects = @(git log "v$v..HEAD" --no-merges --pretty=format:%s | Where-Object { $_ -and $_ -notmatch '^Release \d' })
+            if ($subjects.Count -eq 0) { Write-Host "Nothing new since v$v"; "skip=true" >> $env:GITHUB_OUTPUT; exit 0 }
+            $p = $v.Split('.'); $nv = "{0}.{1}.{2}" -f $p[0], $p[1], ([int]$p[2] + 1)
+            $notes = @($subjects | Select-Object -First 10)
+            $js = ($notes | ForEach-Object { '"' + ($_.Replace('\', '\\').Replace('"', '\"')) + '"' }) -join ','
+            $date = (Get-Date).ToString("d MMM yyyy", [Globalization.CultureInfo]::InvariantCulture)
+            $html = $html.Replace("var VER=`"$v`";", "var VER=`"$nv`";")
+            $entry = " {v:`"$nv`",d:`"$date`",t:[$js]},"
+            $m = [regex]::Match($html, 'var NOTES=\[\r?\n')
+            if (-not $m.Success) { throw "Couldn't find var NOTES in index.html" }
+            $nl = if ($m.Value.EndsWith("`r`n")) { "`r`n" } else { "`n" }
+            $html = $html.Substring(0, $m.Index + $m.Length) + $entry + $nl + $html.Substring($m.Index + $m.Length)
+            [IO.File]::WriteAllText("$PWD/index.html", $html, $utf8)
+            [IO.File]::WriteAllText("$PWD/release-notes.md", (($notes | ForEach-Object { "- $_" }) -join "`n") + "`n", $utf8)
+            git config user.name "xaly-release"
+            git config user.email "xaly-release@users.noreply.github.com"
+            git commit -am "Release $nv" -q
+            git push origin HEAD:main
+            if ($LASTEXITCODE -ne 0) { throw "Couldn't push the version bump" }
+            $sha = (git rev-parse HEAD).Trim()
+            $v = $nv
+            Write-Host "Bumped to $v"
+          }
+          "v=$v" >> $env:GITHUB_OUTPUT
+          "sha=$sha" >> $env:GITHUB_OUTPUT
+          "skip=false" >> $env:GITHUB_OUTPUT
 
       - name: Build
         if: steps.ver.outputs.skip != 'true'
@@ -63,4 +98,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $v = "${{ steps.ver.outputs.v }}"
-          gh release create "v$v" "XalyLauncher-$v.zip" --title "Xaly Launcher $v" --notes-file notes.md --target "${{ github.sha }}"
+          gh release create "v$v" "XalyLauncher-$v.zip" --title "Xaly Launcher $v" --notes-file notes.md --target "${{ steps.ver.outputs.sha }}"

@@ -29,7 +29,9 @@ Installing games from itch.io uses an itch.io API key. A public key from a throw
 
 1. Change `var VER="x.y.z"` near the top of the script in `index.html` (and add an entry to `NOTES` for the in-app patch notes).
 2. Write what changed in `release-notes.md`.
-3. Commit and push to `main`. That's it: when `main` has a version that isn't released yet, the Release workflow builds and publishes it automatically. (You can also start it from **Actions › Release › Run workflow**.)
+3. Commit and push to `main`. The Release workflow builds and publishes it automatically.
+
+You can also skip steps 1 and 2: **every push to `main` is released**. If the version wasn't changed, the workflow raises the last number by itself (1.5.0 → 1.5.1), writes the patch notes from the commit messages, commits that, and publishes the release.
 
 The workflow builds the `.exe` on Windows, packs it with `index.html` and `xaly.ico`, publishes the release with a SHA256 checksum, and every running launcher offers the update within a few hours (or straight away via **Settings › About › Check for updates**).
 

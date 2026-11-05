@@ -326,6 +326,97 @@ namespace Xaly
             }
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
+        // ---- resumable downloads: keep a .part file, continue it with an HTTP Range request
+        class DlJob { public volatile int stop; public HttpWebRequest rq; }
+        Dictionary<string, DlJob> jobs2 = new Dictionary<string, DlJob>();
+        public string DownloadEx(string id, string url, string name, string resume)
+        {
+            try
+            {
+                Directory.CreateDirectory(f.DownloadsDir);
+                string dest = Path.Combine(f.DownloadsDir, SafeName(name));
+                string part = dest + ".part";
+                if (resume != "1" && File.Exists(part)) File.Delete(part);
+                DlJob job = new DlJob();
+                lock (jobs2) { DlJob old; if (jobs2.TryGetValue(id, out old)) return "ERR:This download is already running."; jobs2[id] = job; }
+                ThreadPool.QueueUserWorkItem(delegate(object o) { RunDl(id, url, dest, part, job); });
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        void RunDl(string id, string url, string dest, string part, DlJob job)
+        {
+            string result = "err", detail = "";
+            try
+            {
+                try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                long have = File.Exists(part) ? new FileInfo(part).Length : 0;
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
+                rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) XalyLauncher";
+                rq.Timeout = 30000; rq.ReadWriteTimeout = 30000; rq.AllowAutoRedirect = true;
+                if (have > 0) rq.AddRange(have);
+                job.rq = rq;
+                if (job.stop != 0) throw new OperationCanceledException();
+                using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                {
+                    long total;
+                    if (have > 0 && rs.StatusCode == HttpStatusCode.PartialContent) total = rs.ContentLength >= 0 ? have + rs.ContentLength : -1;
+                    else { have = 0; total = rs.ContentLength; }   // the server ignored the range: start over
+                    using (Stream inp = rs.GetResponseStream())
+                    using (FileStream fs = new FileStream(part, have > 0 ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        byte[] buf = new byte[131072]; int n; long got = have; int last = 0;
+                        f.Js("onDl", id, "p", got.ToString(), total.ToString());
+                        while ((n = inp.Read(buf, 0, buf.Length)) > 0)
+                        {
+                            fs.Write(buf, 0, n); got += n;
+                            if (job.stop != 0) break;
+                            int t = Environment.TickCount;
+                            if (t - last > 250) { last = t; f.Js("onDl", id, "p", got.ToString(), total.ToString()); }
+                        }
+                        f.Js("onDl", id, "p", got.ToString(), total.ToString());
+                        if (job.stop == 0 && total > 0 && got < total) throw new IOException("The connection dropped before the download finished.");
+                    }
+                }
+                if (job.stop == 0)
+                {
+                    if (File.Exists(dest)) File.Delete(dest);
+                    File.Move(part, dest);
+                    result = "done"; detail = dest;
+                }
+            }
+            catch (WebException we)
+            {
+                HttpWebResponse r = we.Response as HttpWebResponse;
+                if (r != null && (int)r.StatusCode == 416) { try { File.Delete(part); } catch (Exception) { } }
+                detail = r != null ? "HTTP " + (int)r.StatusCode + " " + r.StatusDescription : we.Message;
+            }
+            catch (Exception ex) { detail = ex.Message; }
+            if (job.stop == 1) { result = "paused"; detail = ""; }
+            else if (job.stop == 2) { try { File.Delete(part); } catch (Exception) { } result = "cancel"; detail = ""; }
+            lock (jobs2) { jobs2.Remove(id); }
+            f.Js("onDl", id, result, detail, "");
+        }
+        public string DownloadPause(string id)
+        {
+            DlJob j; lock (jobs2) { if (!jobs2.TryGetValue(id, out j)) return "ok"; j.stop = 1; }
+            try { if (j.rq != null) j.rq.Abort(); } catch (Exception) { }
+            return "ok";
+        }
+        public string DownloadCancel(string id, string name)
+        {
+            DlJob j; bool active;
+            lock (jobs2) { active = jobs2.TryGetValue(id, out j); if (active) j.stop = 2; }
+            if (active) { try { if (j.rq != null) j.rq.Abort(); } catch (Exception) { } }
+            else if (!string.IsNullOrEmpty(name)) { try { File.Delete(Path.Combine(f.DownloadsDir, SafeName(name)) + ".part"); } catch (Exception) { } }
+            return "ok";
+        }
+        public string PartSize(string name)
+        {
+            try { string pth = Path.Combine(f.DownloadsDir, SafeName(name)) + ".part"; return File.Exists(pth) ? new FileInfo(pth).Length.ToString() : "0"; }
+            catch (Exception) { return "0"; }
+        }
+
         public string Cancel(string id)
         {
             WebClient wc;

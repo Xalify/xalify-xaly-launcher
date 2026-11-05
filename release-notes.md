@@ -1,3 +1,4 @@
-- **TV mode:** a full-screen, controller-friendly view for playing on a TV, like Steam Big Picture. Open it from the sidebar (TV mode) or press Start on a controller. Works with Xbox, PlayStation and most other controllers, and with the keyboard (arrows, Enter, Esc, M).
-- **Game updates:** Xaly remembers which build of each game you installed and shows an **Update** badge when the developer uploads a new one on itch.io or GitHub. Updating keeps your saves.
-- Settings › General has new switches for game updates and for starting Xaly in TV mode.
+- **Download queue:** install as many games as you like and they download one after another. Pause, resume, reorder or cancel them on the Downloads page.
+- **Downloads survive dropped connections:** if your internet drops, the download tries again by itself and continues where it stopped instead of starting over. Paused and unfinished downloads also continue after you restart Xaly.
+- **Automatic updates:** when a new version of Xaly is out, it installs itself as soon as you start the launcher, on a progress screen showing your download speed and time left. You can turn this off in Settings › About.
+- **What's new popup:** after each update, a small popup shows what changed. Tick "Don't show again" to turn it off.

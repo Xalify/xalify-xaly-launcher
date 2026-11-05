@@ -635,6 +635,51 @@ select::-ms-expand{display:none}
 .tvbtn.f{background:#0f3540;border-color:#2ee6f0;color:#fff}
 .tvmn{width:440px;background:#0e121c;border:1px solid #232a3c;border-radius:24px;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.7)}.tvmn h2{margin:0 0 8px;font-size:28px}
 .classic #tTv{display:none}
+
+/* ===== 1.5.2: queue, updating screen, what's new ===== */
+.dqctl{display:flex;align-items:center;margin:0 0 12px}.dqctl span{flex:1 1 0%;color:#9aa1b8;font-size:13px}.dqctl .btn{margin-left:8px}
+.dq{display:flex;align-items:center;background:#141925;border:1px solid #1f2636;border-radius:14px;padding:12px;margin-bottom:10px}
+.dq.act{border-color:#1f5a66;background:#10202a}.dq.error{border-color:#5a2632}.dq.paused{opacity:.85}
+.dqt{width:120px;height:68px;border-radius:10px;background-size:cover;background-position:center;flex:0 0 auto;margin-right:16px}
+.dqm{flex:1 1 0%;min-width:0}.dqm b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dqs{display:block;color:#c8cddc;font-size:13px;margin-top:2px}.dq.error .dqs{color:#ff8a95}.dqz{display:block;color:#7d8299;font-size:12px;margin:2px 0 8px}
+.dq .pb{height:6px;border-radius:3px;background:#232a3a;overflow:hidden}.dq .pf{height:6px;background:linear-gradient(90deg,#00b8d4,#2ee6f0);transition:width .3s}
+.dq.paused .pf{background:#5b6b94}.dqa{margin-left:16px;white-space:nowrap}.dqa .btn,.dqa .pri{margin-left:6px}
+.dqn{color:#7d8299;font-size:12.5px;margin:6px 2px 22px}
+#updscr{position:fixed;left:0;top:0;right:0;bottom:0;z-index:300;display:none;background:radial-gradient(ellipse at 50% 35%,#0d2c36 0%,#06080d 65%);color:#fff;text-align:center}
+#updscr.on{display:flex;align-items:center;justify-content:center;animation:fade2 .35s both}
+.uw{width:460px}
+.ulg{position:relative;width:120px;height:120px;margin:0 auto 34px}
+.ulg img{position:absolute;left:14px;top:14px;width:92px;height:92px;animation:ubob 2.4s ease-in-out infinite}
+.uring{position:absolute;left:0;top:0;width:114px;height:114px;border-radius:50%;border:3px solid transparent;border-top-color:#2ee6f0;border-right-color:rgba(46,230,240,.35);animation:uspin 1.1s linear infinite}
+.uring.r2{left:-12px;top:-12px;width:138px;height:138px;border-top-color:rgba(46,230,240,.5);border-right-color:transparent;border-left-color:rgba(46,230,240,.2);animation-duration:1.9s;animation-direction:reverse}
+#updscr.inst .uring{animation-duration:.6s}
+@keyframes uspin{to{transform:rotate(360deg)}}
+@keyframes ubob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+#updh{margin:0 0 22px;font-size:26px;font-weight:800}
+.ubar{position:relative;height:10px;border-radius:5px;background:#18202e;overflow:hidden}
+.ubar i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#00b8d4,#2ee6f0);transition:width .35s ease}
+.ushine{position:absolute;top:0;left:-40%;width:40%;height:10px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.35),rgba(255,255,255,0));animation:ushine 1.4s linear infinite}
+@keyframes ushine{to{left:100%}}
+.ustat{display:flex;justify-content:space-between;margin-top:12px;font-size:14px;color:#b8c2d6}#updpct{font-weight:800;color:#fff}#updspd{color:#2ee6f0;font-weight:700}
+.usub{margin-top:26px;color:#7d8299;font-size:13px}
+#wn{position:fixed;left:0;top:0;right:0;bottom:0;z-index:250;display:none;background:rgba(3,5,9,.6)}
+#wn.on{display:flex;align-items:center;justify-content:center;animation:fade2 .25s both}
+.wnb{width:620px;max-width:92%;background:#141822;border:1px solid #262d3d;border-radius:22px;padding:26px 30px 22px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pop .3s both}
+.wnh{display:flex;align-items:center;justify-content:space-between}.wnh h2{margin:0;font-size:26px;font-weight:800}
+.wnx{background:transparent;color:#9aa1b8;font-size:20px;padding:4px 8px;border-radius:8px}.wnx:hover{background:#1f2533;color:#fff}
+.wnl{display:inline-block;color:#2ee6f0;font-size:14.5px;margin:12px 0 4px;cursor:pointer}.wnl:hover{text-decoration:underline}
+.wns{max-height:360px;overflow-y:auto;margin-top:10px}
+.wnv{margin:14px 0 12px}.wnv b{font-size:18px;margin-right:14px}.wnv span{color:#8a8ea6;font-size:15px}
+.wnr{display:flex;align-items:flex-start;position:relative;padding:0 0 16px}
+.wnp{width:86px;flex:0 0 86px;font-size:12.5px;font-weight:700;border-radius:10px;padding:3px 0;text-align:center;margin-right:30px}
+.wnp.new{background:#123a44;color:#7ce9f5}.wnp.imp{background:#272a55;color:#b2b6ff}.wnp.fix{background:#3d3018;color:#f5c45a}
+.wnd{position:absolute;left:107px;top:7px;width:8px;height:8px;border-radius:4px}.wnd.new{background:#2ee6f0}.wnd.imp{background:#9aa0ff}.wnd.fix{background:#f5b942}
+.wnr:not(:last-child):before{content:"";position:absolute;left:110px;top:19px;bottom:2px;width:2px;background:#2a3142}
+.wnx2{flex:1 1 0%;padding-left:12px;font-size:15px;line-height:1.5;color:#e6e9f2}
+.wnf{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.wnc{display:flex;align-items:center;color:#9aa1b8;font-size:14.5px;cursor:pointer}.wnc input{width:18px;height:18px;margin:0 10px 0 0;padding:0;accent-color:#2ee6f0}
+.wnf .pri{padding:12px 26px}
 </style>
 <style id="theme"></style>
 </head>
@@ -681,12 +726,15 @@ select::-ms-expand{display:none}
   <div id="modal"><div id="mbox"></div></div>
   <div id="toast"></div>
 </div>
+<div id="updscr"></div>
+<div id="wn"></div>
 <div id="tv"><div id="tvbg"></div><div id="tvsh"></div><div id="tvtop"></div><div id="tvhero"></div><div id="tvview"><div id="tvrows"></div></div><div id="tvsheet"></div><div id="tvhint"></div></div>
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.1";
+var VER="1.5.2";
 var NOTES=[
+ {v:"1.5.2",d:"5 Nov 2026",t:["Download queue: install as many games as you like and they download one after another. Pause, resume, reorder or cancel them on the Downloads page","Downloads now continue where they stopped if your internet drops, and after you restart Xaly","Xaly now installs updates by itself when it starts, with a progress screen that shows your download speed","A What\u2019s new popup shows the changes after each update. Tick Don\u2019t show again to turn it off"]},
  {v:"1.5.1",d:"5 Nov 2026",t:["TV mode: a full-screen, controller-friendly view for playing on a TV. Open it from the sidebar or press Start on a controller","Game updates: Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. Updating keeps your saves","Settings \u203A General has switches for game updates and TV mode"]},
  {v:"1.5.0",d:"5 Nov 2026",t:["New display engine: Xaly now runs on Microsoft Edge WebView2 instead of Internet Explorer, so pages, scrolling and animations are faster and smoother","If WebView2 isn\u2019t available the launcher falls back to the old engine by itself; you can switch in Settings \u203A General","Fixed feedback messages with more than one line failing to send"]},
  {v:"1.4.1",d:"5 Nov 2026",t:["itch.io installs work out of the box again with a new built-in key","First update delivered through the new self-updater"]},
@@ -943,7 +991,7 @@ function startSession(a){
   if(!S){S=newState(a.name,AC.list.length===1);S.user.color=a.color||0;}
   loadCat();var mig=fixState();curAcc=a;migrateLive();
   S.games.forEach(function(g){if(g.icon&&(ENGINE==="webview2"?/^file:/i:/^https:\/\/data\.xaly\//i).test(g.icon)){g.icon="";getIcon(g);}});AC.active=a.id;saveAcc();if(fresh||mig)saveNow();
-  peers=[];syncMsg="";run={};dl=null;covQ=[];SC=null;
+  peers=[];syncMsg="";run={};dl=null;DQ=[];covQ=[];SC=null;
   P.f={b:"all",g:"",s:"",fr:"",lf:""};P.lim=60;P.spot=null;P.page="store";P.prev="store";P.sel=null;P.cur=null;P.lq="";P.sq="";P.tab="account";P.lt="all";
   $("login").style.display="none";setFP(false);
   applyAccent();applyLayout();
@@ -952,14 +1000,15 @@ function startSession(a){
   S.set.startup=T(function(){return X.StartupGet();},"0")==="1"?1:0;
   P.chat=null;P.draft="";frErr="";frPollT=0;frBusy=0;frInit();
   chip();renderFriends();render();
+  loadDQ();setTimeout(function(){pumpQ();paintDl();},4000);
   queueCovers();loadFeed();syncNow();queueVerify();setTimeout(function(){checkGameUpdates(false);},20000);
   if(S.set.tvStart)setTimeout(function(){enterTV();},300);setTimeout(function(){refreshLive(false);},4000);
 }
 function signOut(){
   var pn=playingName();
   if(pn){toast("Close "+pn+" before signing out");return;}
-  if(dl){toast("A download is still running. Wait for it or cancel it first.");return;}
-  saveNow();hideMenu();
+  if(dl&&dl.st==="downloading"){T(function(){return X.DownloadPause(dl.id);});dl.st="paused";}
+  saveDQ();saveNow();hideMenu();
   S=null;curAcc=null;AC.active="";saveAcc();peers=[];syncMsg="";covQ=[];
   setFP(false);$("modal").className="";
   showLogin();
@@ -1833,7 +1882,12 @@ function setDetailBtn(){
   var it=P.sel,b=$("dbtn");if(!it||!b||P.page!=="detail")return;
   var l=inLib(it.id),k=kindOf(it),ub=$("ubtn");b.disabled=false;b.className="pri big";
   if(ub){if(l&&gameDir(l)){ub.style.display="block";ub.onclick=function(){uninstallGame(l);};}else ub.style.display="none";}
-  if(dl&&dl.it===it){b.textContent="Downloading… "+(dl.pct>=0?dl.pct+"%":"");b.disabled=true;}
+  var jb=jobOf(it);
+  if(jb){
+    if(jb.st==="paused"||jb.st==="error"){b.textContent=(jb.st==="error"?"Download failed \u00B7 Retry":"Paused \u00B7 Resume")+(jb.pct>=0?" ("+jb.pct+"%)":"");b.onclick=function(){resumeJob(jb);};}
+    else if(jb===dl){b.textContent=(jb.st==="resolving"?"Preparing\u2026":"Downloading\u2026 "+(jb.pct>=0?jb.pct+"%":""));b.onclick=function(){nav("downloads");};}
+    else{b.textContent=jb.st==="retry"?"Reconnecting\u2026":"Queued #"+(qPos(jb)+1);b.onclick=function(){nav("downloads");};}
+  }
   else if(l){b.textContent="Open in library";b.onclick=function(){P.cur=l.id;nav("game");};}
   else if(isItch(it)||isGh(it)){b.textContent=isGh(it)?"Install from GitHub":"Install from itch.io";b.onclick=function(){install(it);};}
   else if(k==="page"||!it.url){b.textContent="Not downloadable yet";b.disabled=true;}
@@ -1862,45 +1916,114 @@ function fmtB(n){return n>=1073741824?(n/1073741824).toFixed(2)+" GB":n>=1048576
 function fmtEta(s){s=Math.round(s);if(s<60)return s+" s";if(s<3600){var r=s%60;return Math.floor(s/60)+" min "+pad2(r)+" s";}var m=Math.floor(s/60)%60;return Math.floor(s/3600)+" h "+pad2(m)+" min";}
 function pad2(n){return n<10?"0"+n:""+n;}
 function fname(u){var n="download";try{n=decodeURIComponent(u.split("#")[0].split("?")[0].split("/").pop()||"download");}catch(e){}return n.replace(/[\\\/:*?"<>|]/g,"_");}
+/* ---------- download queue: one download at a time, the rest wait; pause / resume / retry ---------- */
+var DQ=[],dl=null,dqT=null;
+function jobOf(it){var i;for(i=0;i<DQ.length;i++)if(DQ[i].it===it&&!DQ[i].upd)return DQ[i];return null;}
+function jobOfGame(g){var i;for(i=0;i<DQ.length;i++)if(DQ[i].upd===g)return DQ[i];return null;}
+function jobById(id){var i;for(i=0;i<DQ.length;i++)if(DQ[i].id===id)return DQ[i];return null;}
+function qPos(j){var n=0,i;for(i=0;i<DQ.length;i++){if(DQ[i]===j)return n;if(DQ[i].st==="queued"||DQ[i].st==="retry")n++;}return n;}
+function newJob(it,o){var j={id:"q"+now().toString(36)+Math.floor(Math.random()*1e5).toString(36),it:it,st:"queued",bytes:0,total:0,speed:0,pct:-1,eta:-1,tries:0,lt:now(),lb:0};var k;for(k in o)j[k]=o[k];return j;}
+function saveDQ(){if(!S)return;S.dq=DQ.filter(function(j){return j.st!=="done";}).map(function(j){return {id:j.id,itId:j.it.id,upd:j.upd?j.upd.id:"",url:j.direct?j.url:"",direct:j.direct?1:0,fn:j.fn||"",kind:j.kind||"",st:j.st,bytes:j.bytes||0,total:j.total||0,err:j.err||""};});save();}
+function loadDQ(){
+  DQ=[];dl=null;
+  (S.dq||[]).forEach(function(o){
+    var it=storeById(o.itId),g=o.upd?gameBy(o.upd):null;if(!it||(o.upd&&!g))return;
+    var j=newJob(it,{id:o.id,upd:g,url:o.url,direct:o.direct,fn:o.fn,kind:o.kind,bytes:o.bytes,total:o.total,err:o.err});
+    j.st=(o.st==="paused"||o.st==="error")?o.st:"queued";
+    if(j.total>0)j.pct=Math.min(99,Math.floor(j.bytes*100/j.total));
+    DQ.push(j);
+  });
+}
 function install(it){
-  if(isItch(it)||isGh(it)){
-    if(dl){toast("Another download is running. Wait for it or cancel it at the bottom.");return;}
-    dl={it:it,fn:"",lt:now(),lb:0,bytes:0,total:0,speed:0,pct:-1,eta:-1,resolving:1};paintDl();toast("Asking itch.io for the download\u2026");
-    resolveAny(it,function(err,r){
-      if(!dl||dl.it!==it||!dl.resolving)return;
-      if(err){dl=null;paintDl();toast(err);return;}
-      dl.fn=r.name;dl.kind=r.kind;dl.up=r.up||null;dl.resolving=0;
-      var rr=T(function(){return X.Download("d1",r.url,r.name);});
-      if(rr!=="ok"){dl=null;toast("Could not start the download: "+rr.replace("ERR:",""));}
-      paintDl();
-    });
-    return;
-  }
-  var k=kindOf(it),fn=fname(it.url);
+  var k=kindOf(it),ex=jobOf(it);
+  if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else{toast(it.name+" is already in your downloads");}return;}
+  if(isItch(it)||isGh(it)){addJob(newJob(it,{}));return;}
+  var fn=fname(it.url);
   if(k==="page"||!it.url)return;
-  if(dl){toast("Another download is running. Wait for it or cancel it at the bottom.");return;}
   if(k==="standalone"&&!/\.exe$/i.test(fn)){toast("A standalone game must link straight to an .exe");return;}
   if(k==="archive"&&!/\.zip$/i.test(fn)){toast("A game archive must link straight to a .zip");return;}
   if(k==="installer"&&!/\.(exe|msi)$/i.test(fn)){toast("An installer must link straight to an .exe or .msi");return;}
-  dl={it:it,fn:fn,lt:now(),lb:0,bytes:0,total:0,speed:0,pct:-1,eta:-1};
-  var r=T(function(){return X.Download("d1",it.url,fn);});
-  if(r!=="ok"){dl=null;toast("Could not start the download: "+r.replace("ERR:",""));}
-  paintDl();
+  addJob(newJob(it,{direct:1,url:it.url,fn:fn,kind:k}));
 }
+function addJob(j){
+  DQ.push(j);saveDQ();
+  if(dl)toast(j.it.name+" was added to your download queue"+(qPos(j)?" (#"+(qPos(j)+1)+")":""));
+  pumpQ();paintDl();
+}
+function pumpQ(){
+  if(!S||dl||UPD.st==="dl")return;
+  var i,j=null;for(i=0;i<DQ.length;i++)if(DQ[i].st==="queued"){j=DQ[i];break;}
+  if(!j)return;startJob(j);
+}
+function startJob(j){
+  dl=j;j.st="resolving";j.resolving=1;j.err="";paintDl();
+  if(j.direct&&j.url){goJob(j);return;}
+  resolveAny(j.it,function(err,r,code){
+    if(dl!==j||j.st!=="resolving")return;
+    if(err){dl=null;j.resolving=0;jobFail(j,err,code==="nogame"||code==="nowin");return;}
+    if(j.fn&&j.fn!==r.name){T(function(){return X.DownloadCancel("",j.fn);});j.bytes=0;}   // a different file now: start fresh
+    j.url=r.url;j.fn=r.name;j.kind=r.kind;j.up=r.up||null;
+    goJob(j);
+  });
+}
+function goJob(j){
+  j.resolving=0;j.st="downloading";j.lt=now();j.lb=j.bytes;j.speed=0;
+  var have=+T(function(){return X.PartSize(j.fn);},"0")||0;j.bytes=have;
+  var r=T(function(){return X.DownloadEx(j.id,j.url,j.fn,have>0?"1":"0");});
+  if(r!=="ok"){dl=null;jobFail(j,r.replace("ERR:",""),false);return;}
+  saveDQ();paintDl();
+}
+function jobFail(j,msg,hard){
+  j.tries=(j.tries||0)+1;j.err=msg;
+  var waits=[5,10,20,40,60,120];
+  if(!hard&&j.tries<=waits.length){j.st="retry";j.retryAt=now()+waits[j.tries-1]*1000;}
+  else{j.st="error";notify("err","Download failed",j.it.name+": "+msg,null,j.it.image);}
+  saveDQ();paintDl();pumpQ();
+}
+function dqTick(){
+  if(!S)return;var t=now(),ch=0;
+  DQ.forEach(function(j){if(j.st==="retry"&&t>=j.retryAt){j.st="queued";ch=1;}});
+  if(ch){pumpQ();paintDl();}
+  else if(P.page==="downloads"&&DQ.some(function(j){return j.st==="retry";}))renderDownloads();
+}
+function pauseJob(j){
+  if(!j)return;
+  if(j===dl&&j.st==="downloading"){T(function(){return X.DownloadPause(j.id);});j.st="pausing";paintDl();return;}
+  if(j===dl){dl=null;}
+  j.st="paused";saveDQ();paintDl();pumpQ();
+}
+function resumeJob(j){if(!j)return;j.st="queued";j.tries=0;j.err="";if(!j.direct)j.url="";saveDQ();pumpQ();paintDl();}
+function cancelJob(j){
+  if(!j)return;
+  if(j===dl&&(j.st==="downloading"||j.st==="pausing")){T(function(){return X.DownloadCancel(j.id,j.fn||"");});j.st="cancelling";paintDl();return;}
+  if(j===dl)dl=null;
+  if(j.fn)T(function(){return X.DownloadCancel("",j.fn);});
+  DQ.splice(DQ.indexOf(j),1);saveDQ();paintDl();pumpQ();
+}
+function moveJob(j,d){var i=DQ.indexOf(j),k=i+d;if(i<0||k<0||k>=DQ.length)return;DQ[i]=DQ[k];DQ[k]=j;saveDQ();paintDl();}
+function pauseAll(){DQ.slice().forEach(function(j){if(j.st!=="paused"&&j.st!=="error")pauseJob(j);});}
+function resumeAll(){DQ.forEach(function(j){if(j.st==="paused"||j.st==="error"){j.st="queued";j.tries=0;j.err="";if(!j.direct)j.url="";}});saveDQ();pumpQ();paintDl();}
 window.onDl=function(id,kind,a,b){
   if(id==="upd"){onUpdDl(kind,a,b);return;}
-  if(!dl)return;
+  var j=jobById(id);if(!j)return;
   if(kind==="p"){
-    dl.bytes=+a;dl.total=+b>0?+b:0;var t=now(),dt=(t-dl.lt)/1000;
-    if(dt>=1){var inst=(dl.bytes-dl.lb)/dt;dl.speed=dl.speed?dl.speed*.6+inst*.4:inst;dl.lt=t;dl.lb=dl.bytes;}
-    dl.pct=dl.total?Math.min(99,Math.floor(dl.bytes*100/dl.total)):-1;
-    dl.eta=(dl.total&&dl.speed>1)?(dl.total-dl.bytes)/dl.speed:-1;paintDl();
-  }else{
-    var j=dl;dl=null;paintDl();
-    if(kind==="done"){if(j.upd)finishUpdate(j,a);else{finUp=j.up||null;finish(j.it,a,j.kind);finUp=null;}}else if(kind==="err"){notify("err","Download failed",j.it.name+": "+a,null,j.it.image);render();}else render();
+    j.bytes=+a;j.total=+b>0?+b:0;var t=now(),dt=(t-j.lt)/1000;
+    if(dt>=1){var inst=Math.max(0,(j.bytes-j.lb)/dt);j.speed=j.speed?j.speed*.6+inst*.4:inst;j.lt=t;j.lb=j.bytes;}
+    j.pct=j.total?Math.min(99,Math.floor(j.bytes*100/j.total)):-1;
+    j.eta=(j.total&&j.speed>1)?(j.total-j.bytes)/j.speed:-1;paintDl();
+    if(t-(j.svT||0)>5000){j.svT=t;saveDQ();}
+    return;
   }
+  if(dl===j)dl=null;
+  if(kind==="done"){
+    j.st="done";DQ.splice(DQ.indexOf(j),1);saveDQ();paintDl();
+    if(j.upd)finishUpdate(j,a);else{finUp=j.up||null;finish(j.it,a,j.kind);finUp=null;}
+  }else if(kind==="paused"){j.st="paused";j.speed=0;saveDQ();paintDl();}
+  else if(kind==="cancel"){var i=DQ.indexOf(j);if(i>=0)DQ.splice(i,1);saveDQ();paintDl();}
+  else jobFail(j,a||"The download stopped",false);
+  pumpQ();render();
 };
-function cancelDl(){if(dl&&dl.resolving){dl=null;paintDl();return;}if(dl)T(function(){return X.Cancel("d1");});}
+function cancelDl(){if(dl)cancelJob(dl);}
 function addToLib(it,path){
   if(inLib(it.id))return;
   var g={id:rid(),name:it.name,path:path,args:"",fav:0,seconds:0,plays:0,last:0,storeId:it.id,image:it.image||"",added:now()};
@@ -1923,8 +2046,16 @@ function finish(it,dest,kk){
 function paintDl(){
   if(P.page==="downloads")renderDownloads();
   var b=$("dlb");
-  if(!dl){b.className="";$("tDlp").textContent="";setDetailBtn();return;}
-  b.className="act";$("dlt").textContent=dl.it.name;$("dlk").textContent=dl.resolving?"PREPARING":"DOWNLOADING"+(dl.pct>=0?"  \u00B7  "+dl.pct+"%":"");
+  var wait=DQ.filter(function(x){return x!==dl&&(x.st==="queued"||x.st==="retry");}).length,
+      show=dl||DQ.filter(function(x){return x.st==="retry"||x.st==="paused";})[0];
+  if(!show){b.className="";$("tDlp").textContent=wait?String(wait):"";setDetailBtn();return;}
+  if(show!==dl){
+    b.className="act";$("dlt").textContent=(show.upd?show.upd.name:show.it.name);$("dlk").textContent=show.st==="retry"?"RECONNECTING":"PAUSED";
+    $("tDlp").textContent=DQ.length>1?DQ.length+"":"\u2016";$("dlfill").style.width=(show.pct>=0?show.pct:0)+"%";
+    $("dls").textContent=show.st==="retry"?"Connection lost. Trying again in "+Math.max(1,Math.round((show.retryAt-now())/1000))+" s":(fmtB(show.bytes)+(show.total?" of "+fmtB(show.total):"")+"  \u00B7  click to manage");
+    setDetailBtn();if(P.page==="downloads")renderDownloads();return;
+  }
+  b.className="act";$("dlt").textContent=(dl.upd?dl.upd.name:dl.it.name)+(wait?"  +"+wait:"");$("dlk").textContent=dl.resolving?"PREPARING":"DOWNLOADING"+(dl.pct>=0?"  \u00B7  "+dl.pct+"%":"");
   $("tDlp").textContent=dl.pct>=0?dl.pct+"%":"\u2026";
   $("dlfill").style.width=(dl.pct>=0?dl.pct:100)+"%";$("dlfill").style.opacity=dl.pct>=0?"1":".35";
   var s=dl.resolving?"Asking for the download\u2026":(dl.speed>0?fmtB(dl.speed)+"/s":"Starting\u2026");
@@ -1957,19 +2088,31 @@ function renderDownloads(){
   hd.appendChild(btn("\u2699","",function(){nav("settings","downloads");}));
   hd.appendChild(btn("\u2197","",function(){T(function(){return X.Open(dir);});}));
   hd.lastChild.title="Open downloads folder";hd.firstChild.nextSibling.title="Download settings";pg.appendChild(hd);
-  var box=el("div","dlbox");
-  if(dl){
-    box.className="dlbox dlact";
-    var tp=el("div","top");tp.appendChild(el("div","nm",dl.it.name));tp.appendChild(btn("Cancel","btn dng",cancelDl));box.appendChild(tp);
-    var s=fmtB(dl.bytes)+(dl.total?" / "+fmtB(dl.total):"")+(dl.pct>=0?"  \u2022  "+dl.pct+"%":"");
-    if(dl.pct>=0&&dl.eta>=0)s+="  \u2022  "+fmtEta(dl.eta)+" left";
-    box.appendChild(el("div","info",s));
-    var pb=el("div","pb"),pf=el("div","pf");pf.style.width=(dl.pct>=0?dl.pct:100)+"%";pf.style.opacity=dl.pct>=0?"1":".35";pb.appendChild(pf);box.appendChild(pb);
+  if(DQ.length){
+    var ctl=el("div","dqctl");ctl.appendChild(el("span","",DQ.length+" in queue"));
+    ctl.appendChild(btn("Pause all","btn",pauseAll));ctl.appendChild(btn("Resume all","btn",resumeAll));pg.appendChild(ctl);
+    DQ.forEach(function(j,i){
+      var c=el("div","dq "+j.st+(j===dl?" act":"")),th=el("div","dqt");paint(th,j.it.name,j.it.image||"");c.appendChild(th);
+      var m=el("div","dqm");m.appendChild(el("b","",(j.upd?"Update: "+j.upd.name:j.it.name)));
+      var st=j===dl?(j.st==="resolving"?"Preparing the download…":j.st==="pausing"?"Pausing…":j.st==="cancelling"?"Cancelling…":(j.speed>0?fmtB(j.speed)+"/s":"Starting…")+(j.eta>=0?"  ·  "+fmtEta(j.eta)+" left":""))
+        :j.st==="paused"?"Paused":j.st==="retry"?"Connection lost, trying again in "+Math.max(1,Math.round((j.retryAt-now())/1000))+" s":j.st==="error"?"Failed: "+j.err:"Queued #"+(qPos(j)+1);
+      m.appendChild(el("span","dqs",st));
+      m.appendChild(el("span","dqz",fmtB(j.bytes||0)+(j.total?" of "+fmtB(j.total):"")+(j.pct>=0?"  ·  "+j.pct+"%":"")));
+      var pb=el("div","pb"),pf=el("div","pf");pf.style.width=(j.pct>=0?j.pct:(j===dl?100:0))+"%";if(j.pct<0&&j===dl)pf.style.opacity=".35";pb.appendChild(pf);m.appendChild(pb);c.appendChild(m);
+      var ac=el("div","dqa");
+      if(j.st==="paused"||j.st==="error")ac.appendChild(btn(j.st==="error"?"Retry":"Resume","pri sm",function(){resumeJob(j);}));
+      else if(j.st!=="cancelling"&&j.st!=="pausing")ac.appendChild(btn("Pause","btn sm",function(){pauseJob(j);}));
+      if(i>0&&j!==dl)ac.appendChild(btn("↑","btn sm",function(){moveJob(j,-1);}));
+      ac.appendChild(btn("✕","btn sm dng",function(){cancelJob(j);}));
+      c.appendChild(ac);pg.appendChild(c);
+    });
+    var nt=el("div","dqn","Downloads continue where they stopped if your internet drops, and after you restart Xaly.");pg.appendChild(nt);
   }else{
-    box.appendChild(el("div","big","\u21E9"));box.appendChild(el("b","","No active downloads"));
-    box.appendChild(el("span","","Downloads and updates will appear here when they\u2019re in progress."));
+    var box=el("div","dlbox");
+    box.appendChild(el("div","big","⇩"));box.appendChild(el("b","","No downloads"));
+    box.appendChild(el("span","","Games you install wait here in a queue. You can pause and resume them, and they pick up where they left off."));
+    pg.appendChild(box);
   }
-  pg.appendChild(box);
   var sp=el("div","dsec");sp.appendChild(el("h4","","Download speed"));var si=el("div","in");
   si.appendChild(el("div","lb","\u21E9  Download"));si.appendChild(el("div","vl",dl&&dl.speed>0?fmtB(dl.speed)+"/s":"0 B/s"));
   si.appendChild(el("div","lb","\u25A3  Write"));si.appendChild(el("div","vl",dl&&dl.speed>0?fmtB(dl.speed)+"/s":"0 B/s"));
@@ -2263,7 +2406,7 @@ function buildGameDetail(c,g){
   if(!cv&&g.icon){var im=el("img","bic");im.src=g.icon;b.appendChild(im);}
   b.appendChild(el("div","fade"));b.appendChild(el("div","bt",g.name));w.appendChild(b);
   if(g.updAvail){var un=el("div","gupd");un.appendChild(el("b","","Update available"));un.appendChild(el("span","","A new version of "+g.name+" is on "+(g.updAvail.src==="gh"?"GitHub":"itch.io")+". Your saves in the game folder are kept."));
-    var ubn=btn(dl&&dl.upd===g?"Updating\u2026":"Update now","pri",function(){updateGame(g);});if(dl&&dl.upd===g)ubn.disabled=true;un.appendChild(ubn);w.appendChild(un);}
+    var gj=jobOfGame(g),ubn=btn(gj?(gj===dl?"Updating\u2026 "+(gj.pct>=0?gj.pct+"%":""):gj.st==="paused"?"Paused \u00B7 Resume":"Queued"):"Update now","pri",function(){updateGame(g);});un.appendChild(ubn);w.appendChild(un);}
   var bar=el("div","gbar"),pb=el("button","pri gplay");pb.id="gbtn";pb.onclick=playToggle;bar.appendChild(pb);
   var hb=btn("","ibtn"+(g.fav?" on":""),function(){g.fav=g.fav?0:1;save();render();});
   hb.innerHTML=ic(g.fav?"heartf":"heart");hb.title=g.fav?"Remove from favorites":"Add to favorites";bar.appendChild(hb);
@@ -2881,17 +3024,9 @@ function checkGameUpdates(manual){
 function updateGame(g){
   if(!g||!g.updAvail)return;
   if(run[g.id]){toast("Close "+g.name+" before updating it");return;}
-  if(dl){toast("Another download is running. Wait for it or cancel it first.");return;}
+  var ex=jobOfGame(g);if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else nav("downloads");return;}
   var it=storeById(g.storeId);if(!it){toast("This game is no longer in the store, so it can’t be updated");return;}
-  dl={it:it,upd:g,fn:"",lt:now(),lb:0,bytes:0,total:0,speed:0,pct:-1,eta:-1,resolving:1};paintDl();toast("Getting the new version of "+g.name+"…");
-  resolveAny(it,function(err,r){
-    if(!dl||dl.upd!==g||!dl.resolving)return;
-    if(err){dl=null;paintDl();toast(err);return;}
-    dl.fn=r.name;dl.kind=r.kind;dl.up=r.up;dl.resolving=0;
-    var rr=T(function(){return X.Download("d1",r.url,r.name);});
-    if(rr!=="ok"){dl=null;toast("Could not start the download: "+rr.replace("ERR:",""));}
-    paintDl();
-  });
+  addJob(newJob(it,{upd:g}));
 }
 function finishUpdate(j,dest){
   var g=j.upd,it=j.it,k=j.kind||"archive",ok=false,msg="";
@@ -2906,6 +3041,32 @@ function finishUpdate(j,dest){
   else notify("err","Couldn’t update "+g.name,msg||"Something went wrong while installing the new version.",g,it.image);
   render();if(tvOn)tvRender();
 }
+/* ---------- "What's new" popup after an update ---------- */
+function noteTag(t){return /\bfix|fixed|bug|crash|no longer|broken|failing/i.test(t)?["Fix","fix"]:/faster|smoother|better|improv|now |again|clearer|nicer/i.test(t)?["Improved","imp"]:["New","new"];}
+function whatsNew(force){
+  if(!AC)return;var last=AC.lastVer||"";
+  if(!force){
+    if(!last||last===VER){if(last!==VER){AC.lastVer=VER;saveAcc();}return;}
+    AC.lastVer=VER;saveAcc();
+    if(AC.noNotes)return;
+  }
+  var list=NOTES.filter(function(n){return force?n===NOTES[0]:(verNum(n.v)>verNum(last)&&verNum(n.v)<=verNum(VER));}).slice(0,4);
+  if(!list.length)return;
+  var w=$("wn");w.innerHTML="";
+  var box=el("div","wnb"),h=el("div","wnh");h.appendChild(el("h2","","What’s new in Xaly"));h.appendChild(btn("✕","wnx",function(){w.className="";}));box.appendChild(h);
+  var fb=el("a","wnl","Report a bug, request a feature, or share a thought");fb.onclick=function(){w.className="";$("fb").onclick();};box.appendChild(fb);
+  var sc=el("div","wns");
+  list.forEach(function(n){
+    var vh=el("div","wnv");vh.appendChild(el("b","","Version "+n.v));vh.appendChild(el("span","",n.d));sc.appendChild(vh);
+    var tl=el("div","wnt");
+    n.t.forEach(function(t){var tg=noteTag(t),r=el("div","wnr");r.appendChild(el("span","wnp "+tg[1],tg[0]));r.appendChild(el("i","wnd "+tg[1]));r.appendChild(el("div","wnx2",t));tl.appendChild(r);});
+    sc.appendChild(tl);
+  });
+  box.appendChild(sc);
+  var ft=el("div","wnf"),lb=el("label","wnc"),cb=el("input");cb.setAttribute("type","checkbox");cb.checked=!!AC.noNotes;cb.onclick=function(){AC.noNotes=cb.checked?1:0;saveAcc();};
+  lb.appendChild(cb);lb.appendChild(document.createTextNode(" Don’t show again"));ft.appendChild(lb);ft.appendChild(btn("Close","pri",function(){w.className="";}));box.appendChild(ft);
+  w.appendChild(box);w.className="on";
+}
 /* ---------- self-update from GitHub releases ---------- */
 var UPD_REPO="Xalify/xalify-xaly-launcher",UPD={st:"",rel:null,pct:-1,err:"",t:0};
 function verNum(v){var m=String(v||"").replace(/^v/i,"").split(/[.\-]/),n=0,i;for(i=0;i<3;i++)n=n*1000+(parseInt(m[i],10)||0);return n;}
@@ -2914,16 +3075,17 @@ function checkUpdate(manual){
   UPD.st="checking";UPD.err="";if(P.page==="settings")renderSettings();
   http("https://api.github.com/repos/"+UPD_REPO+"/releases/latest",function(ok,t,st){
     UPD.t=now();var j=null;try{j=JSON.parse(t);}catch(e){}
-    if(!ok||!j||!j.tag_name){UPD.st="";UPD.err=st===404||/404/.test(t||"")?"No releases have been published yet.":"Couldn’t reach GitHub.";if(manual)toast(UPD.err);if(P.page==="settings")renderSettings();return;}
+    if(!ok||!j||!j.tag_name){UPD.st="";UPD.err=st===404||/404/.test(t||"")?"No releases have been published yet.":"Couldn’t reach GitHub.";if(manual===true)toast(UPD.err);if(P.page==="settings")renderSettings();return;}
     var asset=null;(j.assets||[]).forEach(function(a){if(/\.zip$/i.test(a.name||"")&&(!asset||/xaly/i.test(a.name)))asset=a;});
     var sha=((j.body||"").match(/SHA256[^0-9a-f]*([0-9a-f]{64})/i)||[])[1]||"";
     UPD.rel={v:String(j.tag_name).replace(/^v/i,""),notes:String(j.body||"").replace(/SHA256[^\n]*\n?/ig,"").replace(/^\s+|\s+$/g,""),url:asset?asset.browser_download_url:"",name:asset?asset.name:"",sha:sha,size:asset?asset.size:0,page:j.html_url||""};
     if(verNum(UPD.rel.v)>verNum(VER)&&UPD.rel.url){
+      if(manual==="start"&&!S&&AC&&AC.autoUpd===0){UPD.st="avail";return;}
       UPD.st="avail";
-      if(!manual&&S&&S.set.skipVer===UPD.rel.v){}
-      else notify("ok","Update available","Xaly "+UPD.rel.v+" is ready to install. You have "+VER+".",null,"");
+      if(manual==="start"&&AC&&AC.autoUpd!==0&&!playingName()){startUpdate();return;}
+      if(manual!=="start")notify("ok","Update available","Xaly "+UPD.rel.v+" is ready to install. You have "+VER+".",null,"");
       showUpdate();
-    }else{UPD.st="";if(manual)toast("You’re on the newest version ("+VER+")");}
+    }else{UPD.st="";if(manual===true)toast("You’re on the newest version ("+VER+")");}
     if(P.page==="settings")renderSettings();
   });
 }
@@ -2938,22 +3100,49 @@ function showUpdate(){
 }
 function startUpdate(){
   if(!UPD.rel||!UPD.rel.url)return;
-  if(dl){toast("Finish or cancel the game download first, then update");return;}
   var pn=playingName();if(pn){toast("Close "+pn+" before updating");return;}
-  UPD.st="dl";UPD.pct=0;
-  var r=T(function(){return X.Download("upd",UPD.rel.url,"XalyLauncher-update-"+UPD.rel.v+".zip");});
-  if(r!=="ok"){UPD.st="avail";toast("Couldn’t start the update: "+r.replace("ERR:",""));return;}
-  toast("Downloading Xaly "+UPD.rel.v+"…");if(P.page==="settings")renderSettings();
+  if(dl&&dl.st==="downloading"){T(function(){return X.DownloadPause(dl.id);});}   // the game download continues after the restart
+  UPD.st="dl";UPD.pct=-1;UPD.b=0;UPD.tot=UPD.rel.size||0;UPD.spd=0;UPD.lt=now();UPD.lb=0;
+  updScreen("dl");
+  var r=T(function(){return X.DownloadEx("upd",UPD.rel.url,"XalyLauncher-update-"+UPD.rel.v+".zip","1");});
+  if(r!=="ok"){UPD.st="avail";updScreen("");toast("Couldn\u2019t start the update: "+r.replace("ERR:",""));return;}
+  if(P.page==="settings")renderSettings();
+}
+function updScreen(mode,msg){
+  var u=$("updscr");if(!mode){u.className="";return;}
+  if(!u.firstChild){
+    u.innerHTML='<div class="uw"><div class="ulg"><div class="uring"></div><div class="uring r2"></div><img id="updimg"></div><h2 id="updh"></h2><div class="ubar"><i id="updfill"></i><b class="ushine"></b></div><div class="ustat"><span id="updpct"></span><span id="updspd"></span><span id="updeta"></span></div><div class="usub" id="updsub"></div></div>';
+    $("updimg").src=$("brand").getElementsByTagName("img")[0].src;
+  }
+  u.className="on "+mode;
+  $("updh").textContent=mode==="inst"?"Installing Xaly "+UPD.rel.v+"\u2026":"Updating Xaly to "+UPD.rel.v;
+  $("updsub").textContent=msg||(mode==="inst"?"Xaly will reopen by itself in a moment.":"Your games, accounts and friends stay exactly as they are.");
+  paintUpd();
+}
+function paintUpd(){
+  if(!$("updfill"))return;
+  $("updfill").style.width=(UPD.pct>=0?UPD.pct:8)+"%";
+  $("updpct").textContent=UPD.pct>=0?UPD.pct+"%":"Connecting\u2026";
+  $("updspd").textContent=UPD.spd>0?"\u21E9 "+fmtB(UPD.spd)+"/s":"";
+  var left=(UPD.tot&&UPD.spd>1)?(UPD.tot-UPD.b)/UPD.spd:-1;
+  $("updeta").textContent=(UPD.tot?fmtB(UPD.b)+" of "+fmtB(UPD.tot):"")+(left>=0?"  \u00B7  "+fmtEta(left)+" left":"");
 }
 function onUpdDl(kind,a,b){
-  if(kind==="p"){UPD.pct=+b>0?Math.floor(+a*100/+b):-1;if(P.page==="settings"&&P.tab==="about"){var e=$("updp");if(e)e.textContent=UPD.pct>=0?UPD.pct+"%":"…";}return;}
+  if(kind==="p"){
+    var t=now(),dt=(t-UPD.lt)/1000;UPD.b=+a;if(+b>0)UPD.tot=+b;UPD.pct=UPD.tot?Math.min(99,Math.floor(UPD.b*100/UPD.tot)):-1;
+    if(dt>=0.5){var inst=Math.max(0,(UPD.b-UPD.lb)/dt);UPD.spd=UPD.spd?UPD.spd*.6+inst*.4:inst;UPD.lt=t;UPD.lb=UPD.b;}
+    paintUpd();if(P.page==="settings"&&P.tab==="about"){var e=$("updp");if(e)e.textContent=UPD.pct>=0?UPD.pct+"%":"\u2026";}return;
+  }
+  if(kind==="done"){UPD.pct=100;paintUpd();updScreen("inst");}
+  else if(kind==="paused"||kind==="cancel"){UPD.st="avail";updScreen("");return;}
+  else if(kind==="err"){updScreen("");}
   if(kind==="done"){
     saveNow();toast("Installing the update…");
     var r=T(function(){return X.UpdateApply(a,UPD.rel.sha||"");});
-    if(r!=="ok"){UPD.st="avail";notify("err","Update failed",r.replace("ERR:",""),null,"");}
+    if(r!=="ok"){UPD.st="avail";updScreen("");notify("err","Update failed",r.replace("ERR:",""),null,"");pumpQ();}
     return;
   }
-  UPD.st="avail";if(kind==="err")notify("err","Update download failed",a,null,"");if(P.page==="settings")renderSettings();
+  UPD.st="avail";if(kind==="err")notify("err","Update download failed",a,null,"");if(P.page==="settings")renderSettings();pumpQ();
 }
 /* ---------- notifications ---------- */
 function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -3107,12 +3296,12 @@ function tvActions(it){
   var a=[],o=it.o;
   if(it.k==="g"){
     a.push([run[o.id]?"Stop game":"Play",function(){P.cur=o.id;playToggle();tvRender();}]);
-    if(o.updAvail)a.push([dl&&dl.upd===o?"Updating… "+(dl.pct>=0?dl.pct+"%":""):"Update to the new version",function(){updateGame(o);tvRender();}]);
+    if(o.updAvail){var oj=jobOfGame(o);a.push([oj?(oj===dl?"Updating\u2026 "+(oj.pct>=0?oj.pct+"%":""):"Queued for update"):"Update to the new version",function(){updateGame(o);tvRender();}]);}
     a.push([o.fav?"Remove from favourites":"Add to favourites",function(){o.fav=o.fav?0:1;save();tvRender();}]);
   }else{
     var l=inLib(o.id);
     if(l)a.push(["Play",function(){P.cur=l.id;playToggle();TV.sheet=null;tvRender();}]);
-    else if(dl&&dl.it===o)a.push(["Downloading… "+(dl.pct>=0?dl.pct+"%":""),function(){}]);
+    else if(jobOf(o)){var sj=jobOf(o);a.push([sj===dl?"Downloading\u2026 "+(sj.pct>=0?sj.pct+"%":""):sj.st==="paused"?"Paused \u00B7 Resume":"Queued #"+(qPos(sj)+1),function(){if(sj.st==="paused"||sj.st==="error")resumeJob(sj);tvRender();}]);}
     else a.push(["Install",function(){install(o);tvRender();}]);
     a.push([wishMap()[o.id]?"Remove from wishlist":"Add to wishlist",function(){toggleWish(o);tvRender();}]);
   }
@@ -3323,6 +3512,8 @@ function renderSettings(){
     if(UPD.st==="dl"){ub.appendChild(el("span","code","Downloading update\u2026 "));var upp=el("span","code",UPD.pct>=0?UPD.pct+"%":"");upp.id="updp";ub.appendChild(upp);}
     else if(UPD.st==="avail")ub.appendChild(btn("Install "+UPD.rel.v,"pri",showUpdate));
     else ub.appendChild(btn(UPD.st==="checking"?"Checking\u2026":"Check for updates","btn",function(){checkUpdate(true);}));
+    b.appendChild(srow("Install updates automatically","When a new version is out, Xaly installs it as soon as it starts.",sw(AC.autoUpd!==0,function(v){AC.autoUpd=v?1:0;saveAcc();})));
+    b.appendChild(srow("What\u2019s new",null,btn("Show patch notes","btn",function(){whatsNew(true);})));
     b.appendChild(srow("Xaly Launcher","Version "+VER+" (Windows). "+(UPD.st==="avail"?"Version "+UPD.rel.v+" is available.":UPD.err?UPD.err:UPD.t?"Checked "+ago(UPD.t)+".":"Updates come from github.com/"+UPD_REPO+"."),ub));
     b.appendChild(srow("Your data",dd[1],btn("Open","btn",function(){T(function(){return X.Open(dd[1]);});})));
     var pn=el("h2","","Patch notes");pn.style.marginTop="30px";b.appendChild(pn);
@@ -3383,7 +3574,8 @@ function init(){
   else{$("splash").style.display="none";}
   setInterval(function(){tickGame();paintDlTick();},1000);
   setInterval(syncNow,25000);
-  setTimeout(function(){checkUpdate(false);},8000);setInterval(function(){checkUpdate(false);},6*3600000);
+  setTimeout(function(){checkUpdate("start");},700);setInterval(function(){checkUpdate(false);},6*3600000);
+  setInterval(dqTick,1000);setTimeout(whatsNew,1600);
   setInterval(function(){refreshLive(false);},30*60000);
   setInterval(function(){if(S&&(!S.guT||now()-S.guT>6*3600000))checkGameUpdates(false);},15*60000);
   setInterval(padTick,33);if(ENGINE==="ie")T(function(){return X.PadNative("1");});

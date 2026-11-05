@@ -3599,14 +3599,13 @@ function selfTest(){   // run by the build server: proves both directions of the
     var od=window.onDl,steps=[];
     window.onDl=function(i2,k,a,b){
       if(i2!=="selfdl"){if(od)od(i2,k,a,b);return;}
-      if(k==="p"){steps.push("p");return;}
+      if(k==="p"){steps.push("p");if(+a>0&&!r.checks.pause&&!r.pauseSent){r.pauseSent=1;T(function(){return X.DownloadPause("selfdl");});}return;}
       steps.push(k);
       if(k==="paused"){r.checks.pause="paused after "+(+T(function(){return X.PartSize("selftest-dl.bin");},"0"))+" bytes";
-        T(function(){return X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.4314.35","selftest-dl.bin","1");});return;}
+        T(function(){return X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","1");});return;}
       r.checks.download=k+" "+(a||"")+" ("+steps.join(",").replace(/(p,)+/g,"p..,")+")";window.onDl=od;fin();
     };
-    r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.4314.35","selftest-dl.bin","0");
-    setTimeout(function(){T(function(){return X.DownloadPause("selfdl");});},250);
+    r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
   };
   c("http",function(){return X.Http(id,"https://api.github.com/repos/"+UPD_REPO);});
   setTimeout(function(){if(!done){r.checks.timeout="no answer within 60s";fin();}},60000);

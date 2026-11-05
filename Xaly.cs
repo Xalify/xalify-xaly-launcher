@@ -1,0 +1,1179 @@
+// Xaly Launcher - native host. C# 5 compatible (builds with the csc.exe that ships with Windows).
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.IO.Compression;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using Microsoft.Win32;
+
+namespace Xaly
+{
+    [ComVisible(true)]
+    public class Bridge
+    {
+        MainForm f;
+        Dictionary<string, Process> procs = new Dictionary<string, Process>();
+        Dictionary<string, WebClient> dls = new Dictionary<string, WebClient>();
+        public Bridge(MainForm form) { f = form; }
+
+        static string SafeName(string n)
+        {
+            if (n == null) n = "x";
+            foreach (char c in Path.GetInvalidFileNameChars()) n = n.Replace(c, '_');
+            return n.Length == 0 ? "x" : n;
+        }
+
+        // ---- storage
+        public string Data(string name)
+        {
+            try { string p = Path.Combine(f.DataDir, SafeName(name)); return File.Exists(p) ? File.ReadAllText(p, Encoding.UTF8) : ""; }
+            catch (Exception) { return ""; }
+        }
+        public string Save(string name, string text)
+        {
+            try
+            {
+                string p = Path.Combine(f.DataDir, SafeName(name)); string tmp = p + ".tmp";
+                File.WriteAllText(tmp, text, new UTF8Encoding(false));
+                if (File.Exists(p)) File.Delete(p);
+                File.Move(tmp, p);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Legacy()
+        {
+            try
+            {
+                string root = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string[] names = new string[] { "XalyLauncher", "Launchpad" };
+                foreach (string n in names)
+                {
+                    string p = Path.Combine(Path.Combine(root, n), "library.json");
+                    if (File.Exists(p)) return File.ReadAllText(p);
+                }
+                return "";
+            }
+            catch (Exception) { return ""; }
+        }
+        public string Info() { return Environment.UserName; }
+        public string Paths() { return f.DownloadsDir + "|" + f.DataDir; }
+        // ---- cache: game icons + unfinished (.part) downloads
+        List<string> CacheFiles()
+        {
+            List<string> l = new List<string>();
+            try { string d = Path.Combine(f.DataDir, "icons"); if (Directory.Exists(d)) l.AddRange(Directory.GetFiles(d, "*", SearchOption.AllDirectories)); } catch (Exception) { }
+            try { if (Directory.Exists(f.DownloadsDir)) l.AddRange(Directory.GetFiles(f.DownloadsDir, "*.part", SearchOption.TopDirectoryOnly)); } catch (Exception) { }
+            return l;
+        }
+        public string CacheSize()
+        {
+            long n = 0;
+            foreach (string p in CacheFiles()) { try { n += new FileInfo(p).Length; } catch (Exception) { } }
+            return n.ToString();
+        }
+        public string ClearCache()
+        {
+            long n = 0;
+            foreach (string p in CacheFiles())
+            {
+                if (dls.Count > 0 && p.EndsWith(".part", StringComparison.OrdinalIgnoreCase)) continue; // a download is running
+                try { long s = new FileInfo(p).Length; File.Delete(p); n += s; } catch (Exception) { }
+            }
+            return n.ToString();
+        }
+        public string Restart()
+        {
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo("cmd.exe", "/c ping 127.0.0.1 -n 3 >nul & start \"\" \"" + Application.ExecutablePath + "\"");
+                psi.CreateNoWindow = true; psi.UseShellExecute = false; psi.WindowStyle = ProcessWindowStyle.Hidden;
+                Process.Start(psi);
+                f.RealExit();
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        // deletes an unpacked game folder, only if it lives inside <downloads>\Games
+        public string DeleteGame(string path)
+        {
+            try
+            {
+                string root = Path.GetFullPath(Path.Combine(f.DownloadsDir, "Games")).TrimEnd('\\') + "\\";
+                string full = Path.GetFullPath(path).TrimEnd('\\') + "\\";
+                if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase) || full.Length <= root.Length) return "ERR:Refusing to delete outside the Xaly games folder.";
+                if (Directory.Exists(path)) Directory.Delete(path, true);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static long DirSize(string p)
+        {
+            long n = 0;
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(p);
+                foreach (FileInfo fi in di.GetFiles()) { try { n += fi.Length; } catch (Exception) { } }
+                foreach (DirectoryInfo sd in di.GetDirectories())
+                {
+                    if ((sd.Attributes & FileAttributes.ReparsePoint) != 0) continue;
+                    n += DirSize(sd.FullName);
+                }
+            }
+            catch (Exception) { }
+            return n;
+        }
+        // measures Xaly's own folders on a background thread, then pushes the result to the page (onScan)
+        public string Scan()
+        {
+            string dl = f.DownloadsDir, dd = f.DataDir;
+            Thread t = new Thread(delegate()
+            {
+                long games = 0, all = 0, data = 0, icons = 0, parts = 0;
+                StringBuilder sb = new StringBuilder();
+                try
+                {
+                    string gdir = Path.Combine(dl, "Games");
+                    if (Directory.Exists(gdir))
+                        foreach (string d in Directory.GetDirectories(gdir))
+                        {
+                            long s = DirSize(d); games += s;
+                            sb.Append(Path.GetFileName(d)).Append("|").Append(s.ToString()).Append("|").Append(d).Append("\n");
+                        }
+                    if (Directory.Exists(dl))
+                    {
+                        all = DirSize(dl);
+                        foreach (string p in Directory.GetFiles(dl, "*.part", SearchOption.TopDirectoryOnly)) { try { parts += new FileInfo(p).Length; } catch (Exception) { } }
+                    }
+                    data = DirSize(dd);
+                    icons = DirSize(Path.Combine(dd, "icons"));
+                }
+                catch (Exception) { }
+                long dlOnly = Math.Max(0, all - games - parts), cache = icons + parts, dataOnly = Math.Max(0, data - icons);
+                string payload = dlOnly.ToString() + "|" + games.ToString() + "|" + cache.ToString() + "|" + dataOnly.ToString() + "\n" + sb.ToString();
+                try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onScan", payload); })); } catch (Exception) { }
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+        public string SetDownloads(string dir)
+        {
+            try { if (dir != null && dir.Length > 0) { Directory.CreateDirectory(dir); f.DownloadsDir = dir; } return "ok"; }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        // every drive on this PC: one line each, fields split by |  (root|label|type|total|free)
+        public string Drives()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (DriveInfo d in DriveInfo.GetDrives())
+            {
+                try
+                {
+                    if (!d.IsReady) continue;
+                    string label = d.VolumeLabel;
+                    sb.Append(d.Name).Append("|").Append(label == null ? "" : label.Replace("|", " ")).Append("|")
+                      .Append(d.DriveType.ToString()).Append("|").Append(d.TotalSize.ToString()).Append("|")
+                      .Append(d.AvailableFreeSpace.ToString()).Append("\n");
+                }
+                catch (Exception) { }
+            }
+            return sb.ToString();
+        }
+
+        // ---- launching games
+        public string Launch(string id, string path, string args)
+        {
+            try
+            {
+                bool uri = path.IndexOf("://") > 0;
+                ProcessStartInfo psi = new ProcessStartInfo(path);
+                psi.UseShellExecute = true;
+                if (!uri)
+                {
+                    if (args != null && args.Length > 0) psi.Arguments = args;
+                    if (File.Exists(path)) psi.WorkingDirectory = Path.GetDirectoryName(path);
+                }
+                Process p = Process.Start(psi);
+                bool track = !uri && p != null && id.Length > 0 && path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+                if (!track) return "ok-untracked";
+                procs[id] = p;
+                p.EnableRaisingEvents = true;
+                p.Exited += delegate(object s, EventArgs e)
+                {
+                    f.BeginInvoke(new MethodInvoker(delegate { procs.Remove(id); f.Js("onExit", id); }));
+                };
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Stop(string id)
+        {
+            Process p;
+            if (procs.TryGetValue(id, out p)) { try { p.Kill(); } catch (Exception) { } }
+            return "ok";
+        }
+        public string Open(string target)
+        {
+            try { Process.Start(target); return "ok"; } catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ---- dialogs
+        public string Pick(string filter)
+        {
+            using (OpenFileDialog d = new OpenFileDialog())
+            {
+                d.Filter = filter; d.CheckFileExists = true;
+                return d.ShowDialog(f) == DialogResult.OK ? d.FileName : "";
+            }
+        }
+        // square-crops and shrinks a picture, returned as a data: URL for profile pictures
+        public string ImageData(string path, string size, string quality)
+        {
+            try
+            {
+                int sz = 128, q = 85; int.TryParse(size, out sz); int.TryParse(quality, out q);
+                if (sz < 24 || sz > 512) sz = 128; if (q < 30 || q > 100) q = 85;
+                using (Image src = Image.FromFile(path))
+                {
+                    int side = Math.Min(src.Width, src.Height);
+                    Rectangle crop = new Rectangle((src.Width - side) / 2, (src.Height - side) / 2, side, side);
+                    using (Bitmap bmp = new Bitmap(sz, sz))
+                    {
+                        using (Graphics g = Graphics.FromImage(bmp))
+                        {
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                            g.Clear(Color.FromArgb(20, 25, 37));
+                            g.DrawImage(src, new Rectangle(0, 0, sz, sz), crop, GraphicsUnit.Pixel);
+                        }
+                        ImageCodecInfo jpg = null;
+                        foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders()) if (c.MimeType == "image/jpeg") jpg = c;
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            if (jpg != null)
+                            {
+                                using (EncoderParameters ep = new EncoderParameters(1))
+                                {
+                                    ep.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)q);
+                                    bmp.Save(ms, jpg, ep);
+                                }
+                            }
+                            else bmp.Save(ms, ImageFormat.Jpeg);
+                            return "data:image/jpeg;base64," + Convert.ToBase64String(ms.ToArray());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string PickFolder()
+        {
+            using (FolderBrowserDialog d = new FolderBrowserDialog())
+            {
+                return d.ShowDialog(f) == DialogResult.OK ? d.SelectedPath : "";
+            }
+        }
+
+        // ---- downloads (progress is pushed to the page)
+        public string Download(string id, string url, string name)
+        {
+            try
+            {
+                Directory.CreateDirectory(f.DownloadsDir);
+                string dest = Path.Combine(f.DownloadsDir, SafeName(name));
+                string part = dest + ".part";
+                if (File.Exists(part)) File.Delete(part);
+                WebClient wc = new WebClient();
+                wc.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 XalyLauncher";
+                long last = 0;
+                wc.DownloadProgressChanged += delegate(object s, DownloadProgressChangedEventArgs e)
+                {
+                    long t = Environment.TickCount;
+                    if (t - last < 250) return;
+                    last = t;
+                    f.Js("onDl", id, "p", e.BytesReceived.ToString(), e.TotalBytesToReceive.ToString());
+                };
+                wc.DownloadFileCompleted += delegate(object s, System.ComponentModel.AsyncCompletedEventArgs e)
+                {
+                    dls.Remove(id);
+                    try
+                    {
+                        if (e.Cancelled) { if (File.Exists(part)) File.Delete(part); f.Js("onDl", id, "cancel", "", ""); return; }
+                        if (e.Error != null) { if (File.Exists(part)) File.Delete(part); f.Js("onDl", id, "err", e.Error.Message, ""); return; }
+                        if (File.Exists(dest)) File.Delete(dest);
+                        File.Move(part, dest);
+                        f.Js("onDl", id, "done", dest, "");
+                    }
+                    catch (Exception ex2) { f.Js("onDl", id, "err", ex2.Message, ""); }
+                };
+                dls[id] = wc;
+                wc.DownloadFileAsync(new Uri(url), part);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Cancel(string id)
+        {
+            WebClient wc;
+            if (dls.TryGetValue(id, out wc)) wc.CancelAsync();
+            return "ok";
+        }
+        public string Extract(string zip, string name)
+        {
+            try
+            {
+                string dir = Path.Combine(Path.Combine(f.DownloadsDir, "Games"), SafeName(name));
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);
+                Directory.CreateDirectory(dir);
+                ZipFile.ExtractToDirectory(zip, dir);
+                string best = null; long size = -1;
+                foreach (string p in Directory.GetFiles(dir, "*.exe", SearchOption.AllDirectories))
+                {
+                    string n = Path.GetFileName(p).ToLower();
+                    if (n.IndexOf("unins") >= 0 || n.IndexOf("crash") >= 0 || n.IndexOf("redist") >= 0 || n.IndexOf("dxsetup") >= 0 || n.IndexOf("helper") >= 0) continue;
+                    long s = new FileInfo(p).Length;
+                    if (s > size) { size = s; best = p; }
+                }
+                try { File.Delete(zip); } catch (Exception) { }   // the archive is not kept once unpacked
+                return (best == null ? "" : best) + "|" + dir;
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Http(string id, string url)
+        {
+            try
+            {
+                WebClient wc = new WebClient();
+                wc.Encoding = Encoding.UTF8;
+                wc.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 XalyLauncher";
+                wc.Headers[HttpRequestHeader.Accept] = "text/html,application/xhtml+xml,application/xml;q=0.9,application/json;q=0.8,*/*;q=0.7";
+                wc.Headers[HttpRequestHeader.AcceptLanguage] = "en-US,en;q=0.9";
+                wc.DownloadStringCompleted += delegate(object s, DownloadStringCompletedEventArgs e)
+                {
+                    if (e.Cancelled || e.Error != null)
+                    {
+                        string code = "0";
+                        WebException we = e.Error as WebException;
+                        if (we != null && we.Response is HttpWebResponse) code = ((int)((HttpWebResponse)we.Response).StatusCode).ToString();
+                        f.Js("onHttp", id, "0", e.Error != null ? e.Error.Message : "cancelled", code);
+                    }
+                    else f.Js("onHttp", id, "1", e.Result, "200");
+                };
+                wc.DownloadStringAsync(new Uri(url));
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ---- itch.io API (the key stays on the C# side; the page only sees the API's answers)
+        // The key is never stored in the source code. Order: the player's own key (Settings > Downloads),
+        // then itchkey.txt shipped next to the .exe in official release downloads.
+        string ItchKey()
+        {
+            try
+            {
+                string p = Path.Combine(f.DataDir, "itch.key");
+                if (File.Exists(p)) { string k = File.ReadAllText(p).Trim(); if (k.Length > 0) return k; }
+                string b = Path.Combine(f.AppDir, "itchkey.txt");
+                if (File.Exists(b)) { string k2 = File.ReadAllText(b).Trim(); if (k2.Length > 0) return k2; }
+            }
+            catch (Exception) { }
+            return "";
+        }
+        public string SetItchKey(string key)
+        {
+            try
+            {
+                string p = Path.Combine(f.DataDir, "itch.key");
+                key = key == null ? "" : key.Trim();
+                if (key.Length == 0) { if (File.Exists(p)) File.Delete(p); return "ok"; }
+                File.WriteAllText(p, key, new UTF8Encoding(false));
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string ItchKeySource()
+        {
+            try
+            {
+                string p = Path.Combine(f.DataDir, "itch.key");
+                if (File.Exists(p) && File.ReadAllText(p).Trim().Length > 0) return "custom";
+                string b = Path.Combine(f.AppDir, "itchkey.txt");
+                if (File.Exists(b) && File.ReadAllText(b).Trim().Length > 0) return "built-in";
+            }
+            catch (Exception) { }
+            return "none";
+        }
+        static string JsonStr(string s)
+        {
+            if (s == null) s = "";
+            return "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+        }
+        // maps the page's short request names onto itch.io's real addresses (v2 = api.itch.io, v1 = itch.io/api/1)
+        string ItchUrl(string path, string key)
+        {
+            if (path == null) return null;
+            System.Text.RegularExpressions.Match m;
+            if (path == "profile") return "https://api.itch.io/profile";
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^v2/games/(\d+)/uploads$");
+            if (m.Success) return "https://api.itch.io/games/" + m.Groups[1].Value + "/uploads";
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^v2/uploads/(\d+)/download$");
+            if (m.Success) return "https://api.itch.io/uploads/" + m.Groups[1].Value + "/download";
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^v1/game/(\d+)/uploads$");
+            if (m.Success) return "https://itch.io/api/1/" + Uri.EscapeDataString(key) + "/game/" + m.Groups[1].Value + "/uploads";
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^v1/upload/(\d+)/download$");
+            if (m.Success) return "https://itch.io/api/1/" + Uri.EscapeDataString(key) + "/upload/" + m.Groups[1].Value + "/download";
+            return null;
+        }
+        // Answer arrives through onHttp(id, "1" or "0", body, status). A redirect is turned into {"url": "..."}.
+        // Sends feedback text to the developer's inbox through the FormSubmit email relay (no password is stored in the app).
+        public string Feedback(string id, string text, string ver, string email)
+        {
+            // everything happens on a background thread so the window never freezes
+            ThreadPool.QueueUserWorkItem(delegate(object st)
+            {
+                string okFlag = "0", msg = "";
+                try
+                {
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    string body = "{\"_subject\":" + JsonStr("Xaly Launcher feedback (" + ver + ")") + ",\"_captcha\":\"false\",\"_template\":\"box\",\"name\":" + JsonStr("Xaly Launcher " + ver)
+                        + (string.IsNullOrEmpty(email) ? "" : ",\"email\":" + JsonStr(email) + ",\"_replyto\":" + JsonStr(email))
+                        + ",\"message\":" + JsonStr(text) + ",\"windows\":" + JsonStr(Environment.OSVersion.VersionString) + "}";
+                    byte[] data = Encoding.UTF8.GetBytes(body);
+                    HttpWebRequest rq = (HttpWebRequest)WebRequest.Create("https://formsubmit.co/ajax/xalify2004@gmail.com");
+                    rq.Method = "POST";
+                    rq.ContentType = "application/json";
+                    rq.Accept = "application/json";
+                    rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 XalyLauncher";
+                    rq.Referer = "https://xaly-launcher.app/feedback";
+                    rq.Headers["Origin"] = "https://xaly-launcher.app";
+                    rq.Timeout = 25000; rq.ReadWriteTimeout = 25000;
+                    rq.ContentLength = data.Length;
+                    using (Stream os = rq.GetRequestStream()) os.Write(data, 0, data.Length);
+                    HttpWebResponse rs = null;
+                    try { rs = (HttpWebResponse)rq.GetResponse(); }
+                    catch (WebException we) { rs = we.Response as HttpWebResponse; if (rs == null) throw; }
+                    string resp;
+                    using (rs) using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8)) resp = sr.ReadToEnd();
+                    bool good = resp.Replace(" ", "").IndexOf("\"success\":\"true\"") >= 0 || resp.Replace(" ", "").IndexOf("\"success\":true") >= 0;
+                    okFlag = good ? "1" : "0";
+                    int m = resp.IndexOf("\"message\"");
+                    if (m >= 0) { int a = resp.IndexOf('"', resp.IndexOf(':', m) + 1); int b = a >= 0 ? resp.IndexOf('"', a + 1) : -1; if (a >= 0 && b > a) msg = resp.Substring(a + 1, b - a - 1); }
+                    if (msg.Length == 0) msg = good ? "sent" : "HTTP " + (int)rs.StatusCode;
+                }
+                catch (Exception ex) { msg = ex.Message; }
+                string o2 = okFlag, m2 = msg;
+                try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onHttp", id, o2, m2, "200"); })); } catch (Exception) { }
+            });
+            return "ok";
+        }
+        public string ItchApi(string id, string path)
+        {
+            try
+            {
+                string key = ItchKey();
+                string url = ItchUrl(path, key);
+                if (url == null) return "ERR:Unsupported itch.io request.";
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
+                rq.UserAgent = "Mozilla/5.0 XalyLauncher";
+                rq.AllowAutoRedirect = false;
+                rq.Timeout = 30000;
+                if (url.StartsWith("https://api.itch.io/")) rq.Headers["Authorization"] = key;
+                rq.BeginGetResponse(delegate(IAsyncResult ar)
+                {
+                    string okFlag = "0", body = "", status = "0";
+                    try
+                    {
+                        HttpWebResponse rs = null;
+                        try { rs = (HttpWebResponse)rq.EndGetResponse(ar); }
+                        catch (WebException we)
+                        {
+                            rs = we.Response as HttpWebResponse;
+                            if (rs == null) throw;
+                        }
+                        using (rs)
+                        {
+                            int code = (int)rs.StatusCode; status = code.ToString();
+                            if (code >= 300 && code < 400)
+                            {
+                                body = "{\"url\":" + JsonStr(rs.Headers["Location"]) + "}";
+                                okFlag = "1";
+                            }
+                            else
+                            {
+                                using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8)) { body = sr.ReadToEnd(); }
+                                if (body.Length > 400000) body = body.Substring(0, 400000);
+                                okFlag = (code >= 200 && code < 300) ? "1" : "0";
+                            }
+                        }
+                    }
+                    catch (Exception ex) { body = ex.Message; }
+                    string b2 = body, o2 = okFlag, s2 = status;
+                    try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onHttp", id, o2, b2, s2); })); } catch (Exception) { }
+                }, null);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ---- accounts: password hashing + removing an account's data file
+        public string Hash(string salt, string text)
+        {
+            try
+            {
+                byte[] sb = Encoding.UTF8.GetBytes("xaly:" + salt);
+                using (Rfc2898DeriveBytes kdf = new Rfc2898DeriveBytes(text == null ? "" : text, sb, 20000))
+                {
+                    byte[] h = kdf.GetBytes(32);
+                    StringBuilder o = new StringBuilder();
+                    foreach (byte b in h) o.Append(b.ToString("x2"));
+                    return o.ToString();
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Delete(string name)
+        {
+            try
+            {
+                string p = Path.Combine(f.DataDir, SafeName(name));
+                if (File.Exists(p)) File.Delete(p);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ---- game details for the library: version, developer, dates, size on disk
+        static long UnixMs(DateTime utc)
+        {
+            return (long)(utc - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+        }
+        public string FileMeta(string path)
+        {
+            try
+            {
+                if (path == null || !File.Exists(path)) return "";
+                FileInfo fi = new FileInfo(path);
+                string ver = "", co = "";
+                try
+                {
+                    FileVersionInfo vi = FileVersionInfo.GetVersionInfo(path);
+                    if (vi.FileVersion != null) ver = vi.FileVersion;
+                    if (vi.CompanyName != null) co = vi.CompanyName;
+                }
+                catch (Exception) { }
+                ver = ver.Replace("|", " ").Trim(); co = co.Replace("|", " ").Trim();
+                return ver + "|" + co + "|" + UnixMs(fi.LastWriteTimeUtc) + "|" + UnixMs(fi.CreationTimeUtc);
+            }
+            catch (Exception) { return ""; }
+        }
+        static bool BroadFolder(string dir)
+        {
+            try
+            {
+                string d = Path.GetFullPath(dir).TrimEnd('\\');
+                if (d.Length <= 3) return true;
+                string[] bad = new string[] {
+                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows) };
+                foreach (string b in bad)
+                    if (b != null && b.Length > 0 && string.Equals(d, b.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase)) return true;
+                return false;
+            }
+            catch (Exception) { return true; }
+        }
+        static long TimedDirBytes(string d, Stopwatch sw)
+        {
+            long t = 0;
+            if (sw.ElapsedMilliseconds > 8000) return t;
+            try
+            {
+                foreach (string x in Directory.GetFiles(d)) { try { t += new FileInfo(x).Length; } catch (Exception) { } }
+                foreach (string s2 in Directory.GetDirectories(d)) { t += TimedDirBytes(s2, sw); if (sw.ElapsedMilliseconds > 8000) break; }
+            }
+            catch (Exception) { }
+            return t;
+        }
+        // measures a game's folder on a background thread; the answer arrives as onSize(id, bytes), -1 = unknown
+        public string GameSize(string id, string path)
+        {
+            try
+            {
+                if (path == null || !File.Exists(path)) return "";
+                string dir = Path.GetDirectoryName(path);
+                bool single = dir == null || BroadFolder(dir);
+                long one = new FileInfo(path).Length;
+                ThreadPool.QueueUserWorkItem(delegate(object o)
+                {
+                    long total = one;
+                    if (!single)
+                    {
+                        Stopwatch sw = Stopwatch.StartNew();
+                        total = TimedDirBytes(dir, sw);
+                        if (sw.ElapsedMilliseconds > 8000) total = -1;
+                    }
+                    try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onSize", id, total.ToString()); })); } catch (Exception) { }
+                });
+                return "ok";
+            }
+            catch (Exception) { return ""; }
+        }
+
+        // ---- game icons
+        public string GameIcon(string id, string path)
+        {
+            try
+            {
+                if (!File.Exists(path)) return "";
+                string dir = Path.Combine(f.DataDir, "icons");
+                Directory.CreateDirectory(dir);
+                string png = Path.Combine(dir, SafeName(id) + ".png");
+                if (!File.Exists(png))
+                {
+                    using (System.Drawing.Icon ic = System.Drawing.Icon.ExtractAssociatedIcon(path))
+                    {
+                        if (ic == null) return "";
+                        using (Bitmap b = ic.ToBitmap()) { b.Save(png, ImageFormat.Png); }
+                    }
+                }
+                return new Uri(png).AbsoluteUri;
+            }
+            catch (Exception) { return ""; }
+        }
+
+        // ---- settings: tray + start with Windows
+        public string SetTray(string on) { f.CloseToTray = (on == "1"); return "ok"; }
+        public string StartupGet()
+        {
+            try
+            {
+                using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run"))
+                { return (k != null && k.GetValue("XalyLauncher") != null) ? "1" : "0"; }
+            }
+            catch (Exception) { return "0"; }
+        }
+        public string StartupSet(string on, string minimized)
+        {
+            try
+            {
+                using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true))
+                {
+                    if (on == "1") k.SetValue("XalyLauncher", "\"" + Application.ExecutablePath + "\"" + (minimized == "1" ? " --tray" : ""));
+                    else k.DeleteValue("XalyLauncher", false);
+                }
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string HideNow() { f.HideToTray(); return "ok"; }
+        public string Quit() { f.RealExit(); return "ok"; }
+        public string Notify(string title, string text)
+        {
+            try { f.tray.ShowBalloonTip(3000, title, text, ToolTipIcon.Info); } catch (Exception) { }
+            return "ok";
+        }
+
+        // ---- self-update: unpack the downloaded release, then a small script swaps the files once we have exited
+        public string UpdateApply(string zip, string sha256)
+        {
+            try
+            {
+                if (!File.Exists(zip)) return "ERR:The update download is missing.";
+                if (!string.IsNullOrEmpty(sha256))
+                {
+                    string got;
+                    using (SHA256 h = SHA256.Create()) using (FileStream fs = File.OpenRead(zip)) got = Hex(h.ComputeHash(fs));
+                    if (!string.Equals(got, sha256.Trim(), StringComparison.OrdinalIgnoreCase)) { try { File.Delete(zip); } catch (Exception) { } return "ERR:The update download was damaged (checksum mismatch). Try again."; }
+                }
+                string tmp = Path.Combine(Path.GetTempPath(), "XalyUpdate_" + DateTime.Now.Ticks);
+                ZipFile.ExtractToDirectory(zip, tmp);
+                string src = null;
+                if (File.Exists(Path.Combine(tmp, "index.html"))) src = tmp;
+                else foreach (string d in Directory.GetDirectories(tmp)) if (File.Exists(Path.Combine(d, "index.html"))) { src = d; break; }
+                if (src == null) return "ERR:The update package doesn't contain the launcher files.";
+                string app = f.AppDir.TrimEnd('\\');
+                string exe = Path.Combine(app, Path.GetFileName(Application.ExecutablePath));
+                int pid = Process.GetCurrentProcess().Id;
+                string cmd = Path.Combine(tmp, "apply_update.cmd");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("@echo off");
+                sb.AppendLine(":wait");
+                sb.AppendLine("tasklist /fi \"PID eq " + pid + "\" | find \"" + pid + "\" >nul && (ping -n 2 127.0.0.1 >nul & goto wait)");
+                sb.AppendLine("xcopy \"" + src + "\\*\" \"" + app + "\\\" /e /y /q /r /h >nul");
+                sb.AppendLine("start \"\" \"" + exe + "\"");
+                sb.AppendLine("cd /d \"%TEMP%\"");
+                sb.AppendLine("rmdir /s /q \"" + tmp + "\"");
+                File.WriteAllText(cmd, sb.ToString(), Encoding.Default);
+                ProcessStartInfo psi = new ProcessStartInfo("cmd.exe", "/c \"" + cmd + "\"");
+                psi.CreateNoWindow = true; psi.UseShellExecute = false; psi.WindowStyle = ProcessWindowStyle.Hidden;
+                Process.Start(psi);
+                try { File.Delete(zip); } catch (Exception) { }
+                f.BeginInvoke(new MethodInvoker(delegate { f.RealExit(); }));
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ---- notifications (shown by Windows when the launcher isn't the active window)
+        public string Notify(string title, string msg, string tag) { return f.ShowNote(title, msg, tag); }
+
+        // ---- in-game overlay (Shift+Tab)
+        public string OverlayHotkey(string on) { return f.SetHotkey(on == "1") ? "ok" : "ERR:Shift+Tab is already used by another app."; }
+        public string OverlayClose() { f.CloseOverlay(); return "ok"; }
+        public string OverlayShots()
+        {
+            try { string d = ShotDir(); Directory.CreateDirectory(d); Process.Start(d); return "ok"; }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static string ShotDir() { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Xaly Screenshots"); }
+        public string OverlayShot(string game)
+        {
+            try
+            {
+                if (!File.Exists(f.OverlayShotPath)) return "ERR:No screenshot was captured.";
+                string d = ShotDir(); Directory.CreateDirectory(d);
+                string nm = SafeName(string.IsNullOrEmpty(game) ? "Game" : game) + " " + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".jpg";
+                string dest = Path.Combine(d, nm);
+                File.Copy(f.OverlayShotPath, dest, true);
+                return dest;
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ---- online friends: ECDH key exchange + AES/HMAC encryption, messages carried by the public ntfy.sh relay
+        static string Hex(byte[] b) { StringBuilder sb = new StringBuilder(b.Length * 2); foreach (byte x in b) sb.Append(x.ToString("x2")); return sb.ToString(); }
+        static byte[] FromHex(string h)
+        {
+            if (h == null || h.Length % 2 != 0) throw new ArgumentException("bad key");
+            byte[] b = new byte[h.Length / 2];
+            for (int i = 0; i < b.Length; i++) b[i] = Convert.ToByte(h.Substring(i * 2, 2), 16);
+            return b;
+        }
+        static byte[] Hm(byte[] key, string label) { using (HMACSHA256 h = new HMACSHA256(key)) return h.ComputeHash(Encoding.UTF8.GetBytes(label)); }
+        static bool OkPub(byte[] p) { return p != null && p.Length == 72 && p[0] == 0x45 && p[1] == 0x43 && p[2] == 0x4B && p[3] == 0x31; }
+        public string EcNew()
+        {
+            try
+            {
+                CngKeyCreationParameters cp = new CngKeyCreationParameters();
+                cp.ExportPolicy = CngExportPolicies.AllowPlaintextExport;
+                using (CngKey k = CngKey.Create(CngAlgorithm.ECDiffieHellmanP256, null, cp))
+                    return Convert.ToBase64String(k.Export(CngKeyBlobFormat.EccPrivateBlob)) + "|" + Convert.ToBase64String(k.Export(CngKeyBlobFormat.EccPublicBlob));
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string PubCode(string pub)
+        {
+            try
+            {
+                byte[] p = Convert.FromBase64String(pub);
+                if (!OkPub(p)) return "";
+                byte[] h; using (SHA256 sh = SHA256.Create()) h = sh.ComputeHash(p);
+                ulong v = 0; for (int i = 0; i < 8; i++) v = (v << 8) | h[i];
+                return (v % 1000000000UL).ToString("D9");
+            }
+            catch (Exception) { return ""; }
+        }
+        public string EcShared(string priv, string pub)
+        {
+            try
+            {
+                byte[] pb = Convert.FromBase64String(pub);
+                if (!OkPub(pb)) return "ERR:Bad public key.";
+                using (CngKey mine = CngKey.Import(Convert.FromBase64String(priv), CngKeyBlobFormat.EccPrivateBlob))
+                using (CngKey theirs = CngKey.Import(pb, CngKeyBlobFormat.EccPublicBlob))
+                using (ECDiffieHellmanCng dh = new ECDiffieHellmanCng(mine))
+                {
+                    dh.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
+                    dh.HashAlgorithm = CngAlgorithm.Sha256;
+                    return Hex(dh.DeriveKeyMaterial(theirs));
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string RandHex(string n)
+        {
+            int c = 32; int.TryParse(n, out c); if (c < 1 || c > 64) c = 32;
+            byte[] b = new byte[c]; using (RNGCryptoServiceProvider r = new RNGCryptoServiceProvider()) r.GetBytes(b);
+            return Hex(b);
+        }
+        public string Topic(string keyHex, string label)
+        {
+            try { return Hex(Hm(FromHex(keyHex), "xaly-topic-" + label)).Substring(0, 32); }
+            catch (Exception) { return "invalid"; }
+        }
+        public string Seal(string keyHex, string text)
+        {
+            try
+            {
+                byte[] k = FromHex(keyHex), ek = Hm(k, "xaly-enc"), mk = Hm(k, "xaly-mac");
+                byte[] pt = Encoding.UTF8.GetBytes(text == null ? "" : text), iv, ct;
+                using (RijndaelManaged a = new RijndaelManaged())
+                {
+                    a.BlockSize = 128; a.KeySize = 256; a.Mode = CipherMode.CBC; a.Padding = PaddingMode.PKCS7; a.Key = ek; a.GenerateIV(); iv = a.IV;
+                    using (ICryptoTransform e = a.CreateEncryptor()) ct = e.TransformFinalBlock(pt, 0, pt.Length);
+                }
+                byte[] body = new byte[iv.Length + ct.Length];
+                Buffer.BlockCopy(iv, 0, body, 0, iv.Length); Buffer.BlockCopy(ct, 0, body, iv.Length, ct.Length);
+                byte[] mac; using (HMACSHA256 h = new HMACSHA256(mk)) mac = h.ComputeHash(body);
+                byte[] outp = new byte[body.Length + 16];
+                Buffer.BlockCopy(body, 0, outp, 0, body.Length); Buffer.BlockCopy(mac, 0, outp, body.Length, 16);
+                return Convert.ToBase64String(outp);
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Unseal(string keyHex, string b64)
+        {
+            try
+            {
+                byte[] k = FromHex(keyHex), ek = Hm(k, "xaly-enc"), mk = Hm(k, "xaly-mac");
+                byte[] all = Convert.FromBase64String(b64 == null ? "" : b64.Trim());
+                if (all.Length < 16 + 16 + 16) return "ERR:Too short.";
+                int bl = all.Length - 16;
+                byte[] mac; using (HMACSHA256 h = new HMACSHA256(mk)) mac = h.ComputeHash(all, 0, bl);
+                int diff = 0; for (int i = 0; i < 16; i++) diff |= mac[i] ^ all[bl + i];
+                if (diff != 0) return "ERR:Bad signature.";
+                byte[] iv = new byte[16]; Buffer.BlockCopy(all, 0, iv, 0, 16);
+                using (RijndaelManaged a = new RijndaelManaged())
+                {
+                    a.BlockSize = 128; a.KeySize = 256; a.Mode = CipherMode.CBC; a.Padding = PaddingMode.PKCS7; a.Key = ek; a.IV = iv;
+                    using (ICryptoTransform d = a.CreateDecryptor())
+                        return Encoding.UTF8.GetString(d.TransformFinalBlock(all, 16, bl - 16));
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static bool OkTopics(string t)
+        {
+            if (string.IsNullOrEmpty(t) || t.Length > 9000) return false;
+            foreach (char c in t) if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == ',')) return false;
+            return true;
+        }
+        // body empty = poll the listed topics; body set = publish to one topic. Result arrives through onHttp(id, ok, body, status).
+        public string Relay(string id, string topics, string since, string body)
+        {
+            if (!OkTopics(topics)) return "ERR:Bad topic.";
+            bool post = !string.IsNullOrEmpty(body);
+            if (post && (topics.IndexOf(',') >= 0 || body.Length > 3800)) return "ERR:Message too long.";
+            string url = "https://ntfy.sh/" + topics + (post ? "" : "/json?poll=1&since=" + Uri.EscapeDataString(string.IsNullOrEmpty(since) ? "12h" : since));
+            ThreadPool.QueueUserWorkItem(delegate(object st)
+            {
+                string okFlag = "0", resp = "", status = "0";
+                try
+                {
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
+                    rq.UserAgent = "XalyLauncher";
+                    rq.Timeout = 30000; rq.ReadWriteTimeout = 30000;
+                    if (post)
+                    {
+                        byte[] d = Encoding.UTF8.GetBytes(body);
+                        rq.Method = "POST"; rq.ContentType = "text/plain; charset=utf-8"; rq.ContentLength = d.Length;
+                        using (Stream os = rq.GetRequestStream()) os.Write(d, 0, d.Length);
+                    }
+                    HttpWebResponse rs = null;
+                    try { rs = (HttpWebResponse)rq.GetResponse(); }
+                    catch (WebException we) { rs = we.Response as HttpWebResponse; if (rs == null) throw; }
+                    using (rs)
+                    {
+                        int code = (int)rs.StatusCode; status = code.ToString();
+                        using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8)) resp = sr.ReadToEnd();
+                        if (resp.Length > 2000000) resp = resp.Substring(resp.Length - 2000000);
+                        okFlag = (code >= 200 && code < 300) ? "1" : "0";
+                    }
+                }
+                catch (Exception ex) { resp = ex.Message; }
+                string o2 = okFlag, r2 = resp, s2 = status;
+                try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onHttp", id, o2, r2, s2); })); } catch (Exception) { }
+            });
+            return "ok";
+        }
+
+        // ---- friends: presence files in a shared folder
+        public string PutPeer(string dir, string code, string json)
+        {
+            try
+            {
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, SafeName(code) + ".xaly"), json, new UTF8Encoding(false));
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string Peers(string dir)
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (string p in Directory.GetFiles(dir, "*.xaly"))
+                {
+                    try { sb.Append(File.ReadAllText(p).Replace("\r", " ").Replace("\n", " ")).Append("\n"); }
+                    catch (Exception) { }
+                }
+                return sb.ToString();
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+    }
+
+    public class MainForm : Form
+    {
+        public WebBrowser browser;
+        public NotifyIcon tray;
+        public bool CloseToTray = true;
+        public string DataDir, DownloadsDir, AppDir;
+        bool allowVisible = true, exiting = false, tipShown = false;
+
+        [DllImport("dwmapi.dll")]
+        static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int val, int size);
+
+        [DllImport("user32.dll")] static extern bool RegisterHotKey(IntPtr hWnd, int id, uint mods, uint vk);
+        [DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr hWnd);
+        const int OVERLAY_HOTKEY = 0x58A1;
+        bool hotkeyOn = false, overlayOn = false, ovWasVisible = false;
+        IntPtr ovGame = IntPtr.Zero;
+        Rectangle ovBounds;
+        FormWindowState ovState = FormWindowState.Normal;
+        FormBorderStyle ovBorder = FormBorderStyle.Sizable;
+        public string OverlayShotPath { get { return Path.Combine(DataDir, "overlay.jpg"); } }
+
+        string noteTag = "";
+        public string ShowNote(string title, string msg, string tag)
+        {
+            try
+            {
+                if (Visible && WindowState != FormWindowState.Minimized && Form.ActiveForm == this) return "skipped";
+                noteTag = tag == null ? "" : tag;
+                tray.BalloonTipTitle = string.IsNullOrEmpty(title) ? "Xaly Launcher" : (title.Length > 60 ? title.Substring(0, 60) : title);
+                tray.BalloonTipText = string.IsNullOrEmpty(msg) ? " " : (msg.Length > 240 ? msg.Substring(0, 240) : msg);
+                tray.BalloonTipIcon = ToolTipIcon.Info;
+                tray.ShowBalloonTip(8000);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        public bool SetHotkey(bool on)
+        {
+            if (on && !hotkeyOn) hotkeyOn = RegisterHotKey(Handle, OVERLAY_HOTKEY, 0x0004 | 0x4000, 0x09);   // Shift + Tab, no auto-repeat
+            else if (!on && hotkeyOn) { UnregisterHotKey(Handle, OVERLAY_HOTKEY); hotkeyOn = false; }
+            return on ? hotkeyOn : true;
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x0312 && m.WParam.ToInt32() == OVERLAY_HOTKEY)
+            {
+                if (overlayOn) CloseOverlay(); else OpenOverlay();
+                return;
+            }
+            base.WndProc(ref m);
+        }
+
+        public void OpenOverlay()
+        {
+            if (overlayOn) return;
+            IntPtr fg = GetForegroundWindow();
+            ovGame = fg == Handle ? IntPtr.Zero : fg;
+            Screen sc = ovGame != IntPtr.Zero ? Screen.FromHandle(ovGame) : Screen.FromPoint(Cursor.Position);
+            Rectangle b = sc.Bounds;
+            string url = "";
+            try
+            {
+                using (Bitmap bmp = new Bitmap(b.Width, b.Height))
+                {
+                    using (Graphics g = Graphics.FromImage(bmp)) g.CopyFromScreen(b.Location, Point.Empty, b.Size);
+                    bmp.Save(OverlayShotPath, ImageFormat.Jpeg);
+                }
+                url = new Uri(OverlayShotPath).AbsoluteUri + "?" + DateTime.Now.Ticks;
+            }
+            catch (Exception) { }
+            ovWasVisible = Visible;
+            ovState = WindowState;
+            ovBorder = FormBorderStyle;
+            ovBounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
+            overlayOn = true;
+            allowVisible = true;
+            if (WindowState != FormWindowState.Normal) WindowState = FormWindowState.Normal;
+            FormBorderStyle = FormBorderStyle.None;
+            Bounds = b;
+            TopMost = true;
+            if (!Visible) Show();
+            Activate();
+            try { browser.Focus(); } catch (Exception) { }
+            Js("onOverlay", "1", url);
+        }
+
+        public void CloseOverlay()
+        {
+            if (!overlayOn) return;
+            overlayOn = false;
+            Js("onOverlay", "0", "");
+            TopMost = false;
+            FormBorderStyle = ovBorder;
+            Bounds = ovBounds;
+            WindowState = ovState;
+            if (!ovWasVisible) Hide();
+            if (ovGame != IntPtr.Zero) { try { SetForegroundWindow(ovGame); } catch (Exception) { } }
+        }
+
+        public MainForm(bool startHidden)
+        {
+            AppDir = AppDomain.CurrentDomain.BaseDirectory;
+            DataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "XalyLauncher");
+            DownloadsDir = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"), "Xaly Launcher");
+            Directory.CreateDirectory(DataDir);
+
+            Text = "Xaly Launcher";
+            ClientSize = new Size(1280, 800);
+            MinimumSize = new Size(1000, 660);
+            StartPosition = FormStartPosition.CenterScreen;
+            BackColor = Color.FromArgb(11, 11, 16);
+            try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
+
+            browser = new WebBrowser();
+            browser.Dock = DockStyle.Fill;
+            browser.ScriptErrorsSuppressed = true;
+            browser.IsWebBrowserContextMenuEnabled = false;
+            browser.AllowWebBrowserDrop = false;
+            browser.WebBrowserShortcutsEnabled = false;
+            browser.ObjectForScripting = new Bridge(this);
+            Controls.Add(browser);
+            // the embedded browser must own keyboard/mouse focus, otherwise the first click only "wakes" it up
+            browser.DocumentCompleted += delegate(object s, WebBrowserDocumentCompletedEventArgs e) { try { browser.Focus(); } catch (Exception) { } };
+            Activated += delegate(object s, EventArgs e) { try { browser.Focus(); } catch (Exception) { } };
+
+            tray = new NotifyIcon();
+            tray.Icon = Icon != null ? Icon : SystemIcons.Application;
+            tray.Text = "Xaly Launcher";
+            tray.Visible = true;
+            ContextMenuStrip menu = new ContextMenuStrip();
+            menu.Items.Add("Open Xaly Launcher", null, delegate(object s, EventArgs e) { ShowMain(); });
+            menu.Items.Add("Exit", null, delegate(object s, EventArgs e) { RealExit(); });
+            tray.ContextMenuStrip = menu;
+            tray.MouseClick += delegate(object s, MouseEventArgs e) { if (e.Button == MouseButtons.Left) ShowMain(); };
+            tray.BalloonTipClicked += delegate(object s, EventArgs e) { ShowMain(); Js("onNotifyClick", noteTag); };
+
+            allowVisible = !startHidden;
+            IntPtr dummy = Handle;            // create the window (and browser) even when starting hidden
+            GC.KeepAlive(dummy);
+            string idx = Path.Combine(AppDir, "index.html");
+            if (File.Exists(idx)) browser.Navigate(new Uri(idx));
+            else browser.DocumentText = "<body style='background:#111;color:#eee;font:16px Segoe UI'><p>index.html is missing next to Xaly Launcher.exe.</p></body>";
+        }
+
+        protected override void SetVisibleCore(bool value) { base.SetVisibleCore(allowVisible && value); }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            try
+            {
+                int one = 1; int cap = 0x100B0B; int txt = 0xF7F3F3;
+                DwmSetWindowAttribute(Handle, 20, ref one, 4);
+                DwmSetWindowAttribute(Handle, 19, ref one, 4);
+                DwmSetWindowAttribute(Handle, 35, ref cap, 4);
+                DwmSetWindowAttribute(Handle, 36, ref txt, 4);
+            }
+            catch (Exception) { }
+        }
+
+        public void Js(string fn, params object[] args)
+        {
+            try { if (browser.Document != null) browser.Document.InvokeScript(fn, args); } catch (Exception) { }
+        }
+
+        public void ShowMain()
+        {
+            allowVisible = true;
+            if (!Visible) Show();
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            TopMost = true; TopMost = false;
+            Activate();
+            Js("onShown");
+        }
+
+        public void HideToTray()
+        {
+            Hide();
+            if (!tipShown)
+            {
+                tipShown = true;
+                try { tray.ShowBalloonTip(2500, "Xaly Launcher", "Still running in the tray. Click the icon to open it, or right-click to exit.", ToolTipIcon.Info); } catch (Exception) { }
+            }
+        }
+
+        public void RealExit()
+        {
+            exiting = true;
+            Js("onQuit");
+            tray.Visible = false;
+            Application.Exit();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (overlayOn && !exiting && e.CloseReason == CloseReason.UserClosing) { e.Cancel = true; CloseOverlay(); return; }
+            if (!exiting && CloseToTray && e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                HideToTray();
+                return;
+            }
+            tray.Visible = false;
+            base.OnFormClosing(e);
+        }
+    }
+
+    static class Program
+    {
+        [DllImport("user32.dll")]
+        static extern bool SetProcessDPIAware();
+
+        [STAThread]
+        static void Main(string[] args)
+        {
+            bool created;
+            EventWaitHandle ev = new EventWaitHandle(false, EventResetMode.AutoReset, "Local\\XalyLauncherShow", out created);
+            if (!created) { ev.Set(); return; }   // already running: just bring it forward
+
+            try { SetProcessDPIAware(); } catch (Exception) { }
+            try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)(3072 | 768 | 192); } catch (Exception) { }   // TLS 1.2 / 1.1 / 1.0
+            try
+            {
+                // make the embedded browser behave like IE11 instead of IE7
+                using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION"))
+                { k.SetValue(Path.GetFileName(Application.ExecutablePath), 11001, RegistryValueKind.DWord); }
+            }
+            catch (Exception) { }
+
+            Application.EnableVisualStyles();
+            MainForm form = new MainForm(Array.IndexOf(args, "--tray") >= 0);
+            Thread t = new Thread(delegate()
+            {
+                while (ev.WaitOne())
+                {
+                    try { form.BeginInvoke(new MethodInvoker(form.ShowMain)); } catch (Exception) { }
+                }
+            });
+            t.IsBackground = true;
+            t.Start();
+            Application.Run(form);
+        }
+    }
+}

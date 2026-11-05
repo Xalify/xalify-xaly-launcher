@@ -1,0 +1,55 @@
+name: Release
+
+# Builds "Xaly Launcher.exe" on Windows and publishes it as a GitHub release.
+# Start it from the Actions tab (Run workflow) or by pushing a tag like v1.4.0.
+# The version comes from var VER="x.y.z" in index.html.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        shell: pwsh
+        run: |
+          $m = Select-String -Path index.html -Pattern 'var VER="([^"]+)"'
+          $v = $m.Matches[0].Groups[1].Value
+          if ("${{ github.ref_type }}" -eq "tag" -and "${{ github.ref_name }}".TrimStart('v') -ne $v) { throw "index.html says $v but the tag is ${{ github.ref_name }}" }
+          "v=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Build
+        shell: cmd
+        run: |
+          set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
+          "%CSC%" /nologo /target:winexe /optimize+ /out:"Xaly Launcher.exe" /win32icon:xaly.ico /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Core.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll Xaly.cs
+
+      - name: Package
+        shell: pwsh
+        env:
+          ITCH_KEY: ${{ secrets.ITCH_KEY }}
+        run: |
+          $v = "${{ steps.ver.outputs.v }}"
+          New-Item -ItemType Directory -Force XalyLauncher | Out-Null
+          Copy-Item "Xaly Launcher.exe","index.html","xaly.ico" XalyLauncher/
+          if ($env:ITCH_KEY) { [IO.File]::WriteAllText("$PWD/XalyLauncher/itchkey.txt", $env:ITCH_KEY.Trim()) } else { Write-Warning "ITCH_KEY secret is not set: players will need their own itch.io key" }
+          Compress-Archive -Path XalyLauncher -DestinationPath "XalyLauncher-$v.zip"
+          $h = (Get-FileHash "XalyLauncher-$v.zip" -Algorithm SHA256).Hash.ToLower()
+          $notes = if (Test-Path release-notes.md) { Get-Content release-notes.md -Raw } else { "Xaly Launcher $v" }
+          [IO.File]::WriteAllText("$PWD/notes.md", $notes.Trim() + "`n`nSHA256: $h`n")
+
+      - name: Publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = "${{ steps.ver.outputs.v }}"
+          gh release create "v$v" "XalyLauncher-$v.zip" --title "Xaly Launcher $v" --notes-file notes.md --target "${{ github.sha }}"

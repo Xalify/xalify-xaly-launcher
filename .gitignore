@@ -1,0 +1,7 @@
+# never commit the itch.io key or build output
+itchkey.txt
+itch.key
+*.exe
+*.zip
+*.part
+XalyLauncher/

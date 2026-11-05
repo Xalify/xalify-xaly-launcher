@@ -1,0 +1,63 @@
+name: Check
+
+# Compiles the launcher both ways (WebView2 and legacy IE) and runs its self-test on Windows.
+# Runs for every branch except main; results are pushed to the ci-logs branch.
+on:
+  push:
+    branches-ignore: [main, ci-logs]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and self-test
+        shell: pwsh
+        run: |
+          $log = New-Object System.Collections.Generic.List[string]
+          function L($t) { Write-Host $t; $log.Add([string]$t) }
+          L "commit ${{ github.sha }} on ${{ github.ref_name }}"
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          $refs = "/r:System.Windows.Forms.dll","/r:System.Drawing.dll","/r:System.Core.dll","/r:System.IO.Compression.dll","/r:System.IO.Compression.FileSystem.dll"
+          try { ./tools/get-webview2.ps1 *>&1 | ForEach-Object { L $_ } } catch { L "get-webview2 failed: $_" }
+          if (Test-Path webview2/version.txt) { L ("WebView2 SDK " + (Get-Content webview2/version.txt)) }
+          L "== compile: legacy =="
+          & $csc /nologo /target:winexe /out:legacy.exe /win32icon:xaly.ico @refs Xaly.cs *>&1 | ForEach-Object { L $_ }
+          L "exit $LASTEXITCODE"
+          L "== compile: webview2 =="
+          & $csc /nologo /target:winexe /out:"Xaly Launcher.exe" /win32icon:xaly.ico @refs /define:WEBVIEW2 /r:webview2\Microsoft.Web.WebView2.Core.dll /r:webview2\Microsoft.Web.WebView2.WinForms.dll Xaly.cs *>&1 | ForEach-Object { L $_ }
+          L "exit $LASTEXITCODE"
+          Copy-Item webview2\*.dll . -ErrorAction SilentlyContinue
+          foreach ($a in "x64","x86","arm64") { if (Test-Path "webview2/$a") { Copy-Item "webview2/$a" $a -Recurse -Force } }
+          function SelfTest($exe, $label) {
+            L "== self-test: $label =="
+            Remove-Item selftest.txt -ErrorAction SilentlyContinue
+            if (-not (Test-Path $exe)) { L "no exe"; return }
+            $p = Start-Process -FilePath (Resolve-Path $exe) -ArgumentList "--selftest" -PassThru
+            if (-not $p.WaitForExit(150000)) { L "still running after 150s, killing"; $p.Kill() }
+            if (Test-Path selftest.txt) { L (Get-Content selftest.txt -Raw) } else { L "no selftest.txt written" }
+            $err = Join-Path $env:APPDATA "XalyLauncher\webview2-error.txt"
+            if (Test-Path $err) { L ("webview2-error: " + (Get-Content $err -Raw)); Remove-Item $err }
+          }
+          SelfTest "Xaly Launcher.exe" "webview2 build"
+          New-Item -ItemType Directory -Force (Join-Path $env:APPDATA "XalyLauncher") | Out-Null
+          Set-Content (Join-Path $env:APPDATA "XalyLauncher\use-ie.txt") "1"
+          SelfTest "Xaly Launcher.exe" "webview2 build forced to legacy engine"
+          Remove-Item (Join-Path $env:APPDATA "XalyLauncher\use-ie.txt")
+          Copy-Item legacy.exe "Legacy Only.exe" -ErrorAction SilentlyContinue
+          SelfTest "Legacy Only.exe" "legacy-only build"
+          $log | Set-Content -Path "$env:RUNNER_TEMP\check.log" -Encoding utf8
+      - name: Publish log
+        if: always()
+        shell: pwsh
+        run: |
+          git config user.name "xaly-ci"; git config user.email "ci@users.noreply.github.com"
+          $f = "$env:RUNNER_TEMP\check.log"; if (-not (Test-Path $f)) { "no log (build step crashed)" | Set-Content $f }
+          git fetch origin ci-logs 2>$null
+          if ($LASTEXITCODE -eq 0) { git checkout -B ci-logs origin/ci-logs } else { git checkout --orphan ci-logs; git rm -rf . -q }
+          Copy-Item $f "${{ github.ref_name }}.log" -Force
+          git add "${{ github.ref_name }}.log"; git commit -m "check log for ${{ github.sha }}" -q; git push origin ci-logs

@@ -33,10 +33,12 @@ jobs:
 
       - name: Build
         if: steps.ver.outputs.skip != 'true'
-        shell: cmd
+        shell: pwsh
         run: |
-          set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
-          "%CSC%" /nologo /target:winexe /optimize+ /out:"Xaly Launcher.exe" /win32icon:xaly.ico /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Core.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll Xaly.cs
+          ./tools/get-webview2.ps1
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          & $csc /nologo /target:winexe /optimize+ /out:"Xaly Launcher.exe" /win32icon:xaly.ico /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Core.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll /define:WEBVIEW2 /r:webview2\Microsoft.Web.WebView2.Core.dll /r:webview2\Microsoft.Web.WebView2.WinForms.dll Xaly.cs
+          if ($LASTEXITCODE -ne 0) { throw "compile failed" }
 
       - name: Package
         if: steps.ver.outputs.skip != 'true'
@@ -46,7 +48,8 @@ jobs:
         run: |
           $v = "${{ steps.ver.outputs.v }}"
           New-Item -ItemType Directory -Force XalyLauncher | Out-Null
-          Copy-Item "Xaly Launcher.exe","index.html","xaly.ico" XalyLauncher/
+          Copy-Item "Xaly Launcher.exe","index.html","xaly.ico","webview2/Microsoft.Web.WebView2.Core.dll","webview2/Microsoft.Web.WebView2.WinForms.dll" XalyLauncher/
+          foreach ($a in "x64","x86","arm64") { if (Test-Path "webview2/$a") { Copy-Item "webview2/$a" "XalyLauncher/$a" -Recurse } }
           if ($env:ITCH_KEY) { [IO.File]::WriteAllText("$PWD/XalyLauncher/itchkey.txt", $env:ITCH_KEY.Trim()) } else { Write-Host "Using the itch.io key built into Xaly.cs" }
           Compress-Archive -Path XalyLauncher -DestinationPath "XalyLauncher-$v.zip"
           $h = (Get-FileHash "XalyLauncher-$v.zip" -Algorithm SHA256).Hash.ToLower()

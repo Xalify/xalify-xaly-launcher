@@ -13,10 +13,15 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
+#if WEBVIEW2
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
+#endif
 
 namespace Xaly
 {
     [ComVisible(true)]
+    [ClassInterface(ClassInterfaceType.AutoDual)]
     public class Bridge
     {
         MainForm f;
@@ -413,10 +418,28 @@ namespace Xaly
             catch (Exception) { }
             return "built-in";
         }
-        static string JsonStr(string s)
+        internal static string JsonStr(string s)
         {
             if (s == null) s = "";
-            return "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+            StringBuilder sb = new StringBuilder(s.Length + 16);
+            sb.Append('"');
+            foreach (char c in s)
+            {
+                switch (c)
+                {
+                    case '"': sb.Append("\\\""); break;
+                    case '\\': sb.Append("\\\\"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\r': sb.Append("\\r"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    default:
+                        if (c < 0x20 || c == '\u2028' || c == '\u2029' || c == '<') sb.Append("\\u").Append(((int)c).ToString("x4"));
+                        else sb.Append(c);
+                        break;
+                }
+            }
+            sb.Append('"');
+            return sb.ToString();
         }
         // maps the page's short request names onto itch.io's real addresses (v2 = api.itch.io, v1 = itch.io/api/1)
         string ItchUrl(string path, string key)
@@ -649,7 +672,7 @@ namespace Xaly
                         using (Bitmap b = ic.ToBitmap()) { b.Save(png, ImageFormat.Png); }
                     }
                 }
-                return new Uri(png).AbsoluteUri;
+                return f.FileUrl(png);
             }
             catch (Exception) { return ""; }
         }
@@ -729,6 +752,23 @@ namespace Xaly
 
         // ---- notifications (shown by Windows when the launcher isn't the active window)
         public string Notify(string title, string msg, string tag) { return f.ShowNote(title, msg, tag); }
+
+        // ---- display engine
+        public string Engine() { return f.Modern ? "webview2" : "ie"; }
+        public string UseEngine(string name)
+        {
+            try
+            {
+                string flag = Path.Combine(f.DataDir, "use-ie.txt");
+                if (name == "ie") File.WriteAllText(flag, "1"); else if (File.Exists(flag)) File.Delete(flag);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string ModernAvailable() { return f.ModernBuilt ? "1" : "0"; }
+        // self-test used by the build server: the page reports that both directions of the bridge work
+        public string SelfTest() { return f.SelfTesting ? "1" : "0"; }
+        public string SelfTestDone(string result) { f.FinishSelfTest(result); return "ok"; }
 
         // ---- in-game overlay (Shift+Tab)
         public string OverlayHotkey(string on) { return f.SetHotkey(on == "1") ? "ok" : "ERR:Shift+Tab is already used by another app."; }
@@ -931,7 +971,15 @@ namespace Xaly
 
     public class MainForm : Form
     {
-        public WebBrowser browser;
+        public WebBrowser browser;           // legacy engine (Internet Explorer 11)
+#if WEBVIEW2
+        public WebView2 wv;                  // modern engine (Microsoft Edge WebView2)
+        public bool ModernBuilt = true;
+#else
+        public bool ModernBuilt = false;
+#endif
+        public bool Modern = false, SelfTesting = false;
+        Bridge bridge;
         public NotifyIcon tray;
         public bool CloseToTray = true;
         public string DataDir, DownloadsDir, AppDir;
@@ -1000,7 +1048,7 @@ namespace Xaly
                     using (Graphics g = Graphics.FromImage(bmp)) g.CopyFromScreen(b.Location, Point.Empty, b.Size);
                     bmp.Save(OverlayShotPath, ImageFormat.Jpeg);
                 }
-                url = new Uri(OverlayShotPath).AbsoluteUri + "?" + DateTime.Now.Ticks;
+                url = FileUrl(OverlayShotPath) + "?" + DateTime.Now.Ticks;
             }
             catch (Exception) { }
             ovWasVisible = Visible;
@@ -1015,7 +1063,7 @@ namespace Xaly
             TopMost = true;
             if (!Visible) Show();
             Activate();
-            try { browser.Focus(); } catch (Exception) { }
+            FocusView();
             Js("onOverlay", "1", url);
         }
 
@@ -1046,17 +1094,10 @@ namespace Xaly
             BackColor = Color.FromArgb(11, 11, 16);
             try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
 
-            browser = new WebBrowser();
-            browser.Dock = DockStyle.Fill;
-            browser.ScriptErrorsSuppressed = true;
-            browser.IsWebBrowserContextMenuEnabled = false;
-            browser.AllowWebBrowserDrop = false;
-            browser.WebBrowserShortcutsEnabled = false;
-            browser.ObjectForScripting = new Bridge(this);
-            Controls.Add(browser);
+            bridge = new Bridge(this);
+            SelfTesting = Array.IndexOf(Environment.GetCommandLineArgs(), "--selftest") >= 0;
             // the embedded browser must own keyboard/mouse focus, otherwise the first click only "wakes" it up
-            browser.DocumentCompleted += delegate(object s, WebBrowserDocumentCompletedEventArgs e) { try { browser.Focus(); } catch (Exception) { } };
-            Activated += delegate(object s, EventArgs e) { try { browser.Focus(); } catch (Exception) { } };
+            Activated += delegate(object s, EventArgs e) { FocusView(); };
 
             tray = new NotifyIcon();
             tray.Icon = Icon != null ? Icon : SystemIcons.Application;
@@ -1073,8 +1114,106 @@ namespace Xaly
             IntPtr dummy = Handle;            // create the window (and browser) even when starting hidden
             GC.KeepAlive(dummy);
             string idx = Path.Combine(AppDir, "index.html");
+            if (SelfTesting) StartSelfTestTimer();
+#if WEBVIEW2
+            if (!File.Exists(Path.Combine(DataDir, "use-ie.txt"))) { StartModern(idx); return; }
+#endif
+            StartLegacy(idx);
+        }
+
+        const string Missing = "<body style='background:#111;color:#eee;font:16px Segoe UI'><p>index.html is missing next to Xaly Launcher.exe.</p></body>";
+
+        void StartLegacy(string idx)
+        {
+            Modern = false;
+            browser = new WebBrowser();
+            browser.Dock = DockStyle.Fill;
+            browser.ScriptErrorsSuppressed = true;
+            browser.IsWebBrowserContextMenuEnabled = false;
+            browser.AllowWebBrowserDrop = false;
+            browser.WebBrowserShortcutsEnabled = false;
+            browser.ObjectForScripting = bridge;
+            Controls.Add(browser);
+            browser.DocumentCompleted += delegate(object s, WebBrowserDocumentCompletedEventArgs e) { FocusView(); };
             if (File.Exists(idx)) browser.Navigate(new Uri(idx));
-            else browser.DocumentText = "<body style='background:#111;color:#eee;font:16px Segoe UI'><p>index.html is missing next to Xaly Launcher.exe.</p></body>";
+            else browser.DocumentText = Missing;
+        }
+
+#if WEBVIEW2
+        async void StartModern(string idx)
+        {
+            try
+            {
+                wv = new WebView2();
+                wv.Dock = DockStyle.Fill;
+                wv.DefaultBackgroundColor = Color.FromArgb(8, 10, 16);
+                Controls.Add(wv);
+                string loader = Path.Combine(AppDir, Environment.Is64BitProcess ? "x64" : "x86");
+                if (Directory.Exists(loader)) CoreWebView2Environment.SetLoaderDllFolderPath(loader);
+                CoreWebView2Environment env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(DataDir, "WebView2"));
+                await wv.EnsureCoreWebView2Async(env);
+                CoreWebView2 c = wv.CoreWebView2;
+                c.Settings.AreDefaultContextMenusEnabled = false;
+                c.Settings.IsStatusBarEnabled = false;
+                c.Settings.AreBrowserAcceleratorKeysEnabled = false;
+                c.Settings.IsZoomControlEnabled = false;
+                c.Settings.AreDevToolsEnabled = File.Exists(Path.Combine(DataDir, "devtools.txt"));
+                c.AddHostObjectToScript("external", bridge);
+                c.SetVirtualHostNameToFolderMapping("app.xaly", AppDir, CoreWebView2HostResourceAccessKind.Allow);
+                c.SetVirtualHostNameToFolderMapping("data.xaly", DataDir, CoreWebView2HostResourceAccessKind.Allow);
+                c.NewWindowRequested += delegate(object s, CoreWebView2NewWindowRequestedEventArgs e) { e.Handled = true; try { Process.Start(e.Uri); } catch (Exception) { } };
+                c.NavigationCompleted += delegate(object s, CoreWebView2NavigationCompletedEventArgs e) { FocusView(); };
+                Modern = true;
+                if (File.Exists(idx)) c.Navigate("https://app.xaly/index.html");
+                else c.NavigateToString(Missing);
+            }
+            catch (Exception ex)
+            {
+                // no WebView2 runtime (or its files are missing): fall back to the Internet Explorer engine
+                try { File.WriteAllText(Path.Combine(DataDir, "webview2-error.txt"), DateTime.Now + "\r\n" + ex); } catch (Exception) { }
+                try { if (wv != null) { Controls.Remove(wv); wv.Dispose(); } } catch (Exception) { }
+                wv = null;
+                StartLegacy(idx);
+            }
+        }
+#endif
+
+        public void FocusView()
+        {
+            try
+            {
+#if WEBVIEW2
+                if (Modern && wv != null) { wv.Focus(); return; }
+#endif
+                if (browser != null) browser.Focus();
+            }
+            catch (Exception) { }
+        }
+
+        // turns a file inside the data folder into an address the current engine can load
+        public string FileUrl(string path)
+        {
+            if (Modern)
+            {
+                string d = DataDir.TrimEnd('\\') + "\\";
+                if (path.StartsWith(d, StringComparison.OrdinalIgnoreCase)) return "https://data.xaly/" + Uri.EscapeUriString(path.Substring(d.Length).Replace('\\', '/'));
+            }
+            return new Uri(path).AbsoluteUri;
+        }
+
+        System.Windows.Forms.Timer selfTimer;
+        void StartSelfTestTimer()
+        {
+            selfTimer = new System.Windows.Forms.Timer();
+            selfTimer.Interval = 90000;
+            selfTimer.Tick += delegate(object s, EventArgs e) { FinishSelfTest("{\"ok\":false,\"error\":\"timeout: the page never reported back\",\"engine\":\"" + (Modern ? "webview2" : "ie") + "\"}"); };
+            selfTimer.Start();
+        }
+        public void FinishSelfTest(string result)
+        {
+            try { if (selfTimer != null) selfTimer.Stop(); } catch (Exception) { }
+            try { File.WriteAllText(Path.Combine(AppDir, "selftest.txt"), result ?? ""); } catch (Exception) { }
+            RealExit();
         }
 
         protected override void SetVisibleCore(bool value) { base.SetVisibleCore(allowVisible && value); }
@@ -1095,7 +1234,24 @@ namespace Xaly
 
         public void Js(string fn, params object[] args)
         {
-            try { if (browser.Document != null) browser.Document.InvokeScript(fn, args); } catch (Exception) { }
+            if (InvokeRequired) { try { BeginInvoke(new MethodInvoker(delegate { Js(fn, args); })); } catch (Exception) { } return; }
+#if WEBVIEW2
+            if (Modern)
+            {
+                try
+                {
+                    if (wv == null || wv.CoreWebView2 == null) return;
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("window.").Append(fn).Append("&&window.").Append(fn).Append('(');
+                    for (int i = 0; i < args.Length; i++) { if (i > 0) sb.Append(','); sb.Append(Bridge.JsonStr(args[i] == null ? "" : args[i].ToString())); }
+                    sb.Append(')');
+                    wv.CoreWebView2.ExecuteScriptAsync(sb.ToString());
+                }
+                catch (Exception) { }
+                return;
+            }
+#endif
+            try { if (browser != null && browser.Document != null) browser.Document.InvokeScript(fn, args); } catch (Exception) { }
         }
 
         public void ShowMain()

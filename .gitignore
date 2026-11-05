@@ -5,3 +5,9 @@ itch.key
 *.zip
 *.part
 XalyLauncher/
+webview2/
+x64/
+x86/
+arm64/
+Microsoft.Web.WebView2.*.dll
+selftest.txt

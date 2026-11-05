@@ -639,9 +639,10 @@ select::-ms-expand{display:none}
 </div>
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
-var X=window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.4.1";
+var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
+var VER="1.5.0";
 var NOTES=[
+ {v:"1.5.0",d:"5 Nov 2026",t:["New display engine: Xaly now runs on Microsoft Edge WebView2 instead of Internet Explorer, so pages, scrolling and animations are faster and smoother","If WebView2 isn\u2019t available the launcher falls back to the old engine by itself; you can switch in Settings \u203A General","Fixed feedback messages with more than one line failing to send"]},
  {v:"1.4.1",d:"5 Nov 2026",t:["itch.io installs work out of the box again with a new built-in key","First update delivered through the new self-updater"]},
  {v:"1.4.0",d:"5 Nov 2026",t:["Xaly now updates itself: new versions are published on GitHub, and the launcher offers to install them with one click","Check for updates in Settings \u203A About","Installs from itch.io use a new built-in key"]},
  {v:"1.3.0",d:"5 Nov 2026",t:["New profiles: your picture, level and XP, badges you earn by playing, a favourite-game showcase, recent activity with hours played in the past 2 weeks, and stats","Edit profile: real name, country, About me, favourite game, background and featured badge","Friends can see each other\u2019s profiles and pictures (shared privately, end-to-end encrypted). Open one from a chat or from your profile\u2019s friends list"]},
@@ -671,6 +672,12 @@ function now(){return new Date().getTime();}
 function trim(s){return (s||"").replace(/^\s+|\s+$/g,"");}
 function hash(s){var h=0,i;for(i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h);}
 function T(fn,d){try{return fn();}catch(e){return d===undefined?"ERR:"+e.message:d;}}
+function copyText(t){   // works in both display engines
+  if(window.clipboardData){window.clipboardData.setData("Text",t);return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(String(t));return;}
+  var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=document.execCommand("copy");document.body.removeChild(a);if(!ok)throw new Error("copy failed");
+}
+var ENGINE="ie";
 function rid(){return "g"+now()+Math.floor(Math.random()*9999);}
 function stp(e){e=e||window.event;e.cancelBubble=true;}
 function toast(t){var d=$("toast");d.textContent=t;d.className="show";clearTimeout(toast.t);toast.t=setTimeout(function(){d.className="";},3400);}
@@ -888,7 +895,8 @@ function startSession(a){
   try{S=t?JSON.parse(t):null;}catch(e){S=null;}
   var fresh=!S;
   if(!S){S=newState(a.name,AC.list.length===1);S.user.color=a.color||0;}
-  loadCat();var mig=fixState();curAcc=a;migrateLive();AC.active=a.id;saveAcc();if(fresh||mig)saveNow();
+  loadCat();var mig=fixState();curAcc=a;migrateLive();
+  S.games.forEach(function(g){if(g.icon&&(ENGINE==="webview2"?/^file:/i:/^https:\/\/data\.xaly\//i).test(g.icon)){g.icon="";getIcon(g);}});AC.active=a.id;saveAcc();if(fresh||mig)saveNow();
   peers=[];syncMsg="";run={};dl=null;covQ=[];SC=null;
   P.f={b:"all",g:"",s:"",fr:"",lf:""};P.lim=60;P.spot=null;P.page="store";P.prev="store";P.sel=null;P.cur=null;P.lq="";P.sq="";P.tab="account";P.lt="all";
   $("login").style.display="none";setFP(false);
@@ -2519,7 +2527,7 @@ function renderFriends(toBottom){
     var e0=el("div","fempty");e0.appendChild(el("b","","No friends yet"));
     e0.appendChild(el("div","","Click + Add and type a friend's code, or give them yours:"));
     var cc=el("div","fcode");cc.appendChild(el("span","",fmtCode(S.user.code)));
-    cc.appendChild(btn("Copy","btn sm",function(){try{window.clipboardData.setData("Text",S.user.code);toast("Friend code copied");}catch(e){toast("Your code is "+S.user.code);}}));
+    cc.appendChild(btn("Copy","btn sm",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Your code is "+S.user.code);}}));
     e0.appendChild(cc);b.appendChild(e0);
   }
   if(S.oldFriends&&S.oldFriends.length)b.appendChild(el("div","fnote","Friends from the old sync-folder system need to be added again with their new friend codes."));
@@ -2541,7 +2549,7 @@ function renderChat(f,b,toBottom){
   var mb=btn("⋯","ichb",null);mb.onclick=function(e){stp(e);ctxMenu(mb,[
     {t:"View profile",fn:function(){openProfile(f.code);}},
     {t:"Set nickname",fn:function(){openForm("Nickname for "+(f.name||fname2(f)),[{id:"nick",label:"Nickname",value:f.nick||"",ph:f.name||""}],"Save",function(v){f.nick=v.nick;save();renderFriends();},null);}},
-    {t:"Copy friend code",fn:function(){try{window.clipboardData.setData("Text",f.code);toast("Copied "+fmtCode(f.code));}catch(e2){toast(fmtCode(f.code));}}},
+    {t:"Copy friend code",fn:function(){try{copyText(f.code);toast("Copied "+fmtCode(f.code));}catch(e2){toast(fmtCode(f.code));}}},
     {t:(S.set.readRc!==0?"Turn off":"Turn on")+" read receipts",fn:function(){S.set.readRc=S.set.readRc!==0?0:1;save();toast("Read receipts "+(S.set.readRc?"on":"off"));}},
     {t:"Clear chat history",fn:function(){f.msgs=[];save();renderFriends();}},
     {sep:1},{t:"Remove friend",cls:"dng",fn:function(){removeFriend(f);}}]);};
@@ -2963,7 +2971,7 @@ function renderSettings(){
     var sc=el("div");AV.forEach(function(c,i){var s=el("span","swatch"+(S.user.color===i?" on":""));s.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s.onclick=function(){S.user.color=i;save();syncAcc();render();renderFriends();syncNow();};sc.appendChild(s);});
     var rr=srow("Avatar colour",null,sc);b.appendChild(rr);
     var cp=el("div");cp.style.cssText="display:flex;align-items:center";cp.appendChild(el("span","code",fmtCode(S.user.code)));
-    cp.appendChild(btn("Copy","btn",function(){try{window.clipboardData.setData("Text",S.user.code);toast("Friend code copied");}catch(e){toast("Couldn't copy. Your code is "+S.user.code);}}));
+    cp.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Couldn't copy. Your code is "+S.user.code);}}));
     b.appendChild(srow("Friend code","Give this to friends so they can add you.",cp));
     var ss=el("select");[["online","Online"],["away","Away"],["busy","Do not disturb"],["invisible","Invisible"]].forEach(function(o){var op=el("option","",o[1]);op.value=o[0];ss.appendChild(op);});
     ss.value=S.user.status;ss.style.width="180px";ss.onchange=function(){S.user.status=ss.value;save();render();renderFriends();syncNow();};
@@ -2975,7 +2983,7 @@ function renderSettings(){
     b.appendChild(srow("Online friends","Send and accept friend requests, see who's online and what they're playing, chat, and recommend games.",sw(S.set.online!==0,function(v){S.set.online=v?1:0;if(v)frInit();save();renderFriends();if(v)syncNow();renderSettings();})));
     if(frOn()){
       var cp2=el("div");cp2.style.cssText="display:flex;align-items:center";cp2.appendChild(el("span","code",fmtCode(S.user.code)));
-      cp2.appendChild(btn("Copy","btn",function(){try{window.clipboardData.setData("Text",S.user.code);toast("Friend code copied");}catch(e){toast("Your code is "+S.user.code);}}));
+      cp2.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Your code is "+S.user.code);}}));
       b.appendChild(srow("Your friend code","Give this to friends so they can send you a request.",cp2));
       b.appendChild(srow("Show what I'm playing","Friends can see the game you're in.",sw(!!S.set.showPlaying,function(v){S.set.showPlaying=v?1:0;save();syncNow();})));
     }
@@ -2987,6 +2995,10 @@ function renderSettings(){
     b.appendChild(srow("Keep running in the tray when I close the window","The launcher stays in the hidden icons area (^ in the taskbar) so friends still see you online. Turn this off to quit when you close it.",sw(!!S.set.tray,function(v){S.set.tray=v?1:0;save();T(function(){return X.SetTray(v?"1":"0");});})));
     b.appendChild(srow("Start Xaly Launcher when I sign in to Windows",null,sw(!!S.set.startup,function(v){S.set.startup=v?1:0;save();var r=T(function(){return X.StartupSet(v?"1":"0",S.set.startMin?"1":"0");});if(r!=="ok")toast("Couldn't change startup: "+r.replace("ERR:",""));renderSettings();})));
     if(S.set.startup)b.appendChild(srow("Start minimised to the tray","Open quietly in the background instead of showing the window.",sw(!!S.set.startMin,function(v){S.set.startMin=v?1:0;save();T(function(){return X.StartupSet("1",v?"1":"0");});})));
+    var eng=el("div","seg");[["webview2","Modern (Edge)"],["ie","Legacy (IE)"]].forEach(function(o){eng.appendChild(btn(o[1],"sgb"+(ENGINE===o[0]?" on":""),function(){
+      if(o[0]===ENGINE)return;if(o[0]==="webview2"&&T(function(){return X.ModernAvailable();},"0")!=="1"){toast("This build doesn\u2019t include the modern engine. Install the latest release from GitHub.");return;}
+      T(function(){return X.UseEngine(o[0]);});openForm("Restart to switch the display engine?",[],"Restart now",function(){T(function(){return X.Restart();});},null);}));});
+    b.appendChild(srow("Display engine","Modern uses Microsoft Edge WebView2: faster and smoother. Legacy uses the old Internet Explorer engine, in case something looks wrong."+(ENGINE==="ie"&&T(function(){return X.ModernAvailable();},"0")==="1"?" Modern couldn\u2019t start on this PC, so Legacy is being used. Installing the free WebView2 Runtime from Microsoft fixes that.":""),eng));
     var lay=el("div","seg");[["side","Sidebar"],["classic","Classic"]].forEach(function(o){lay.appendChild(btn(o[1],"sgb"+((S.set.layout||"side")===o[0]?" on":""),function(){S.set.layout=o[0];save();applyLayout();renderSettings();}));});
     b.appendChild(srow("Layout","Sidebar is the new look. Classic brings back the top bar with Store and Library tabs and the bar along the bottom.",lay));
     var lu=el("div");lu.style.cssText="display:flex;align-items:center";
@@ -3078,6 +3090,8 @@ window.onQuit=function(){if(!S)return;var k;for(k in run){var g=gameBy(k);if(g)g
   saveNow();};
 
 function init(){
+  ENGINE=T(function(){return X.Engine();},"ie");
+  document.ondragover=document.ondrop=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();return false;};
   loadAcc();
   var intro=AC.intro!==0,a=accBy(AC.active);
   if(a)startSession(a);else showLogin();
@@ -3088,6 +3102,19 @@ function init(){
   setTimeout(function(){checkUpdate(false);},8000);setInterval(function(){checkUpdate(false);},6*3600000);
   setInterval(function(){refreshLive(false);},30*60000);
   setInterval(function(){if(chatOpen()&&now()-frPollT>6000)frPoll();},2000);
+  if(T(function(){return X.SelfTest();},"0")==="1")setTimeout(selfTest,1500);
+}
+function selfTest(){   // run by the build server: proves both directions of the page <-> app bridge work
+  var r={engine:ENGINE,ua:navigator.userAgent,ok:false,checks:{}};
+  function c(n,f){try{var v=f();r.checks[n]=String(v).substr(0,80);}catch(e){r.checks[n]="ERR "+e.message;}}
+  c("paths",function(){return X.Paths();});c("hash",function(){return X.Hash("a","b");});c("ecnew",function(){return X.EcNew().length;});
+  c("seal",function(){var k=X.RandHex("32"),t=X.Seal(k,"h\u00e9llo\n\"x\"");return X.Unseal(k,t);});
+  c("save",function(){return X.Save("selftest.json","{\"a\":1}")+" "+X.Data("selftest.json");});
+  c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});
+  var id="h_self",done=false;
+  cbs[id]=function(ok,text,st){if(done)return;done=true;r.checks.callback="ok="+ok+" status="+st+" bytes="+(text||"").length;r.ok=r.checks.seal==="h\u00e9llo\n\"x\"";T(function(){return X.SelfTestDone(JSON.stringify(r));});};
+  c("http",function(){return X.Http(id,"https://api.github.com/repos/"+UPD_REPO);});
+  setTimeout(function(){if(!done){done=true;r.checks.callback="no callback within 20s";T(function(){return X.SelfTestDone(JSON.stringify(r));});}},20000);
 }
 function paintDlTick(){bottom();}
 init();

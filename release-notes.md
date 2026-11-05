@@ -1,5 +1,2 @@
-- Xaly now updates itself: new versions are published here on GitHub, and the launcher offers to install them with one click.
-- Check for updates any time in Settings › About.
-- Profiles: picture, level and XP, badges, favourite-game showcase, recent activity and stats. Friends can see each other's profiles.
-- iMessage-style chat with Delivered and Read receipts.
-- The store keeps growing by itself with free Windows games from itch.io.
+- Installing games from itch.io works out of the box again, with a new built-in key.
+- First version delivered through the launcher's own updater: if you're on 1.4.0, you'll see **Update available**.

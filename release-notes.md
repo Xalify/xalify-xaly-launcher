@@ -1,2 +1,3 @@
-- Installing games from itch.io works out of the box again, with a new built-in key.
-- First version delivered through the launcher's own updater: if you're on 1.4.0, you'll see **Update available**.
+- **TV mode:** a full-screen, controller-friendly view for playing on a TV, like Steam Big Picture. Open it from the sidebar (TV mode) or press Start on a controller. Works with Xbox, PlayStation and most other controllers, and with the keyboard (arrows, Enter, Esc, M).
+- **Game updates:** Xaly remembers which build of each game you installed and shows an **Update** badge when the developer uploads a new one on itch.io or GitHub. Updating keeps your saves.
+- Settings › General has new switches for game updates and for starting Xaly in TV mode.

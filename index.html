@@ -592,6 +592,49 @@ select::-ms-expand{display:none}
 .updv{color:#2ee6f0;font-weight:700;font-size:13px;margin-bottom:8px}
 .updt{white-space:pre-wrap;font-size:13.5px;line-height:1.55;color:#d6dae6;max-height:220px;overflow-y:auto}
 .updk{color:#8a8ea6;font-size:12px;margin-top:10px}
+
+/* ===== 1.5.1: game updates + TV mode ===== */
+.ubadge{position:absolute;left:8px;top:8px;background:#0a84ff;color:#fff;border-radius:8px;padding:3px 9px;font-size:11.5px;font-weight:800;box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.lupd{color:#2f9bff;font-weight:800;margin-left:6px}
+.gupd{display:flex;align-items:center;background:#0d2236;border:1px solid #1d4a73;border-radius:14px;padding:12px 16px;margin:0 0 16px}
+.gupd b{font-size:14.5px;margin-right:12px;white-space:nowrap;color:#8fc8ff}.gupd span{flex:1 1 0%;color:#b8c6d8;font-size:13px;margin-right:14px}
+#tv{position:fixed;left:0;top:0;right:0;bottom:0;z-index:140;display:none;background:#04060b;overflow:hidden;color:#fff;font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif}
+#tv.on{display:block;animation:fade2 .3s both}
+@keyframes fade2{from{opacity:0}to{opacity:1}}
+#tvbg{position:absolute;left:0;top:0;right:0;height:78%;background-size:cover;background-position:center 25%;opacity:.5;transition:opacity .3s}
+#tvsh{position:absolute;left:0;top:0;right:0;bottom:0;background:linear-gradient(90deg,rgba(4,6,11,.97) 0%,rgba(4,6,11,.75) 38%,rgba(4,6,11,.15) 75%),linear-gradient(0deg,#04060b 30%,rgba(4,6,11,0) 75%)}
+#tvtop{position:absolute;left:56px;right:56px;top:28px;display:flex;align-items:center;justify-content:space-between}
+.tvlg{display:flex;align-items:center}.tvlg img{width:40px;height:40px;margin-right:12px}.tvlg b{font-size:24px;letter-spacing:1px}
+.tvrt{display:flex;align-items:center}.tvclk{font-size:22px;font-weight:600;margin:0 22px}.tvdl{color:#2ee6f0;font-size:16px;font-weight:600}
+#tvhero{position:absolute;left:56px;top:120px;width:46%}
+.tvk{color:#2ee6f0;font-size:14px;font-weight:800;letter-spacing:3px;margin-bottom:10px}
+#tvhero h1{margin:0 0 10px;font-size:54px;line-height:1.05;font-weight:800;text-shadow:0 4px 24px rgba(0,0,0,.6)}
+.tvm{color:#c6cbe0;font-size:18px;margin-bottom:12px}
+#tvhero p{color:#aeb4c8;font-size:17px;line-height:1.5;margin:0}
+#tvview{position:absolute;left:0;right:0;top:56%;bottom:78px;overflow:hidden}
+#tvrows{position:absolute;left:56px;right:0;top:0;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.tvrow{height:292px;opacity:.55;transition:opacity .2s}.tvrow.on{opacity:1}.tvrow.gone{opacity:0}
+.tvrt2{font-size:22px;font-weight:700;margin:0 0 12px 4px}
+.tvtrack{white-space:nowrap;transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.tvt{position:relative;display:inline-block;vertical-align:top;width:264px;margin-right:20px;white-space:normal;cursor:pointer}
+.tva{height:190px;border-radius:16px;background-size:cover;background-position:center;transition:transform .18s,box-shadow .18s;box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.tvtrack{padding:14px 0 0 14px;margin:-14px 0 0 -14px}
+.tvt.f .tva{transform:scale(1.07);box-shadow:0 0 0 4px #2ee6f0,0 18px 40px rgba(0,0,0,.7)}
+.tvn{font-size:17px;font-weight:600;margin:14px 4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .15s}
+.tvt.f .tvn{opacity:1}
+.tvb{position:absolute;left:12px;top:12px;background:#0a84ff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800;letter-spacing:1px}.tvb.pl{background:#1fbf75}.tvb.in{background:rgba(0,0,0,.65);color:#6fe38a}
+#tvhint{position:absolute;left:56px;bottom:26px;display:flex;align-items:center;color:#aeb4c8;font-size:16px}
+#tvhint span{margin-right:28px;display:flex;align-items:center}#tvhint i{font-style:normal;display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:15px;background:#1c2232;color:#fff;font-weight:800;margin-right:10px;font-size:14px}
+#tvhint .kb{color:#5f6680;font-size:13px}
+#tvsheet{position:absolute;left:0;top:0;right:0;bottom:0;display:none;background:rgba(3,5,9,.78);z-index:5}
+#tvsheet.on{display:flex;align-items:center;justify-content:center;animation:fade2 .2s both}
+.tvsp{display:flex;width:1040px;max-width:90%;background:#0e121c;border:1px solid #232a3c;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.tvsa{width:48%;min-height:360px;background-size:cover;background-position:center;flex:0 0 auto}
+.tvsb{flex:1 1 0%;padding:34px 36px}.tvsb h2{margin:0 0 8px;font-size:34px}
+.tvbtn{display:block;width:100%;text-align:left;background:#161c2a;border:2px solid transparent;border-radius:14px;padding:16px 20px;margin-top:12px;font-size:19px;font-weight:600;color:#e8ebf5}
+.tvbtn.f{background:#0f3540;border-color:#2ee6f0;color:#fff}
+.tvmn{width:440px;background:#0e121c;border:1px solid #232a3c;border-radius:24px;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.7)}.tvmn h2{margin:0 0 8px;font-size:28px}
+.classic #tTv{display:none}
 </style>
 <style id="theme"></style>
 </head>
@@ -604,6 +647,7 @@ select::-ms-expand{display:none}
     <div class="snav">
       <button class="tab" id="tStore"><svg class="ico" viewBox="0 0 24 24"><path d="M5 8h14l-1.2 11.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Store</span></button>
       <button class="tab" id="tLib"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.4"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.4"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.4"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.4"/></svg><span>Library</span></button>
+      <button class="tab" id="tTv"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg><span>TV mode</span></button>
       <button class="tab" id="tProf"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/></svg><span>Profile</span></button>
       <button class="tab" id="tDl"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></svg><span>Downloads</span><em id="tDlp"></em></button>
       <button id="fbtn"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M3.5 19.5c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5"/><circle cx="16.8" cy="9.3" r="2.6"/><path d="M15.6 14.6c2.6-.2 4.4 1.3 4.9 4.4"/></svg><span>Friends</span><span id="badge">0</span></button>
@@ -637,11 +681,13 @@ select::-ms-expand{display:none}
   <div id="modal"><div id="mbox"></div></div>
   <div id="toast"></div>
 </div>
+<div id="tv"><div id="tvbg"></div><div id="tvsh"></div><div id="tvtop"></div><div id="tvhero"></div><div id="tvview"><div id="tvrows"></div></div><div id="tvsheet"></div><div id="tvhint"></div></div>
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.0";
+var VER="1.5.1";
 var NOTES=[
+ {v:"1.5.1",d:"5 Nov 2026",t:["TV mode: a full-screen, controller-friendly view for playing on a TV. Open it from the sidebar or press Start on a controller","Game updates: Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. Updating keeps your saves","Settings \u203A General has switches for game updates and TV mode"]},
  {v:"1.5.0",d:"5 Nov 2026",t:["New display engine: Xaly now runs on Microsoft Edge WebView2 instead of Internet Explorer, so pages, scrolling and animations are faster and smoother","If WebView2 isn\u2019t available the launcher falls back to the old engine by itself; you can switch in Settings \u203A General","Fixed feedback messages with more than one line failing to send"]},
  {v:"1.4.1",d:"5 Nov 2026",t:["itch.io installs work out of the box again with a new built-in key","First update delivered through the new self-updater"]},
  {v:"1.4.0",d:"5 Nov 2026",t:["Xaly now updates itself: new versions are published on GitHub, and the launcher offers to install them with one click","Check for updates in Settings \u203A About","Installs from itch.io use a new built-in key"]},
@@ -906,7 +952,8 @@ function startSession(a){
   S.set.startup=T(function(){return X.StartupGet();},"0")==="1"?1:0;
   P.chat=null;P.draft="";frErr="";frPollT=0;frBusy=0;frInit();
   chip();renderFriends();render();
-  queueCovers();loadFeed();syncNow();queueVerify();setTimeout(function(){refreshLive(false);},4000);
+  queueCovers();loadFeed();syncNow();queueVerify();setTimeout(function(){checkGameUpdates(false);},20000);
+  if(S.set.tvStart)setTimeout(function(){enterTV();},300);setTimeout(function(){refreshLive(false);},4000);
 }
 function signOut(){
   var pn=playingName();
@@ -1054,6 +1101,7 @@ function render(){
   if(pg!=="store")stopCar();
   if(pg==="store")renderStore();else if(pg==="detail")renderDetail();else if(pg==="lib")renderLib();else if(pg==="game")renderGame();else if(pg==="downloads")renderDownloads();else if(pg==="profile")renderProfile();else renderSettings();
   chip();bottom();paintBell();
+  if(tvOn&&!TV.sheet&&!TV.menu)tvRender();
 }
 function chip(){
   var c=$("chip");c.innerHTML="";c.appendChild(avatar(S.user.name,S.user.color,32,S.user.status==="invisible"?"offline":S.user.status,myAv()));
@@ -1170,7 +1218,7 @@ function resolveGh(it,dry,cb){
     });
     if(!best){cb("No Windows download (.zip, .exe or .msi) was found in the latest release.",null,"nowin");return;}
     var nm=best.name.replace(/[\\\/:*?"<>|]/g,"_");
-    cb(null,{url:best.browser_download_url,name:nm,kind:kindFor(best._e,nm)});
+    cb(null,{url:best.browser_download_url,name:nm,kind:kindFor(best._e,nm),up:{src:"gh",tag:String(j.tag_name||""),fn:best.name,sz:best.size||0}});
   });
 }
 function resolveAny(it,cb,dry){
@@ -1182,10 +1230,11 @@ function resolveAny(it,cb,dry){
       var best=pickUpload(ups);
       if(!best){cb("No Windows download (.zip, .exe or .msi) was found for this game on itch.io.",null,"nowin");return;}
       var nm=(best.filename||"game.zip").replace(/[\\\/:*?"<>|]/g,"_");
-      if(dry){cb(null,{name:nm,kind:kindFor(best._e,nm)});return;}
+      var up={src:"itch",gid:gid,uid:best.id,fn:best.filename||"",sz:best.size||0,bid:best.build_id||"",at:best.updated_at||""};
+      if(dry){cb(null,{name:nm,kind:kindFor(best._e,nm),up:up});return;}
       itchLink(best.id,ver,function(e2,url){
         if(e2){cb(e2,null,"api");return;}
-        cb(null,{url:url,name:nm,kind:kindFor(best._e,nm)});
+        cb(null,{url:url,name:nm,kind:kindFor(best._e,nm),up:up});
       });
     });
   });
@@ -1820,7 +1869,7 @@ function install(it){
     resolveAny(it,function(err,r){
       if(!dl||dl.it!==it||!dl.resolving)return;
       if(err){dl=null;paintDl();toast(err);return;}
-      dl.fn=r.name;dl.kind=r.kind;dl.resolving=0;
+      dl.fn=r.name;dl.kind=r.kind;dl.up=r.up||null;dl.resolving=0;
       var rr=T(function(){return X.Download("d1",r.url,r.name);});
       if(rr!=="ok"){dl=null;toast("Could not start the download: "+rr.replace("ERR:",""));}
       paintDl();
@@ -1848,13 +1897,14 @@ window.onDl=function(id,kind,a,b){
     dl.eta=(dl.total&&dl.speed>1)?(dl.total-dl.bytes)/dl.speed:-1;paintDl();
   }else{
     var j=dl;dl=null;paintDl();
-    if(kind==="done")finish(j.it,a,j.kind);else if(kind==="err"){notify("err","Download failed",j.it.name+": "+a,null,j.it.image);render();}else render();
+    if(kind==="done"){if(j.upd)finishUpdate(j,a);else{finUp=j.up||null;finish(j.it,a,j.kind);finUp=null;}}else if(kind==="err"){notify("err","Download failed",j.it.name+": "+a,null,j.it.image);render();}else render();
   }
 };
 function cancelDl(){if(dl&&dl.resolving){dl=null;paintDl();return;}if(dl)T(function(){return X.Cancel("d1");});}
 function addToLib(it,path){
   if(inLib(it.id))return;
   var g={id:rid(),name:it.name,path:path,args:"",fav:0,seconds:0,plays:0,last:0,storeId:it.id,image:it.image||"",added:now()};
+  if(finUp)g.up=finUp;
   S.games.push(g);getIcon(g);save();return g;
 }
 function finish(it,dest,kk){
@@ -2144,7 +2194,7 @@ function renderLib(){
     list.forEach(function(g){
       var t=el("div","tile"),a=el("div","art"),cv=coverOf(g);paint(a,g.name,cv);
       if(!cv&&g.icon){var im=el("img","ic");im.src=g.icon;a.appendChild(im);}
-      if(run[g.id])a.appendChild(el("div","dot"));if(g.fav)a.appendChild(el("div","star","★"));
+      if(run[g.id])a.appendChild(el("div","dot"));if(g.fav)a.appendChild(el("div","star","★"));if(g.updAvail)a.appendChild(el("div","ubadge","⇧ Update"));
       t.appendChild(a);t.appendChild(el("div","nm",g.name));t.appendChild(el("div","sb",(g.seconds||g.plays)?fmtT(total(g))+" played":"Not played yet"));
       t.onclick=function(){P.cur=g.id;nav("game");};w.appendChild(t);
     });
@@ -2155,7 +2205,7 @@ function renderLib(){
   list.forEach(function(g){
     var r=el("div","li"+(g.id===sel.id?" on":"")),ico=el("div","lic"),cv=coverOf(g);
     paint(ico,g.name,cv||g.icon||"");if(run[g.id])ico.appendChild(el("i","ldot"));
-    r.appendChild(ico);r.appendChild(el("div","ln",g.name));if(g.fav)r.appendChild(el("span","lfav","★"));
+    r.appendChild(ico);r.appendChild(el("div","ln",g.name));if(g.updAvail)r.appendChild(el("span","lupd","⇧"));if(g.fav)r.appendChild(el("span","lfav","★"));
     r.onclick=function(){P.cur=g.id;renderLib();};ll.appendChild(r);
   });
   ll.scrollTop=lt;buildGameDetail(ld,sel);
@@ -2212,13 +2262,17 @@ function buildGameDetail(c,g){
   var b=el("div","banner");paint(b,g.name,cv);
   if(!cv&&g.icon){var im=el("img","bic");im.src=g.icon;b.appendChild(im);}
   b.appendChild(el("div","fade"));b.appendChild(el("div","bt",g.name));w.appendChild(b);
+  if(g.updAvail){var un=el("div","gupd");un.appendChild(el("b","","Update available"));un.appendChild(el("span","","A new version of "+g.name+" is on "+(g.updAvail.src==="gh"?"GitHub":"itch.io")+". Your saves in the game folder are kept."));
+    var ubn=btn(dl&&dl.upd===g?"Updating\u2026":"Update now","pri",function(){updateGame(g);});if(dl&&dl.upd===g)ubn.disabled=true;un.appendChild(ubn);w.appendChild(un);}
   var bar=el("div","gbar"),pb=el("button","pri gplay");pb.id="gbtn";pb.onclick=playToggle;bar.appendChild(pb);
   var hb=btn("","ibtn"+(g.fav?" on":""),function(){g.fav=g.fav?0:1;save();render();});
   hb.innerHTML=ic(g.fav?"heartf":"heart");hb.title=g.fav?"Remove from favorites":"Add to favorites";bar.appendChild(hb);
   var mb=el("button","ibtn");mb.innerHTML=ic("dots");mb.title="More";
   mb.onclick=function(e){stp(e);var it=[];
     if(!isUrl)it.push({t:"Show folder",fn:function(){var d=g.path.replace(/[\\\/][^\\\/]*$/,"");T(function(){return X.Open(d);});}});
-    it.push({t:"Edit details",fn:function(){gameForm(g);}});it.push({sep:1});
+    it.push({t:"Edit details",fn:function(){gameForm(g);}});
+    if(updatable(g))it.push({t:g.updAvail?"Update now":"Check for updates",fn:function(){if(g.updAvail)updateGame(g);else checkGameUpdates(true);}});
+    it.push({sep:1});
     if(gameDir(g))it.push({t:"Uninstall (delete files)",cls:"dng",fn:function(){uninstallGame(g);}});
     it.push({t:"Remove from library (keep files)",cls:"dng",fn:function(){S.games.splice(S.games.indexOf(g),1);if(P.cur===g.id)P.cur=null;if(P.page==="game")P.page="lib";save();render();}});
     ctxMenu(mb,it);};
@@ -2234,7 +2288,7 @@ function buildGameDetail(c,g){
   pa.appendChild(gitem("gamepad","Total play time","","gs1"));
   pa.appendChild(gitem("clock","Last played","","gs2"));
   pa.appendChild(gitem("rocket","Launches","","gs3"));
-  pa.appendChild(gitem("history","Game updated","No updates yet"));
+  pa.appendChild(gitem("history","Game updated",g.updAvail?"Update available":g.updT?ago(g.updT):g.up?"Up to date":"No updates yet"));
   var inst=g.added||(m&&m.ct)||0;
   pa.appendChild(gitem("download","Installed",inst?ago(inst):"—"));
   c1.appendChild(pa);
@@ -2789,6 +2843,69 @@ function pickAvatar(){
   if(big.indexOf("data:")!==0){toast("Couldn’t read that picture: "+big.replace("ERR:",""));return;}
   S.prof=S.prof||{};S.prof.av=big;S.prof.avs=small.indexOf("data:")===0?small:"";save();chip();renderFriends();renderProfile();pubStatus(true);toast("Picture updated");
 }
+/* ---------- game updates: remember the itch.io build / GitHub release each game came from ---------- */
+var finUp=null,guBusy=0;
+function upChanged(o,n){
+  if(!o||!n)return false;
+  if(o.src==="gh"||n.src==="gh")return !!n.tag&&n.tag!==o.tag;
+  if(o.bid&&n.bid)return String(o.bid)!==String(n.bid)||o.uid!==n.uid;
+  return o.uid!==n.uid||o.fn!==n.fn||(!!o.sz&&!!n.sz&&o.sz!==n.sz);
+}
+function updatable(g){var it=g.storeId?storeById(g.storeId):null;return !!(it&&(isItch(it)||isGh(it))&&gameDir(g));}
+function updCount(){var n=0;if(S)S.games.forEach(function(g){if(g.updAvail)n++;});return n;}
+function checkGameUpdates(manual){
+  if(!S||guBusy)return;if(S.set.gameUpd===0&&!manual)return;
+  var q=S.games.filter(updatable),mine=S,found=[];
+  if(!q.length){if(manual)toast("None of your games can be updated through Xaly");return;}
+  guBusy=1;if(manual)toast("Checking "+q.length+" game"+(q.length===1?"":"s")+" for updates…");
+  (function next(){
+    if(S!==mine){guBusy=0;return;}
+    if(!q.length){
+      guBusy=0;S.guT=now();save();
+      if(found.length)notify("ok",found.length===1?"Game update available":found.length+" game updates available",found.slice(0,3).join(", ")+(found.length>3?" and more":"")+(found.length===1?" has":" have")+" a new version. Open it in your library to update.",null,"");
+      else if(manual)toast("All your games are up to date");
+      if(P.page==="lib"||P.page==="game"||P.page==="settings")render();if(tvOn)tvRender();
+      return;
+    }
+    var g=q.shift(),it=storeById(g.storeId);
+    resolveAny(it,function(err,r){
+      if(!err&&r&&r.up){
+        if(!g.up){g.up=r.up;}                                   // first check after 1.5.1: remember what is installed now
+        else if(upChanged(g.up,r.up)){var was=!!g.updAvail;g.updAvail=r.up;if(!was)found.push(g.name);}
+        else delete g.updAvail;
+      }
+      setTimeout(next,1200);
+    },true);
+  })();
+}
+function updateGame(g){
+  if(!g||!g.updAvail)return;
+  if(run[g.id]){toast("Close "+g.name+" before updating it");return;}
+  if(dl){toast("Another download is running. Wait for it or cancel it first.");return;}
+  var it=storeById(g.storeId);if(!it){toast("This game is no longer in the store, so it can’t be updated");return;}
+  dl={it:it,upd:g,fn:"",lt:now(),lb:0,bytes:0,total:0,speed:0,pct:-1,eta:-1,resolving:1};paintDl();toast("Getting the new version of "+g.name+"…");
+  resolveAny(it,function(err,r){
+    if(!dl||dl.upd!==g||!dl.resolving)return;
+    if(err){dl=null;paintDl();toast(err);return;}
+    dl.fn=r.name;dl.kind=r.kind;dl.up=r.up;dl.resolving=0;
+    var rr=T(function(){return X.Download("d1",r.url,r.name);});
+    if(rr!=="ok"){dl=null;toast("Could not start the download: "+rr.replace("ERR:",""));}
+    paintDl();
+  });
+}
+function finishUpdate(j,dest){
+  var g=j.upd,it=j.it,k=j.kind||"archive",ok=false,msg="";
+  if(k==="archive"){
+    var r=T(function(){return X.ExtractUpdate(dest,gameDir(g),g.path||"");});
+    if(r.indexOf("ERR")===0)msg=r.replace("ERR:","");else{var p=r.split("|");if(p[0])g.path=p[0];ok=true;}
+  }else if(k==="standalone"){
+    var r2=T(function(){return X.ReplaceFile(dest,g.path||"");});
+    if(r2.indexOf("ERR")===0)msg=r2.replace("ERR:","");else ok=true;
+  }else{T(function(){return X.Launch("",dest,"");});ok=true;}
+  if(ok){g.up=j.up||g.updAvail;delete g.updAvail;g.updT=now();save();sizeQ[g.id]=0;notify("ok","Updated",g.name+" is now up to date.",g,it.image);}
+  else notify("err","Couldn’t update "+g.name,msg||"Something went wrong while installing the new version.",g,it.image);
+  render();if(tvOn)tvRender();
+}
 /* ---------- self-update from GitHub releases ---------- */
 var UPD_REPO="Xalify/xalify-xaly-launcher",UPD={st:"",rel:null,pct:-1,err:"",t:0};
 function verNum(v){var m=String(v||"").replace(/^v/i,"").split(/[.\-]/),n=0,i;for(i=0;i<3;i++)n=n*1000+(parseInt(m[i],10)||0);return n;}
@@ -2889,6 +3006,169 @@ function toggleNotes(open){
   notes().forEach(function(n){n.read=1;});save();paintBell();
 }
 window.onNotifyClick=function(tag){if(!S)return;if(tag&&gameBy(tag)){P.cur=tag;nav("game");}};
+/* ---------- controller input (Gamepad API in the new engine, XInput through the app in the old one) ---------- */
+var PAD={prev:0,state:0,rep:{},native:0};
+var PADMAP=[[1,"up"],[2,"down"],[4,"left"],[8,"right"],[4096,"a"],[8192,"b"],[16384,"x"],[32768,"y"],[16,"start"],[32,"back"],[256,"lb"],[512,"rb"]];
+window.onPad=function(bits){PAD.native=1;PAD.state=+bits||0;};
+function padBits(){
+  if(PAD.native||!navigator.getGamepads)return PAD.state;
+  var gp,b=0,i;try{gp=navigator.getGamepads();}catch(e){return 0;}
+  for(i=0;gp&&i<gp.length;i++){
+    var g=gp[i];if(!g||!g.connected)continue;
+    var B=g.buttons,A=g.axes||[],pr=function(n){return !!(B[n]&&(B[n].pressed||B[n].value>0.5));};
+    if(pr(12)||A[1]<-0.55)b|=1;if(pr(13)||A[1]>0.55)b|=2;if(pr(14)||A[0]<-0.55)b|=4;if(pr(15)||A[0]>0.55)b|=8;
+    if(pr(9))b|=16;if(pr(8))b|=32;if(pr(0))b|=4096;if(pr(1))b|=8192;if(pr(2))b|=16384;if(pr(3))b|=32768;if(pr(4))b|=256;if(pr(5))b|=512;
+  }
+  return b;
+}
+function padTick(){
+  if(!S)return;var b=padBits(),t=now(),i;
+  for(i=0;i<PADMAP.length;i++){
+    var m=PADMAP[i][0],k=PADMAP[i][1],on=(b&m)!==0,was=(PAD.prev&m)!==0;
+    if(on&&!was){PAD.rep[k]=t+380;padPress(k);}
+    else if(on&&was&&m<16&&t>=PAD.rep[k]){PAD.rep[k]=t+110;padPress(k);}
+  }
+  PAD.prev=b;
+}
+function padPress(k){
+  if(ovOn)return;
+  if(tvOn){tvInput(k);return;}
+  if((k==="start"||k==="back")&&!$("modal").className)enterTV();
+}
+/* ---------- TV mode: a full-screen, controller-first view ---------- */
+var tvOn=false,TV={rows:[],r:0,c:{},sheet:null,sf:0,menu:0},tvT=null;
+function enterTV(){
+  if(!S||tvOn)return;tvOn=true;hideMenu();closeForm();setFP(false);
+  $("tv").className="on";if(S.set.tvFull!==0)T(function(){return X.SetFullscreen("1");});
+  TV.sheet=null;TV.menu=0;tvRender();clearInterval(tvT);tvT=setInterval(tvTick,1000);tvTick();
+}
+function exitTV(){
+  if(!tvOn)return;tvOn=false;clearInterval(tvT);$("tv").className="";
+  T(function(){return X.SetFullscreen("0");});render();
+}
+function tvItem(kind,o){return {k:kind,o:o};}
+function tvRows(){
+  var rows=[],lib=S.games.slice(),every=allStore().filter(visIt);
+  var rec=lib.filter(function(g){return g.last;}).sort(function(a,b){return b.last-a.last;}).slice(0,12);
+  if(rec.length)rows.push({t:"Continue playing",l:rec.map(function(g){return tvItem("g",g);})});
+  var ups=lib.filter(function(g){return g.updAvail;});if(ups.length)rows.push({t:"Updates available",l:ups.map(function(g){return tvItem("g",g);})});
+  if(lib.length)rows.push({t:"Your library",l:lib.sort(function(a,b){return (b.last||b.added||0)-(a.last||a.added||0);}).map(function(g){return tvItem("g",g);})});
+  function lf(k,t){var l=every.filter(function(x){return x.lf&&x.lf[k]!==undefined&&!inLib(x.id);}).sort(function(a,b){return a.lf[k]-b.lf[k];}).slice(0,20);if(l.length>=3)rows.push({t:t,l:l.map(function(x){return tvItem("s",x);})});}
+  function fr(k,t){var l=every.filter(function(x){return frOf(x)===k&&!inLib(x.id);}).slice(0,20);if(l.length>=3)rows.push({t:t,l:l.map(function(x){return tvItem("s",x);})});}
+  lf("top","Top rated on itch.io");lf("popular","Popular right now");fr("FNAF","Five Nights at Freddy’s fan games");lf("horror","Horror");lf("newpop","New & popular");lf("platformer","Platformers");lf("action","Action");fr("Recomp","PC ports");
+  if(!rows.length)rows.push({t:"Store",l:every.slice(0,20).map(function(x){return tvItem("s",x);})});
+  return rows;
+}
+function tvArt(i){return i.k==="g"?(coverOf(i.o)||i.o.icon||""):(i.o.image||i.o.hero||"");}
+function tvRender(){
+  if(!tvOn)return;TV.rows=tvRows();if(TV.r>=TV.rows.length)TV.r=Math.max(0,TV.rows.length-1);
+  var top=$("tvtop");top.innerHTML="";var lg=el("div","tvlg"),im=el("img");im.src=$("brand").getElementsByTagName("img")[0].src;lg.appendChild(im);lg.appendChild(el("b","","Xaly"));top.appendChild(lg);
+  var rt=el("div","tvrt");rt.appendChild(el("span","tvdl",""));rt.appendChild(el("span","tvclk",""));rt.appendChild(avatar(S.user.name,S.user.color,40,S.user.status==="invisible"?"offline":S.user.status,myAv()));top.appendChild(rt);
+  var R=$("tvrows");R.innerHTML="";
+  TV.rows.forEach(function(row,ri){
+    var rw=el("div","tvrow"+(ri===TV.r?" on":""));rw.appendChild(el("div","tvrt2",row.t));
+    var tr=el("div","tvtrack");
+    row.l.forEach(function(it,ci){
+      var t=el("div","tvt"),a=el("div","tva");paint(a,it.o.name,tvArt(it));t.appendChild(a);
+      if(it.k==="g"&&it.o.updAvail)t.appendChild(el("span","tvb","UPDATE"));
+      if(it.k==="g"&&run[it.o.id])t.appendChild(el("span","tvb pl","PLAYING"));
+      if(it.k==="s"&&inLib(it.o.id))t.appendChild(el("span","tvb in","INSTALLED"));
+      t.appendChild(el("div","tvn",it.o.name));
+      t.onclick=function(){TV.r=ri;TV.c[ri]=ci;tvFocus();tvOpen();};
+      t.onmouseover=function(){if(TV.sheet||TV.menu)return;if(TV.r!==ri||(TV.c[ri]||0)!==ci){TV.r=ri;TV.c[ri]=ci;tvFocus();}};
+      tr.appendChild(t);
+    });
+    rw.appendChild(tr);R.appendChild(rw);
+  });
+  $("tvhint").innerHTML='<span><i>A</i>Select</span><span><i>B</i>Back</span><span><i>☰</i>Menu</span><span class="kb">Keyboard: arrows, Enter, Esc, M</span>';
+  tvFocus();tvTick();
+  if(TV.sheet)tvSheet();else if(TV.menu)tvMenu();else{$("tvsheet").className="";$("tvsheet").innerHTML="";}
+}
+function tvCur(){var row=TV.rows[TV.r];if(!row)return null;var c=Math.min(TV.c[TV.r]||0,row.l.length-1);TV.c[TV.r]=c;return row.l[c];}
+function tvFocus(){
+  var R=$("tvrows"),rows=R.childNodes,i;
+  for(i=0;i<rows.length;i++){
+    var on=i===TV.r;rows[i].className="tvrow"+(on?" on":"")+(i<TV.r?" gone":"");
+    var tr=rows[i].childNodes[1],c=TV.c[i]||0,ts=tr.childNodes,j;
+    for(j=0;j<ts.length;j++)ts[j].className="tvt"+(on&&j===c?" f":"");
+    tr.style.transform=tr.style.msTransform="translateX("+(-Math.max(0,c-1)*284)+"px)";
+  }
+  R.style.transform=R.style.msTransform="translateY("+(-TV.r*292)+"px)";
+  var it=tvCur(),h=$("tvhero");h.innerHTML="";if(!it)return;
+  paint($("tvbg"),it.o.name,(it.k==="s"&&it.o.shots&&it.o.shots[0]&&it.o.shots[0].f)||tvArt(it));
+  h.appendChild(el("div","tvk",it.k==="g"?(run[it.o.id]?"PLAYING NOW":"IN YOUR LIBRARY"):frOf(it.o).toUpperCase()+(it.o.genre?"  •  "+it.o.genre.toUpperCase():"")));
+  h.appendChild(el("h1","",it.o.name));
+  var meta=it.k==="g"?((it.o.seconds||it.o.plays)?fmtT(total(it.o))+" played":"Not played yet")+(it.o.last?"   ·   last played "+ago(it.o.last):"")+(it.o.updAvail?"   ·   update available":"")
+    :"Free"+(it.o.rt&&it.o.rt.n?"   ·   ★ "+it.o.rt.v.toFixed(1)+" ("+it.o.rt.n+" ratings)":"")+(inLib(it.o.id)?"   ·   installed":"");
+  h.appendChild(el("div","tvm",meta));
+  var d=it.k==="s"?(it.o.desc||it.o.tagline||""):"";if(d)h.appendChild(el("p","",d.length>180?d.substr(0,177)+"…":d));
+}
+function tvActions(it){
+  var a=[],o=it.o;
+  if(it.k==="g"){
+    a.push([run[o.id]?"Stop game":"Play",function(){P.cur=o.id;playToggle();tvRender();}]);
+    if(o.updAvail)a.push([dl&&dl.upd===o?"Updating… "+(dl.pct>=0?dl.pct+"%":""):"Update to the new version",function(){updateGame(o);tvRender();}]);
+    a.push([o.fav?"Remove from favourites":"Add to favourites",function(){o.fav=o.fav?0:1;save();tvRender();}]);
+  }else{
+    var l=inLib(o.id);
+    if(l)a.push(["Play",function(){P.cur=l.id;playToggle();TV.sheet=null;tvRender();}]);
+    else if(dl&&dl.it===o)a.push(["Downloading… "+(dl.pct>=0?dl.pct+"%":""),function(){}]);
+    else a.push(["Install",function(){install(o);tvRender();}]);
+    a.push([wishMap()[o.id]?"Remove from wishlist":"Add to wishlist",function(){toggleWish(o);tvRender();}]);
+  }
+  a.push(["Back",function(){TV.sheet=null;tvRender();}]);
+  return a;
+}
+function tvOpen(){var it=tvCur();if(!it)return;TV.sheet=it;TV.sf=0;tvSheet();}
+function tvSheet(){
+  var it=TV.sheet,s=$("tvsheet");s.innerHTML="";s.className="on";
+  var p=el("div","tvsp"),a=el("div","tvsa");paint(a,it.o.name,(it.k==="s"&&it.o.shots&&it.o.shots[0]&&it.o.shots[0].f)||tvArt(it));p.appendChild(a);
+  var b=el("div","tvsb");b.appendChild(el("h2","",it.o.name));
+  b.appendChild(el("div","tvm",it.k==="g"?((it.o.seconds||it.o.plays)?fmtT(total(it.o))+" played  ·  "+(it.o.plays||0)+" launches":"Not played yet"):"Free  ·  "+frOf(it.o)+(it.o.genre?"  ·  "+it.o.genre:"")));
+  var acts=tvActions(it);if(TV.sf>=acts.length)TV.sf=acts.length-1;
+  acts.forEach(function(x,i){var bt=el("button","tvbtn"+(i===TV.sf?" f":""),x[0]);bt.onclick=function(){TV.sf=i;x[1]();};bt.onmouseover=function(){TV.sf=i;tvSheetFocus();};b.appendChild(bt);});
+  p.appendChild(b);s.appendChild(p);
+}
+function tvSheetFocus(){var bs=$("tvsheet").getElementsByTagName("button"),i;for(i=0;i<bs.length;i++)bs[i].className="tvbtn"+(i===TV.sf?" f":"");}
+function tvMenuItems(){
+  var full=S.set.tvFull!==0,on=0;S.friends.forEach(function(f){if(pstate(f)!=="offline")on++;});
+  return [["Resume",function(){TV.menu=0;tvRender();}],
+    ["Friends online: "+on,function(){}],
+    [full?"Leave full screen":"Full screen",function(){S.set.tvFull=full?0:1;save();T(function(){return X.SetFullscreen(full?"0":"1");});tvMenu();}],
+    ["Exit TV mode",function(){TV.menu=0;exitTV();}],
+    ["Quit Xaly",function(){T(function(){return X.Quit();});}]];
+}
+function tvMenu(){
+  var s=$("tvsheet");s.innerHTML="";s.className="on menu";var p=el("div","tvmn");p.appendChild(el("h2","","Menu"));
+  tvMenuItems().forEach(function(x,i){var bt=el("button","tvbtn"+(i===TV.sf?" f":""),x[0]);bt.onclick=function(){TV.sf=i;x[1]();};bt.onmouseover=function(){TV.sf=i;tvSheetFocus();};p.appendChild(bt);});
+  s.appendChild(p);
+}
+function tvInput(k){
+  if(TV.sheet||TV.menu){
+    var n=TV.menu?tvMenuItems().length:tvActions(TV.sheet).length;
+    if(k==="up"){TV.sf=(TV.sf+n-1)%n;tvSheetFocus();}
+    else if(k==="down"){TV.sf=(TV.sf+1)%n;tvSheetFocus();}
+    else if(k==="a"){var bs=$("tvsheet").getElementsByTagName("button");if(bs[TV.sf])bs[TV.sf].onclick();}
+    else if(k==="b"||(k==="start"&&TV.menu)){TV.sheet=null;TV.menu=0;tvRender();}
+    return;
+  }
+  var row=TV.rows[TV.r];
+  if(k==="left"&&row){TV.c[TV.r]=Math.max(0,(TV.c[TV.r]||0)-1);tvFocus();}
+  else if(k==="right"&&row){TV.c[TV.r]=Math.min(row.l.length-1,(TV.c[TV.r]||0)+1);tvFocus();}
+  else if(k==="up"){TV.r=Math.max(0,TV.r-1);tvFocus();}
+  else if(k==="down"){TV.r=Math.min(TV.rows.length-1,TV.r+1);tvFocus();}
+  else if(k==="lb"){TV.r=Math.max(0,TV.r-1);tvFocus();}
+  else if(k==="rb"){TV.r=Math.min(TV.rows.length-1,TV.r+1);tvFocus();}
+  else if(k==="a")tvOpen();
+  else if(k==="x"){var it=tvCur();if(it&&it.k==="g"){P.cur=it.o.id;playToggle();tvRender();}}
+  else if(k==="start"||k==="back"){TV.menu=1;TV.sf=0;tvMenu();}
+  else if(k==="b"){TV.menu=1;TV.sf=0;tvMenu();}
+}
+function tvTick(){
+  if(!tvOn)return;var c=document.querySelector?document.querySelector("#tv .tvclk"):null;if(c)c.textContent=hhmm(new Date());
+  var d=document.querySelector?document.querySelector("#tv .tvdl"):null;if(d)d.textContent=dl?"⇩ "+(dl.upd?dl.upd.name:dl.it.name)+(dl.pct>=0?"  "+dl.pct+"%":""):"";
+  if(TV.sheet&&dl)tvSheet();
+}
 /* ---------- in-game overlay (Shift+Tab while a game is running) ---------- */
 var ovOn=false,ovT=null;
 function ovHotkey(){
@@ -3005,6 +3285,10 @@ function renderSettings(){
     lu.appendChild(btn(liveBusy?"Updating…":"Update now","btn",function(){if(!liveBusy){CAT.err="";refreshLive(true,true);toast("Checking itch.io for new games…");}}));
     var cs=CAT.items.length+" games from itch.io. "+(CAT.t?"Last updated "+ago(CAT.t)+". ":"")+(CAT.err?"Last problem: "+CAT.err+". ":(CAT.items.length<CAT_TARGET?"Still adding more in the background. ":""))+"New free Windows games are added automatically every 6 hours.";
     b.appendChild(srow("Store catalog",cs,lu));
+    var gu=el("div");gu.style.cssText="display:flex;align-items:center";gu.appendChild(btn(guBusy?"Checking\u2026":"Check now","btn",function(){checkGameUpdates(true);}));gu.appendChild(sw(S.set.gameUpd!==0,function(v){S.set.gameUpd=v?1:0;save();}));gu.lastChild.style.marginLeft="14px";
+    b.appendChild(srow("Game updates","Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. "+(updCount()?updCount()+" update"+(updCount()===1?"":"s")+" waiting. ":"")+(S.guT?"Last checked "+ago(S.guT)+".":""),gu));
+    b.appendChild(srow("TV mode","A full-screen view made for controllers and TVs. Open it from the sidebar or press Start on a controller.",btn("Open TV mode","btn",function(){enterTV();})));
+    b.appendChild(srow("Start Xaly in TV mode",null,sw(!!S.set.tvStart,function(v){S.set.tvStart=v?1:0;save();})));
     b.appendChild(srow("Notify me when a download finishes","Shows a card in the launcher with a Play button, and keeps a list under the bell.",sw(S.set.notify!==0,function(v){S.set.notify=v?1:0;save();})));
     b.appendChild(srow("Windows notifications","Also pop up a Windows notification when the launcher is in the background or in the tray.",sw(S.set.winNotify!==0,function(v){S.set.winNotify=v?1:0;save();})));
     b.appendChild(srow("Opening animation",null,sw(AC.intro!==0,function(v){S.set.intro=v?1:0;AC.intro=v?1:0;save();saveAcc();})));
@@ -3056,7 +3340,7 @@ $("fbtn").onclick=function(){if(ovOn)return;var o=$("fp").className==="open";set
 $("fq").onkeyup=renderFriends;
 $("fadd").onclick=function(){if(!frOn()){toast(frErr||"Turn on online friends in Settings \u203A Friends first");return;}openForm("Add a friend",[{id:"code",label:"Their friend code (yours is "+fmtCode(S.user.code)+")",ph:"123 456 789"},{id:"nick",label:"Nickname (optional)"}],"Send request",function(v){return addFriend(v.code,v.nick);},null);};
 $("dlb").onclick=function(){nav("downloads");};
-$("tDl").onclick=function(){nav("downloads");};$("tProf").onclick=function(){openProfile("");};$("tSet").onclick=function(){nav("settings",P.page==="settings"?P.tab:"account");};
+$("tDl").onclick=function(){nav("downloads");};$("tTv").onclick=function(){enterTV();};$("tProf").onclick=function(){openProfile("");};$("tSet").onclick=function(){nav("settings",P.page==="settings"?P.tab:"account");};
 $("bell").onclick=function(e){stp(e);toggleNotes();};$("npan").onclick=function(e){stp(e);};
 $("dlx").onclick=function(e){stp(e);cancelDl();};
 $("rec").onclick=function(e){stp(e);toggleRec();};
@@ -3084,7 +3368,7 @@ function fbFail(v,msg){
   var bx=$("mbox"),p0=el("div","fbm",act?"The first message to a new inbox triggers a one-time check. An email titled “FormSubmit activation” (or similar) was sent to xalify2004@gmail.com. Click its Activate button once, and from then on every message from the launcher arrives there.":"The feedback service said: "+(msg||"no answer")+". Your message was saved to feedback.txt, and you can also send it with your own email app.");
   bx.insertBefore(p0,bx.childNodes[1]);
 }
-document.onkeydown=function(e){e=e||window.event;if(ovOn&&e.keyCode===27&&$("modal").className!=="open"){T(function(){return X.OverlayClose();});return false;}if(e.keyCode===27){if($("modal").className==="open")closeForm();else if(P.page==="detail"||P.page==="game"||P.page==="downloads")backNav();}};
+document.onkeydown=function(e){e=e||window.event;if(tvOn&&!ovOn&&$("modal").className!=="open"){var km={37:"left",38:"up",39:"right",40:"down",13:"a",32:"a",27:"b",8:"b",77:"start",112:"start",9:"rb"},kk=km[e.keyCode];if(kk){tvInput(kk);if(e.preventDefault)e.preventDefault();return false;}}if(ovOn&&e.keyCode===27&&$("modal").className!=="open"){T(function(){return X.OverlayClose();});return false;}if(e.keyCode===27){if($("modal").className==="open")closeForm();else if(P.page==="detail"||P.page==="game"||P.page==="downloads")backNav();}};
 window.onShown=function(){if(!S)return;var a=$("app");a.className="";void a.offsetWidth;a.className="pop";syncNow();};
 window.onQuit=function(){if(!S)return;var k;for(k in run){var g=gameBy(k);if(g)g.seconds=(g.seconds||0)+Math.round((now()-run[k].t)/1000);}
   saveNow();};
@@ -3101,6 +3385,8 @@ function init(){
   setInterval(syncNow,25000);
   setTimeout(function(){checkUpdate(false);},8000);setInterval(function(){checkUpdate(false);},6*3600000);
   setInterval(function(){refreshLive(false);},30*60000);
+  setInterval(function(){if(S&&(!S.guT||now()-S.guT>6*3600000))checkGameUpdates(false);},15*60000);
+  setInterval(padTick,33);if(ENGINE==="ie")T(function(){return X.PadNative("1");});
   setInterval(function(){if(chatOpen()&&now()-frPollT>6000)frPoll();},2000);
   if(T(function(){return X.SelfTest();},"0")==="1")setTimeout(selfTest,1500);
 }
@@ -3110,6 +3396,9 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("paths",function(){return X.Paths();});c("hash",function(){return X.Hash("a1730000000000","pw1234").length;});c("ecnew",function(){return X.EcNew().length;});
   c("seal",function(){var k=X.RandHex("32"),t=X.Seal(k,"h\u00e9llo\n\"x\"");return X.Unseal(k,t);});
   c("save",function(){return X.Save("selftest.json","{\"a\":1}")+" "+X.Data("selftest.json");});
+  c("fullscreen",function(){return X.SetFullscreen("1")+" "+X.SetFullscreen("0");});
+  c("pad",function(){return X.PadNative("1")+" "+X.PadNative("0");});
+  c("tv",function(){enterTV();var n=document.getElementById("tvrows").childNodes.length;exitTV();return n+" rows";});
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});
   var id="h_self",done=false;
   cbs[id]=function(ok,text,st){if(done)return;done=true;r.checks.callback="ok="+ok+" status="+st+" bytes="+(text||"").length;r.ok=r.checks.seal==="h\u00e9llo\n\"x\"";T(function(){return X.SelfTestDone(JSON.stringify(r));});};

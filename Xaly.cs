@@ -353,6 +353,63 @@ namespace Xaly
             }
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
+        // ---- game updates: unpack over the installed copy, keeping files the update doesn't contain (like saves)
+        public string ExtractUpdate(string zip, string dir, string oldExe)
+        {
+            try
+            {
+                string root = Path.GetFullPath(Path.Combine(f.DownloadsDir, "Games")).TrimEnd('\\') + "\\";
+                string full = Path.GetFullPath(dir).TrimEnd('\\') + "\\";
+                if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase) || full.Length <= root.Length) return "ERR:Only games installed by Xaly can be updated.";
+                string tmp = Path.Combine(Path.GetTempPath(), "XalyGameUpdate_" + DateTime.Now.Ticks);
+                ZipFile.ExtractToDirectory(zip, tmp);
+                CopyTree(tmp, dir);
+                try { Directory.Delete(tmp, true); } catch (Exception) { }
+                try { File.Delete(zip); } catch (Exception) { }
+                string exe = (!string.IsNullOrEmpty(oldExe) && File.Exists(oldExe)) ? oldExe : BestExe(dir);
+                return (exe ?? "") + "|" + dir;
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string ReplaceFile(string src, string dest)
+        {
+            try
+            {
+                string root = Path.GetFullPath(f.DownloadsDir).TrimEnd('\\') + "\\";
+                if (!Path.GetFullPath(dest).StartsWith(root, StringComparison.OrdinalIgnoreCase)) return "ERR:Only games downloaded by Xaly can be updated.";
+                File.Copy(src, dest, true);
+                try { File.Delete(src); } catch (Exception) { }
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static void CopyTree(string src, string dst)
+        {
+            Directory.CreateDirectory(dst);
+            foreach (string file in Directory.GetFiles(src))
+            {
+                string to = Path.Combine(dst, Path.GetFileName(file));
+                if (File.Exists(to)) File.SetAttributes(to, FileAttributes.Normal);
+                File.Copy(file, to, true);
+            }
+            foreach (string d in Directory.GetDirectories(src)) CopyTree(d, Path.Combine(dst, Path.GetFileName(d)));
+        }
+        static string BestExe(string dir)
+        {
+            string best = null; long size = -1;
+            foreach (string p in Directory.GetFiles(dir, "*.exe", SearchOption.AllDirectories))
+            {
+                string n = Path.GetFileName(p).ToLower();
+                if (n.IndexOf("unins") >= 0 || n.IndexOf("crash") >= 0 || n.IndexOf("redist") >= 0 || n.IndexOf("dxsetup") >= 0 || n.IndexOf("helper") >= 0) continue;
+                long sz = new FileInfo(p).Length;
+                if (sz > size) { size = sz; best = p; }
+            }
+            return best;
+        }
+        // ---- TV mode
+        public string SetFullscreen(string on) { f.SetFullscreen(on == "1"); return "ok"; }
+        public string PadNative(string on) { f.PadNative(on == "1"); return "ok"; }
+
         public string Http(string id, string url)
         {
             try
@@ -1031,6 +1088,63 @@ namespace Xaly
                 return;
             }
             base.WndProc(ref m);
+        }
+
+        // ---- TV mode: borderless full screen and Xbox controller input via XInput
+        bool fsOn = false; Rectangle fsBounds; FormWindowState fsState; FormBorderStyle fsBorder;
+        public void SetFullscreen(bool on)
+        {
+            if (overlayOn || on == fsOn) return;
+            if (on)
+            {
+                fsState = WindowState; fsBorder = FormBorderStyle; fsBounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
+                fsOn = true;
+                if (WindowState != FormWindowState.Normal) WindowState = FormWindowState.Normal;
+                FormBorderStyle = FormBorderStyle.None;
+                Bounds = Screen.FromControl(this).Bounds;
+            }
+            else
+            {
+                fsOn = false;
+                FormBorderStyle = fsBorder; Bounds = fsBounds; WindowState = fsState;
+            }
+            FocusView();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct XGamepad { public ushort wButtons; public byte bLeftTrigger, bRightTrigger; public short sThumbLX, sThumbLY, sThumbRX, sThumbRY; }
+        [StructLayout(LayoutKind.Sequential)]
+        struct XState { public uint dwPacketNumber; public XGamepad Gamepad; }
+        [DllImport("xinput1_4.dll", EntryPoint = "XInputGetState")] static extern int XInputGetState14(int user, ref XState state);
+        [DllImport("xinput9_1_0.dll", EntryPoint = "XInputGetState")] static extern int XInputGetState910(int user, ref XState state);
+        System.Windows.Forms.Timer padTimer; int padLast = -1, padApi = 14;
+        public void PadNative(bool on)
+        {
+            if (!on) { if (padTimer != null) padTimer.Stop(); return; }
+            if (padTimer == null)
+            {
+                padTimer = new System.Windows.Forms.Timer();
+                padTimer.Interval = 16;
+                padTimer.Tick += delegate(object s, EventArgs e) { PadPoll(); };
+            }
+            padTimer.Start();
+        }
+        void PadPoll()
+        {
+            if (Form.ActiveForm != this || padApi == 0) return;
+            int bits = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                XState st = new XState(); int r;
+                try { r = padApi == 14 ? XInputGetState14(i, ref st) : XInputGetState910(i, ref st); }
+                catch (Exception) { padApi = padApi == 14 ? 910 : 0; return; }
+                if (r != 0) continue;
+                XGamepad g = st.Gamepad;
+                bits |= g.wButtons & 0xF33F;
+                if (g.sThumbLY > 16000) bits |= 1; if (g.sThumbLY < -16000) bits |= 2;
+                if (g.sThumbLX < -16000) bits |= 4; if (g.sThumbLX > 16000) bits |= 8;
+            }
+            if (bits != padLast) { padLast = bits; Js("onPad", bits.ToString()); }
         }
 
         public void OpenOverlay()

@@ -411,6 +411,11 @@ namespace Xaly
             else if (!string.IsNullOrEmpty(name)) { try { File.Delete(Path.Combine(f.DownloadsDir, SafeName(name)) + ".part"); } catch (Exception) { } }
             return "ok";
         }
+        public string FileSizeOf(string name)
+        {
+            try { string pth = Path.Combine(f.DownloadsDir, SafeName(name)); return File.Exists(pth) ? new FileInfo(pth).Length.ToString() : "0"; }
+            catch (Exception) { return "0"; }
+        }
         public string PartSize(string name)
         {
             try { string pth = Path.Combine(f.DownloadsDir, SafeName(name)) + ".part"; return File.Exists(pth) ? new FileInfo(pth).Length.ToString() : "0"; }

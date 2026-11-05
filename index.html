@@ -3593,7 +3593,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("tv",function(){enterTV();var n=document.getElementById("tvrows").childNodes.length;exitTV();return n+" rows";});
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});
   var id="h_self",done=false;
-  function fin(){if(done)return;done=true;r.ok=r.checks.seal==="h\u00e9llo\n\"x\""&&/^done/.test(r.checks.download||"");T(function(){return X.SelfTestDone(JSON.stringify(r));});}
+  function fin(){if(done)return;done=true;r.ok=r.checks.seal==="h\u00e9llo\n\"x\""&&/^done/.test(r.checks.download||"");r.checks.dlsize=T(function(){return X.FileSizeOf("selftest-dl.bin");},"?");T(function(){return X.SelfTestDone(JSON.stringify(r));});}
   cbs[id]=function(ok,text,st){
     r.checks.callback="ok="+ok+" status="+st+" bytes="+(text||"").length;
     var od=window.onDl,steps=[];
@@ -3602,11 +3602,11 @@ function selfTest(){   // run by the build server: proves both directions of the
       if(k==="p"){steps.push("p");return;}
       steps.push(k);
       if(k==="paused"){r.checks.pause="paused after "+(+T(function(){return X.PartSize("selftest-dl.bin");},"0"))+" bytes";
-        T(function(){return X.DownloadEx("selfdl","https://github.com/Xalify/xalify-xaly-launcher/releases/download/v1.5.1/XalyLauncher-1.5.1.zip","selftest-dl.bin","1");});return;}
+        T(function(){return X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.4314.35","selftest-dl.bin","1");});return;}
       r.checks.download=k+" "+(a||"")+" ("+steps.join(",").replace(/(p,)+/g,"p..,")+")";window.onDl=od;fin();
     };
-    r.checks.dlstart=X.DownloadEx("selfdl","https://github.com/Xalify/xalify-xaly-launcher/releases/download/v1.5.1/XalyLauncher-1.5.1.zip","selftest-dl.bin","0");
-    setTimeout(function(){T(function(){return X.DownloadPause("selfdl");});},700);
+    r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.4314.35","selftest-dl.bin","0");
+    setTimeout(function(){T(function(){return X.DownloadPause("selfdl");});},250);
   };
   c("http",function(){return X.Http(id,"https://api.github.com/repos/"+UPD_REPO);});
   setTimeout(function(){if(!done){r.checks.timeout="no answer within 60s";fin();}},60000);

@@ -680,6 +680,30 @@ select::-ms-expand{display:none}
 .wnf{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
 .wnc{display:flex;align-items:center;color:#9aa1b8;font-size:14.5px;cursor:pointer}.wnc input{width:18px;height:18px;margin:0 10px 0 0;padding:0;accent-color:#2ee6f0}
 .wnf .pri{padding:12px 26px}
+
+/* ===== 1.5.3: achievements ===== */
+.achi{display:inline-block;width:44px;height:44px;border-radius:13px;text-align:center;line-height:44px;font-size:21px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35);flex:0 0 auto;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.achi.lg{width:56px;height:56px;line-height:56px;font-size:27px;border-radius:16px}
+.achbox{padding:16px 18px}
+.achh{display:flex;align-items:center;margin-bottom:14px}.achh span{color:#c8cddc;font-size:13.5px;font-weight:600;margin-right:14px;white-space:nowrap}
+.achbar{flex:1 1 0%;height:6px;border-radius:3px;background:#232a3a;overflow:hidden}.achbar i{display:block;height:6px;background:linear-gradient(90deg,#d4a017,#ffd95a)}
+.achg{display:flex;flex-wrap:wrap;margin-right:-10px}
+.achk{display:flex;align-items:center;width:calc(50% - 10px);margin:0 10px 10px 0;background:#10141d;border-radius:12px;padding:10px;box-sizing:border-box}
+.achk:not(.got) .achi{background:#1d2230 !important;color:#4a5268;box-shadow:none;text-shadow:none}
+.achm{margin-left:12px;min-width:0;flex:1 1 0%}.achm b{display:block;font-size:13.5px}.achm span{display:block;color:#8a8ea6;font-size:12px;margin-top:1px}
+.achm small{display:block;color:#7d8299;font-size:11.5px;margin-top:4px}.achk.got .achm small{color:#d4b24a}
+.achpb{height:4px;border-radius:2px;background:#232a3a;overflow:hidden;margin-top:6px}.achpb i{display:block;height:4px;background:#5b6b94}
+#achp{position:fixed;right:28px;bottom:28px;z-index:260;display:flex;flex-direction:column;align-items:flex-end}
+.achc{display:flex;align-items:center;width:340px;background:linear-gradient(135deg,#1a1f2c,#121621);border:1px solid #3a3420;border-radius:16px;padding:14px;margin-top:10px;cursor:pointer;box-shadow:0 18px 44px rgba(0,0,0,.6),0 0 0 1px rgba(255,217,90,.08);animation:achin .5s cubic-bezier(.2,.9,.3,1.3) both}
+.achc.out{animation:achout .5s both}
+@keyframes achin{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes achout{to{opacity:0;transform:translateX(40px)}}
+.achc .achi{width:52px;height:52px;line-height:52px;font-size:25px;border-radius:15px;animation:achglow 1.6s ease-in-out 2}
+@keyframes achglow{50%{box-shadow:0 0 0 6px rgba(255,217,90,.25),0 4px 12px rgba(0,0,0,.3)}}
+.acht{margin-left:14px;min-width:0}.acht small{display:block;color:#ffd95a;font-size:10.5px;font-weight:800;letter-spacing:1.6px}.acht b{display:block;font-size:16px;margin:2px 0}.acht span{display:block;color:#9aa1b8;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prach{display:flex;flex-wrap:wrap;margin-right:-10px}
+.prak{display:flex;align-items:center;width:calc(50% - 10px);margin:0 10px 10px 0;background:#10141d;border-radius:12px;padding:10px;box-sizing:border-box;cursor:pointer}.prak:hover{background:#171d2a}
+.prak>div:last-child{margin-left:12px;min-width:0}.prak b{display:block;font-size:14px}.prak span{display:block;color:#8a8ea6;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 <style id="theme"></style>
 </head>
@@ -727,13 +751,15 @@ select::-ms-expand{display:none}
   <div id="toast"></div>
 </div>
 <div id="updscr"></div>
+<div id="achp"></div>
 <div id="wn"></div>
 <div id="tv"><div id="tvbg"></div><div id="tvsh"></div><div id="tvtop"></div><div id="tvhero"></div><div id="tvview"><div id="tvrows"></div></div><div id="tvsheet"></div><div id="tvhint"></div></div>
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.2";
+var VER="1.5.3";
 var NOTES=[
+ {v:"1.5.3",d:"5 Nov 2026",t:["New achievements for every game: First Launch, Night Shift, Marathon, Week Streak, Legend and more. Unlocking one pops up a little trophy","Each game\u2019s page shows its achievements with progress bars, and your profile shows your latest ones to friends. Achievements also give XP","Crash reports: if something goes wrong, the details are sent to the developer automatically so it can be fixed. You can turn this off in Settings \u203A About"]},
  {v:"1.5.2",d:"5 Nov 2026",t:["Download queue: install as many games as you like and they download one after another. Pause, resume, reorder or cancel them on the Downloads page","Downloads now continue where they stopped if your internet drops, and after you restart Xaly","Xaly now installs updates by itself when it starts, with a progress screen that shows your download speed","A What\u2019s new popup shows the changes after each update. Tick Don\u2019t show again to turn it off"]},
  {v:"1.5.1",d:"5 Nov 2026",t:["TV mode: a full-screen, controller-friendly view for playing on a TV. Open it from the sidebar or press Start on a controller","Game updates: Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. Updating keeps your saves","Settings \u203A General has switches for game updates and TV mode"]},
  {v:"1.5.0",d:"5 Nov 2026",t:["New display engine: Xaly now runs on Microsoft Edge WebView2 instead of Internet Explorer, so pages, scrolling and animations are faster and smoother","If WebView2 isn\u2019t available the launcher falls back to the old engine by itself; you can switch in Settings \u203A General","Fixed feedback messages with more than one line failing to send"]},
@@ -1001,6 +1027,7 @@ function startSession(a){
   P.chat=null;P.draft="";frErr="";frPollT=0;frBusy=0;frInit();
   chip();renderFriends();render();
   loadDQ();setTimeout(function(){pumpQ();paintDl();},4000);
+  if(!S.achInit){S.games.forEach(function(g){checkAch(g,true);});S.achInit=1;save();}
   queueCovers();loadFeed();syncNow();queueVerify();setTimeout(function(){checkGameUpdates(false);},20000);
   if(S.set.tvStart)setTimeout(function(){enterTV();},300);setTimeout(function(){refreshLive(false);},4000);
 }
@@ -2435,6 +2462,7 @@ function buildGameDetail(c,g){
   var inst=g.added||(m&&m.ct)||0;
   pa.appendChild(gitem("download","Installed",inst?ago(inst):"—"));
   c1.appendChild(pa);
+  if(!isUrl){c1.appendChild(el("div","sec","Achievements"));c1.appendChild(achSection(g));}
   c2.appendChild(el("div","sec","Details"));
   pd.appendChild(drow("Platform",isUrl?"Web":"Windows"));
   pd.appendChild(drow("Version",m&&m.ver?m.ver:"—"));
@@ -2464,11 +2492,11 @@ function playToggle(){
   if(r.indexOf("ERR")===0){toast("Couldn't start "+g.name+": "+r.replace("ERR:",""));return;}
   if(r==="ok")run[g.id]={t:now()};
   ovHotkey();
-  g.plays=(g.plays||0)+1;g.last=now();save();render();syncNow();
+  g.plays=(g.plays||0)+1;g.last=now();checkAch(g);save();render();syncNow();
 }
 window.onExit=function(id){
   if(!S)return;var g=gameBy(id);if(g&&run[id]){var dur=Math.round((now()-run[id].t)/1000);g.seconds=(g.seconds||0)+dur;g.last=now();g.sess=g.sess||[];g.sess.push([run[id].t,dur]);if(g.sess.length>120)g.sess.splice(0,g.sess.length-120);}
-  delete run[id];save();render();syncNow();ovHotkey();
+  delete run[id];if(g)checkAch(g);save();render();syncNow();ovHotkey();
 };
 
 /* ---------- friends: online, end-to-end encrypted, over the free ntfy.sh relay ---------- */
@@ -2827,6 +2855,67 @@ function sbTick(){
   sbL=sbL.filter(function(c){if(document.body.contains(c))return true;if(c._sb&&c._sb.bar.parentNode)c._sb.bar.parentNode.removeChild(c._sb.bar);return false;});
 }
 setInterval(sbTick,300);
+/* ---------- achievements: Xaly-made milestones for every game ---------- */
+var ACH=[
+ ["first","First Launch","Start the game for the first time","\u25B6",["#5b6b94","#8a9ac4"],function(s){return [s.plays,1];}],
+ ["h1","Getting Into It","Play for 1 hour","\u23F1",["#b07a4a","#e0a86e"],function(s){return [s.h,1];}],
+ ["l10","Regular","Launch it 10 times","\u21BB",["#b07a4a","#e0a86e"],function(s){return [s.plays,10];}],
+ ["night","Night Shift","Play between midnight and 5 AM","\u263E",["#3b5bdb","#7c9cff"],function(s){return [s.night,1];}],
+ ["d3","On a Roll","Play 3 days in a row","\u2600",["#8f9bb3","#d4dbe8"],function(s){return [s.streak,3];}],
+ ["wknd","Weekend Warrior","Play on a Saturday and the Sunday after","\u2691",["#8f9bb3","#d4dbe8"],function(s){return [s.wknd,1];}],
+ ["h10","Dedicated","Play for 10 hours","\u2605",["#8f9bb3","#d4dbe8"],function(s){return [s.h,10];}],
+ ["mara","Marathon","Play for 3 hours in one session","\u221E",["#d4a017","#ffd95a"],function(s){return [s.maxS,3];}],
+ ["d7","Week Streak","Play 7 days in a row","\u2737",["#d4a017","#ffd95a"],function(s){return [s.streak,7];}],
+ ["h25","Devoted","Play for 25 hours","\u2756",["#d4a017","#ffd95a"],function(s){return [s.h,25];}],
+ ["l50","Can\u2019t Stop","Launch it 50 times","\u2668",["#00b8d4","#2ee6f0"],function(s){return [s.plays,50];}],
+ ["h100","Legend","Play for 100 hours","\u265B",["#00b8d4","#a17cff"],function(s){return [s.h,100];}]
+];
+var ACHM={};ACH.forEach(function(a){ACHM[a[0]]=a;});
+function dKey(t){var d=new Date(t);return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+function dNext(k){var d=new Date(Math.floor(k/10000),Math.floor(k/100)%100-1,k%100+1);return dKey(d.getTime());}
+function gStats(g){
+  var live=run[g.id]?(now()-run[g.id].t)/1000:0,ss=(g.sess||[]).slice();if(live>0)ss.push([run[g.id].t,live]);
+  var days={},maxS=0,night=0,streak=0,wknd=0;
+  ss.forEach(function(x){days[dKey(x[0])]=1;if(x[1]>maxS)maxS=x[1];var h=new Date(x[0]).getHours();if(h<5)night=1;
+    var hEnd=new Date(x[0]+x[1]*1000).getHours();if(x[1]>0&&(hEnd<5||dKey(x[0]+x[1]*1000)!==dKey(x[0])))night=1;});
+  if(g.last)days[dKey(g.last)]=1;
+  var k;for(k in days){var n=1,c=+k;while(days[dNext(c)]){n++;c=dNext(c);}if(n>streak)streak=n;if(new Date(Math.floor(k/10000),Math.floor(k/100)%100-1,k%100).getDay()===6&&days[dNext(+k)])wknd=1;}
+  return {plays:g.plays||0,h:((g.seconds||0)+live)/3600,maxS:maxS/3600,night:night,streak:streak,wknd:wknd};
+}
+function achProg(g){var s=gStats(g);return ACH.map(function(a){var r=a[5](s);return {a:a,v:r[0],goal:r[1],got:g.ach&&g.ach[a[0]]};});}
+function achCount(g){var n=0,k;for(k in (g.ach||{}))if(ACHM[k])n++;return n;}
+function achTotal(){var n=0;S.games.forEach(function(g){n+=achCount(g);});return n;}
+function achRecent(max){var l=[];S.games.forEach(function(g){var k;for(k in (g.ach||{}))if(ACHM[k])l.push({id:k,g:g,t:g.ach[k]});});return l.sort(function(a,b){return b.t-a.t;}).slice(0,max);}
+function checkAch(g,silent){
+  if(!g)return;var got=[];g.ach=g.ach||{};
+  achProg(g).forEach(function(p){if(!p.got&&p.v>=p.goal){g.ach[p.a[0]]=now();got.push(p.a);}});
+  if(!got.length)return;save();
+  if(!silent){got.forEach(function(a,i){setTimeout(function(){achPop(a,g);},i*1600);});pubStatus(true);}
+}
+var achQ=0;
+function achPop(a,g){
+  var focused=!document.hasFocus||document.hasFocus();
+  notes().unshift({id:rid(),k:"ok",title:"Achievement unlocked: "+a[1],msg:g.name+" \u2014 "+a[2],gid:g.id,img:gArt(g),t:now(),read:0});if(S.notes.length>30)S.notes.length=30;paintBell();
+  if(!focused||ovOn){T(function(){return X.Notify("Achievement unlocked: "+a[1],g.name+" \u2014 "+a[2],g.id);});}
+  var w=$("achp"),c=el("div","achc"),ic=el("div","achi",a[3]);ic.style.background="linear-gradient(135deg,"+a[4][0]+","+a[4][1]+")";c.appendChild(ic);
+  var t=el("div","acht");t.appendChild(el("small","","ACHIEVEMENT UNLOCKED"));t.appendChild(el("b","",a[1]));t.appendChild(el("span","",g.name));c.appendChild(t);
+  c.onclick=function(){P.cur=g.id;nav("game");};w.appendChild(c);
+  setTimeout(function(){c.className="achc out";},6000);setTimeout(function(){if(c.parentNode)c.parentNode.removeChild(c);},6600);
+}
+function achBadge(a,size){var d=el("div","achi"+(size?" "+size:""),a[3]);d.style.background="linear-gradient(135deg,"+a[4][0]+","+a[4][1]+")";return d;}
+function achSection(g){
+  var box=el("div","gp achbox"),pr=achProg(g),n=0;pr.forEach(function(x){if(x.got)n++;});
+  var h=el("div","achh");h.appendChild(el("span","",n+" of "+ACH.length+" unlocked"));var bar=el("div","achbar"),f=el("i");f.style.width=Math.round(n*100/ACH.length)+"%";bar.appendChild(f);h.appendChild(bar);box.appendChild(h);
+  var grid=el("div","achg");
+  pr.forEach(function(x){
+    var c=el("div","achk"+(x.got?" got":"")),ic=achBadge(x.a);c.appendChild(ic);
+    var t=el("div","achm");t.appendChild(el("b","",x.a[1]));t.appendChild(el("span","",x.a[2]));
+    if(x.got)t.appendChild(el("small","","Unlocked "+ago(x.got)));
+    else if(x.goal>1){var pb=el("div","achpb"),pf=el("i");pf.style.width=Math.min(100,Math.round(x.v*100/x.goal))+"%";pb.appendChild(pf);t.appendChild(pb);t.appendChild(el("small","",(x.goal>=1&&x.a[0].charAt(0)==="h"||x.a[0]==="mara"?hfmt(x.v):Math.floor(x.v))+" / "+x.goal));}
+    c.appendChild(t);grid.appendChild(c);
+  });
+  box.appendChild(grid);return box;
+}
 /* ---------- profiles ---------- */
 var COUNTRIES=["","United States","Canada","Mexico","Brazil","Argentina","Colombia","Chile","United Kingdom","Ireland","France","Germany","Spain","Portugal","Italy","Netherlands","Belgium","Sweden","Norway","Denmark","Finland","Poland","Ukraine","Romania","Greece","Turkey","Russia","India","Pakistan","Philippines","Indonesia","Malaysia","Singapore","Vietnam","Thailand","China","Japan","South Korea","Australia","New Zealand","South Africa","Nigeria","Egypt","Saudi Arabia","United Arab Emirates","Israel"];
 var BADGES=[
@@ -2859,7 +2948,7 @@ function myBadges(){
   return out;
 }
 function lvInfo(xp){var lv=1,need=150;while(xp>=need){xp-=need;lv++;need=150+lv*50;}return {lv:lv,cur:Math.round(xp),need:need};}
-function myXp(bd){var hrs=0;S.games.forEach(function(g){hrs+=(g.seconds||0)/3600;});return Math.round(hrs*20+S.games.length*40+bd.length*100+(S.friends||[]).length*25);}
+function myXp(bd){var hrs=0;S.games.forEach(function(g){hrs+=(g.seconds||0)/3600;});return Math.round(hrs*20+S.games.length*40+bd.length*100+(S.friends||[]).length*25+achTotal()*50);}
 function recentOf(gs){
   var cut=now()-14*86400000,l=gs.filter(function(g){return g.last&&g.last>cut;});
   if(!l.length)l=gs.filter(function(g){return g.last;});
@@ -2877,25 +2966,28 @@ function profMine(){
     bg:(pr.bg&&gameBy(pr.bg))?gArt(gameBy(pr.bg)):(fav?gArt(fav):""),
     rec:recentOf(S.games).map(function(g){return {n:g.name,i:gArt(g),h:(g.seconds||0)/3600,l:g.last||0,gid:g.id,sid:g.storeId||""};}),
     h2:hrs2w(S.games),gc:S.games.length,hrs:hrs,wc:w,fc:(S.friends||[]).length,
-    st:S.user.status==="invisible"?"offline":S.user.status,playing:playingName(),friends:S.friends||[]};
+    st:S.user.status==="invisible"?"offline":S.user.status,playing:playingName(),friends:S.friends||[],
+    ac:achTotal(),ar:achRecent(6).map(function(x){return {id:x.id,g:x.g.name,t:x.t,i:gArt(x.g),gid:x.g.id};})};
 }
 function profShare(){
   if(!S.prof&&!S.games.length)return null;
   var m=profMine(),cut=function(s,n){return String(s||"").substr(0,n);};
   return {lv:m.lvi.lv,xp:m.xp,bd:m.bd,feat:m.feat,rn:cut(m.rn,40),cn:cut(m.cn,30),bio:cut(m.bio,180),since:m.since,gc:m.gc,hrs:Math.round(m.hrs),h2:Math.round(m.h2*10)/10,fc:m.fc,
     fav:m.fav?{n:cut(m.fav.n,60),i:cut(m.fav.i,300),h:Math.round(m.fav.h*10)/10,l:m.fav.l,sid:m.fav.sid}:null,
-    rec:m.rec.slice(0,3).map(function(r){return {n:cut(r.n,60),i:cut(r.i,300),h:Math.round(r.h*10)/10,l:r.l,sid:r.sid};})};
+    rec:m.rec.slice(0,3).map(function(r){return {n:cut(r.n,60),i:cut(r.i,300),h:Math.round(r.h*10)/10,l:r.l,sid:r.sid};}),
+    ac:m.ac,ar:m.ar.slice(0,4).map(function(x){return {id:x.id,g:cut(x.g,60),t:x.t};})};
 }
 function cleanProf(o){
   var s=function(v,n){return String(v||"").substr(0,n);},num=function(v){return Math.max(0,+v||0);},img=function(v){v=s(v,300);return /^https:\/\//.test(v)?v:"";};
   var g=function(r){return r&&typeof r==="object"?{n:s(r.n,60),i:img(r.i),h:num(r.h),l:num(r.l),sid:s(r.sid,40)}:null;};
   return {lv:Math.min(999,Math.max(1,Math.floor(num(o.lv))||1)),xp:num(o.xp),bd:(o.bd&&o.bd.length?o.bd:[]).filter(function(b){return BADGE[b];}).slice(0,20),feat:BADGE[o.feat]?o.feat:"",
-    rn:s(o.rn,40),cn:s(o.cn,30),bio:s(o.bio,180),since:num(o.since),gc:num(o.gc),hrs:num(o.hrs),h2:num(o.h2),fc:num(o.fc),fav:g(o.fav),rec:(o.rec&&o.rec.length?o.rec:[]).slice(0,3).map(g)};
+    rn:s(o.rn,40),cn:s(o.cn,30),bio:s(o.bio,180),since:num(o.since),gc:num(o.gc),hrs:num(o.hrs),h2:num(o.h2),fc:num(o.fc),fav:g(o.fav),rec:(o.rec&&o.rec.length?o.rec:[]).slice(0,3).map(g),
+    ac:num(o.ac),ar:(o.ar&&o.ar.length?o.ar:[]).filter(function(x){return x&&ACHM[x.id];}).slice(0,4).map(function(x){return {id:x.id,g:s(x.g,60),t:num(x.t)};})};
 }
 function profFriend(f){
   var p=f.prof||cleanProf({});
   return {me:0,f:f,name:fname2(f),color:f.color,av:f.av||"",rn:p.rn,cn:p.cn,bio:p.bio,since:p.since,lvi:{lv:p.lv,cur:0,need:0},xp:p.xp,bd:p.bd,feat:p.feat,
-    fav:p.fav,bg:p.fav?p.fav.i:"",rec:p.rec,h2:p.h2,gc:p.gc,hrs:p.hrs,wc:-1,fc:p.fc,st:pstate(f),playing:f.playing,friends:[],noProf:!f.prof};
+    fav:p.fav,bg:p.fav?p.fav.i:"",rec:p.rec,h2:p.h2,gc:p.gc,hrs:p.hrs,wc:-1,fc:p.fc,st:pstate(f),playing:f.playing,friends:[],noProf:!f.prof,ac:p.ac||0,ar:p.ar||[]};
 }
 function openProfile(code){P.prof=code||"";nav("profile");}
 function lvClass(lv){return lv>=30?"l4":lv>=20?"l3":lv>=10?"l2":"l1";}
@@ -2944,6 +3036,10 @@ function renderProfile(){
   });
   if(d.me){var lk=el("div","prlk");lk.appendChild(btn("Library","seeall",function(){nav("lib");}));lk.appendChild(btn("Wishlist","seeall",function(){P.f={b:"wish",g:"",s:"",fr:"",lf:""};nav("store");}));ra.appendChild(lk);}
   L.appendChild(ra);
+  var ak=el("div","prc"),ah=el("div","prch");ah.appendChild(el("h3","","Achievements"));ah.appendChild(el("span","",(d.ac||0)+" unlocked"));ak.appendChild(ah);
+  if(!d.ar||!d.ar.length)ak.appendChild(el("div","prbio empty",d.me?"Play your games to unlock achievements like Night Shift, Marathon and Week Streak.":"No achievements yet."));
+  else{var ag=el("div","prach");(d.ar||[]).forEach(function(x){var a=ACHM[x.id];if(!a)return;var r=el("div","prak");r.appendChild(achBadge(a));var t=el("div");t.appendChild(el("b","",a[1]));t.appendChild(el("span","",x.g+"  \u00B7  "+ago(x.t)));r.appendChild(t);if(d.me&&x.gid)r.onclick=function(){P.cur=x.gid;nav("game");};ag.appendChild(r);});ak.appendChild(ag);}
+  L.appendChild(ak);
   // right column
   var bc=el("div","prc"),bh=el("div","prch");bh.appendChild(el("h3","","Badges"));bh.appendChild(el("span","",d.bd.length+" of "+BADGES.length));bc.appendChild(bh);
   if(d.feat){var fb=el("div","prfb");fb.appendChild(badgeEl(d.feat,1));var fbt=el("div");fbt.appendChild(el("b","",BADGE[d.feat][1]));fbt.appendChild(el("span","",BADGE[d.feat][2]));fb.appendChild(fbt);bc.appendChild(fb);}
@@ -2952,7 +3048,7 @@ function renderProfile(){
   if(!bg2.childNodes.length)bg2.appendChild(el("div","prbio empty","No badges yet."));
   bc.appendChild(bg2);R.appendChild(bc);
   var sc=el("div","prc prstats");
-  [["Games",d.gc],["Hours played",Math.round(d.hrs||0)],["Wishlist",d.wc],["Friends",d.fc],["Badges",d.bd.length]].forEach(function(x){
+  [["Games",d.gc],["Hours played",Math.round(d.hrs||0)],["Achievements",d.ac||0],["Wishlist",d.wc],["Friends",d.fc],["Badges",d.bd.length]].forEach(function(x){
     if(x[1]<0)return;var r=el("div","prsr");r.appendChild(el("span","",x[0]));r.appendChild(el("b","",String(x[1])));
     if(d.me&&x[0]==="Games")r.onclick=function(){nav("lib");};if(d.me&&x[0]==="Wishlist")r.onclick=function(){P.f={b:"wish",g:"",s:"",fr:"",lf:""};nav("store");};
     if(d.me&&x[0]==="Friends")r.onclick=function(){setFP(true);renderFriends();};
@@ -3144,6 +3240,21 @@ function onUpdDl(kind,a,b){
   }
   UPD.st="avail";if(kind==="err")notify("err","Update download failed",a,null,"");if(P.page==="settings")renderSettings();pumpQ();
 }
+/* ---------- crash reports: errors are saved and emailed to the developer (no personal data) ---------- */
+var crashN=0,SELFTEST=false;
+function scrub(t){return String(t||"").replace(/file:\/\/\/[A-Za-z]:\/Users\/[^\/]+/gi,"file:///C:/Users/<user>").replace(/[A-Za-z]:\\\\Users\\\\[^\\\\]+/gi,"C:\\\\Users\\\\<user>").replace(/[A-Za-z]:\\Users\\[^\\\s"]+/g,"C:\\Users\\<user>").replace(/[\w.+-]+@[\w-]+\.[\w.]+/g,"<email>");}
+function reportError(kind,msg,where,stack){
+  try{
+    if(crashN>=3)return;var sig=kind+"|"+msg+"|"+where,day=Math.floor(now()/86400000);
+    if(!AC)return;var seen=AC.crashSig||(AC.crashSig={}),k;for(k in seen)if(seen[k]!==day)delete seen[k];
+    if(seen[sig]===day)return;seen[sig]=day;crashN++;
+    var t="Xaly "+VER+" \u00B7 "+ENGINE+" engine\nWhat: "+kind+"\nError: "+msg+"\nWhere: "+where+"\nScreen: "+(P&&P.page||"login")+(P&&P.page==="settings"?" / "+P.tab:"")+(tvOn?" (TV mode)":"")+"\nWhen: "+new Date().toUTCString()+"\nBrowser: "+navigator.userAgent+"\n\n"+(stack||"");
+    T(function(){return X.CrashLog("page",scrub(t).substr(0,6000));});
+    try{saveAcc();}catch(e){}
+    if(AC.crashRep!==0&&!SELFTEST)setTimeout(function(){T(function(){return X.SendCrashes(VER);});},3000);
+  }catch(e){}
+}
+window.onerror=function(msg,src,line,col,err){reportError("Script error",String(msg),"line "+line+":"+(col||0),err&&err.stack?String(err.stack).substr(0,3000):"");return false;};
 /* ---------- notifications ---------- */
 function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function notes(){return S.notes||(S.notes=[]);}
@@ -3313,7 +3424,7 @@ function tvSheet(){
   var it=TV.sheet,s=$("tvsheet");s.innerHTML="";s.className="on";
   var p=el("div","tvsp"),a=el("div","tvsa");paint(a,it.o.name,(it.k==="s"&&it.o.shots&&it.o.shots[0]&&it.o.shots[0].f)||tvArt(it));p.appendChild(a);
   var b=el("div","tvsb");b.appendChild(el("h2","",it.o.name));
-  b.appendChild(el("div","tvm",it.k==="g"?((it.o.seconds||it.o.plays)?fmtT(total(it.o))+" played  ·  "+(it.o.plays||0)+" launches":"Not played yet"):"Free  ·  "+frOf(it.o)+(it.o.genre?"  ·  "+it.o.genre:"")));
+  b.appendChild(el("div","tvm",it.k==="g"?((it.o.seconds||it.o.plays)?fmtT(total(it.o))+" played  ·  "+achCount(it.o)+"/"+ACH.length+" achievements":"Not played yet"):"Free  ·  "+frOf(it.o)+(it.o.genre?"  ·  "+it.o.genre:"")));
   var acts=tvActions(it);if(TV.sf>=acts.length)TV.sf=acts.length-1;
   acts.forEach(function(x,i){var bt=el("button","tvbtn"+(i===TV.sf?" f":""),x[0]);bt.onclick=function(){TV.sf=i;x[1]();};bt.onmouseover=function(){TV.sf=i;tvSheetFocus();};b.appendChild(bt);});
   p.appendChild(b);s.appendChild(p);
@@ -3513,6 +3624,7 @@ function renderSettings(){
     else if(UPD.st==="avail")ub.appendChild(btn("Install "+UPD.rel.v,"pri",showUpdate));
     else ub.appendChild(btn(UPD.st==="checking"?"Checking\u2026":"Check for updates","btn",function(){checkUpdate(true);}));
     b.appendChild(srow("Install updates automatically","When a new version is out, Xaly installs it as soon as it starts.",sw(AC.autoUpd!==0,function(v){AC.autoUpd=v?1:0;saveAcc();})));
+    b.appendChild(srow("Send crash reports automatically","When something goes wrong, the error details are emailed to the developer so it can be fixed. Only the error, the Xaly and Windows versions and the screen you were on are sent: no names, emails or files.",sw(AC.crashRep!==0,function(v){AC.crashRep=v?1:0;saveAcc();})));
     b.appendChild(srow("What\u2019s new",null,btn("Show patch notes","btn",function(){whatsNew(true);})));
     b.appendChild(srow("Xaly Launcher","Version "+VER+" (Windows). "+(UPD.st==="avail"?"Version "+UPD.rel.v+" is available.":UPD.err?UPD.err:UPD.t?"Checked "+ago(UPD.t)+".":"Updates come from github.com/"+UPD_REPO+"."),ub));
     b.appendChild(srow("Your data",dd[1],btn("Open","btn",function(){T(function(){return X.Open(dd[1]);});})));
@@ -3574,13 +3686,15 @@ function init(){
   else{$("splash").style.display="none";}
   setInterval(function(){tickGame();paintDlTick();},1000);
   setInterval(syncNow,25000);
-  setTimeout(function(){checkUpdate("start");},700);setInterval(function(){checkUpdate(false);},6*3600000);
-  setInterval(dqTick,1000);setTimeout(whatsNew,1600);
+  setTimeout(function(){checkUpdate("start");},700);
+  setTimeout(function(){if(AC&&AC.crashRep!==0&&!SELFTEST)T(function(){return X.SendCrashes(VER);});},15000);setInterval(function(){checkUpdate(false);},6*3600000);
+  setInterval(dqTick,1000);
+  setInterval(function(){if(!S)return;var k;for(k in run)checkAch(gameBy(k));},60000);setTimeout(whatsNew,1600);
   setInterval(function(){refreshLive(false);},30*60000);
   setInterval(function(){if(S&&(!S.guT||now()-S.guT>6*3600000))checkGameUpdates(false);},15*60000);
   setInterval(padTick,33);if(ENGINE==="ie")T(function(){return X.PadNative("1");});
   setInterval(function(){if(chatOpen()&&now()-frPollT>6000)frPoll();},2000);
-  if(T(function(){return X.SelfTest();},"0")==="1")setTimeout(selfTest,1500);
+  if(T(function(){return X.SelfTest();},"0")==="1"){SELFTEST=true;setTimeout(selfTest,1500);}
 }
 function selfTest(){   // run by the build server: proves both directions of the page <-> app bridge work
   var r={engine:ENGINE,ua:navigator.userAgent,ok:false,checks:{}};
@@ -3591,6 +3705,8 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("fullscreen",function(){return X.SetFullscreen("1")+" "+X.SetFullscreen("0");});
   c("pad",function(){return X.PadNative("1")+" "+X.PadNative("0");});
   c("tv",function(){enterTV();var n=document.getElementById("tvrows").childNodes.length;exitTV();return n+" rows";});
+  c("crashlog",function(){return X.CrashLog("page","self-test entry (not a real crash)");});
+  c("ach",function(){var g={id:"t",name:"T",plays:12,seconds:3*3600+60,sess:[[new Date(2026,0,3,1,0).getTime(),11000],[new Date(2026,0,4,20,0).getTime(),600],[new Date(2026,0,5,20,0).getTime(),600]]};checkAch(g,true);var k,l=[];for(k in g.ach)l.push(k);return l.sort().join(",");});
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});
   var id="h_self",done=false;
   function fin(){if(done)return;done=true;r.ok=r.checks.seal==="h\u00e9llo\n\"x\""&&/^done/.test(r.checks.download||"");r.checks.dlsize=T(function(){return X.FileSizeOf("selftest-dl.bin");},"?");T(function(){return X.SelfTestDone(JSON.stringify(r));});}

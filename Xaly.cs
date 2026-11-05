@@ -612,6 +612,62 @@ namespace Xaly
         }
         // Answer arrives through onHttp(id, "1" or "0", body, status). A redirect is turned into {"url": "..."}.
         // Sends feedback text to the developer's inbox through the FormSubmit email relay (no password is stored in the app).
+        // ---- crash reports: saved to %AppData%\XalyLauncher\crashes, emailed in the background, deleted once sent
+        public string CrashLog(string kind, string text) { MainForm.LogCrash(kind, text); return "ok"; }
+        static int crashSending = 0;
+        public string SendCrashes(string ver)
+        {
+            if (Interlocked.Exchange(ref crashSending, 1) == 1) return "busy";
+            string dir = Path.Combine(f.DataDir, "crashes");
+            ThreadPool.QueueUserWorkItem(delegate(object st)
+            {
+                try
+                {
+                    if (!Directory.Exists(dir)) return;
+                    string[] files = Directory.GetFiles(dir, "crash-*.txt");
+                    Array.Sort(files);
+                    int sent = 0;
+                    foreach (string file in files)
+                    {
+                        if (sent >= 5) break;
+                        string text; try { text = File.ReadAllText(file); } catch (Exception) { continue; }
+                        if (PostForm("Xaly crash report (" + ver + ")", text, ver, "")) { try { File.Delete(file); } catch (Exception) { } sent++; }
+                        else break;   // offline or the inbox isn't activated yet: try again next start
+                    }
+                    // never let old reports pile up
+                    files = Directory.GetFiles(dir, "crash-*.txt"); Array.Sort(files);
+                    for (int i = 0; i < files.Length - 20; i++) { try { File.Delete(files[i]); } catch (Exception) { } }
+                }
+                catch (Exception) { }
+                finally { Interlocked.Exchange(ref crashSending, 0); }
+            });
+            return "ok";
+        }
+        static bool PostForm(string subject, string text, string ver, string email)
+        {
+            try
+            {
+                try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                string body = "{\"_subject\":" + JsonStr(subject) + ",\"_captcha\":\"false\",\"_template\":\"box\",\"name\":" + JsonStr("Xaly Launcher " + ver)
+                    + (string.IsNullOrEmpty(email) ? "" : ",\"email\":" + JsonStr(email))
+                    + ",\"message\":" + JsonStr(text) + ",\"windows\":" + JsonStr(Environment.OSVersion.VersionString) + "}";
+                byte[] data = Encoding.UTF8.GetBytes(body);
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create("https://formsubmit.co/ajax/xalify2004@gmail.com");
+                rq.Method = "POST"; rq.ContentType = "application/json"; rq.Accept = "application/json";
+                rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) XalyLauncher";
+                rq.Referer = "https://xaly-launcher.app/feedback"; rq.Headers["Origin"] = "https://xaly-launcher.app";
+                rq.Timeout = 25000; rq.ReadWriteTimeout = 25000; rq.ContentLength = data.Length;
+                using (Stream os = rq.GetRequestStream()) os.Write(data, 0, data.Length);
+                using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8))
+                {
+                    string resp = sr.ReadToEnd().Replace(" ", "");
+                    return resp.IndexOf("\"success\":\"true\"") >= 0 || resp.IndexOf("\"success\":true") >= 0;
+                }
+            }
+            catch (Exception) { return false; }
+        }
+
         public string Feedback(string id, string text, string ver, string email)
         {
             // everything happens on a background thread so the window never freezes
@@ -1373,6 +1429,12 @@ namespace Xaly
                 c.SetVirtualHostNameToFolderMapping("data.xaly", DataDir, CoreWebView2HostResourceAccessKind.Allow);
                 c.NewWindowRequested += delegate(object s, CoreWebView2NewWindowRequestedEventArgs e) { e.Handled = true; try { Process.Start(e.Uri); } catch (Exception) { } };
                 c.NavigationCompleted += delegate(object s, CoreWebView2NavigationCompletedEventArgs e) { FocusView(); };
+                c.ProcessFailed += delegate(object s, CoreWebView2ProcessFailedEventArgs e)
+                {
+                    LogCrash("webview2", "The WebView2 " + e.ProcessFailedKind + " stopped (" + e.Reason + ", exit code " + e.ExitCode + ").");
+                    if (e.ProcessFailedKind == CoreWebView2ProcessFailedKind.RenderProcessExited || e.ProcessFailedKind == CoreWebView2ProcessFailedKind.RenderProcessUnresponsive)
+                    { try { wv.Reload(); } catch (Exception) { } }
+                };
                 Modern = true;
                 if (File.Exists(idx)) c.Navigate("https://app.xaly/index.html");
                 else c.NavigateToString(Missing);
@@ -1387,6 +1449,21 @@ namespace Xaly
             }
         }
 #endif
+
+        public static void LogCrash(string kind, string text)
+        {
+            try
+            {
+                string dir = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "XalyLauncher"), "crashes");
+                Directory.CreateDirectory(dir);
+                string user = Environment.UserName;
+                string body = (text ?? "");
+                if (!string.IsNullOrEmpty(user) && user.Length > 1) body = body.Replace(user, "<user>");
+                if (kind != "page") body = "Xaly app error (" + kind + ")\r\nWindows: " + Environment.OSVersion.VersionString + (Environment.Is64BitOperatingSystem ? " 64-bit" : " 32-bit") + "\r\nWhen: " + DateTime.UtcNow.ToString("u") + "\r\n\r\n" + body;
+                File.WriteAllText(Path.Combine(dir, "crash-" + DateTime.UtcNow.Ticks + ".txt"), body.Length > 8000 ? body.Substring(0, 8000) : body, Encoding.UTF8);
+            }
+            catch (Exception) { }
+        }
 
         public void FocusView()
         {
@@ -1528,6 +1605,9 @@ namespace Xaly
             }
             catch (Exception) { }
 
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += delegate(object s, ThreadExceptionEventArgs e) { MainForm.LogCrash("ui", e.Exception.ToString()); };
+            AppDomain.CurrentDomain.UnhandledException += delegate(object s, UnhandledExceptionEventArgs e) { MainForm.LogCrash("fatal", e.ExceptionObject == null ? "unknown" : e.ExceptionObject.ToString()); };
             Application.EnableVisualStyles();
             MainForm form = new MainForm(Array.IndexOf(args, "--tray") >= 0);
             Thread t = new Thread(delegate()

@@ -1,4 +1,4 @@
-- **Download queue:** install as many games as you like and they download one after another. Pause, resume, reorder or cancel them on the Downloads page.
-- **Downloads survive dropped connections:** if your internet drops, the download tries again by itself and continues where it stopped instead of starting over. Paused and unfinished downloads also continue after you restart Xaly.
-- **Automatic updates:** when a new version of Xaly is out, it installs itself as soon as you start the launcher, on a progress screen showing your download speed and time left. You can turn this off in Settings › About.
-- **What's new popup:** after each update, a small popup shows what changed. Tick "Don't show again" to turn it off.
+- **Achievements:** every game now has 12 milestones: First Launch, Getting Into It (1 hour), Regular (10 launches), Night Shift (play between midnight and 5 AM), On a Roll (3 days in a row), Weekend Warrior, Dedicated (10 hours), Marathon (3 hours in one go), Week Streak (7 days in a row), Devoted (25 hours), Can't Stop (50 launches) and Legend (100 hours). Unlocking one pops up a trophy, and you get a Windows notification if you're in a game.
+- Each game's page shows its achievements with progress bars. Your profile shows your latest ones, and friends can see them too. Achievements also give XP.
+- Games you already played get the achievements they've earned straight away.
+- **Crash reports:** if something goes wrong in Xaly, the details are sent to the developer automatically so it can be fixed. Only the error, the Xaly and Windows versions and the screen you were on are sent: no names, emails or files. Turn it off in Settings › About.

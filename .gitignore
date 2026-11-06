@@ -11,3 +11,8 @@ x86/
 arm64/
 Microsoft.Web.WebView2.*.dll
 selftest.txt
+tests/.work/
+tests/fixtures/
+tests/node_modules/
+tests/package.json
+tests/package-lock.json

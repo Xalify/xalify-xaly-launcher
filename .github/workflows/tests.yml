@@ -1,0 +1,28 @@
+name: Tests
+
+# Runs every automatic test on each push: the launcher's logic (store, downloads, friends, challenges,
+# backups, blocking, ...) and the real page in a Chromium browser. Releases also refuse to publish
+# when the logic tests fail (see release.yml).
+on:
+  push:
+    branches-ignore: [ci-logs, catalog]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Get the shared store list
+        run: git fetch -q --depth 1 origin catalog || echo "no catalog branch yet"
+      - name: Install a test browser
+        run: |
+          cd tests && npm init -y >/dev/null && npm i --no-save playwright@1.49.1 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Run tests
+        run: NODE_PATH=tests/node_modules node tests/run.js --ui

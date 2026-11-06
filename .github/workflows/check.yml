@@ -25,6 +25,10 @@ jobs:
           $refs = "/r:System.Windows.Forms.dll","/r:System.Drawing.dll","/r:System.Core.dll","/r:System.IO.Compression.dll","/r:System.IO.Compression.FileSystem.dll"
           try { ./tools/get-webview2.ps1 *>&1 | ForEach-Object { L $_ } } catch { L "get-webview2 failed: $_" }
           if (Test-Path webview2/version.txt) { L ("WebView2 SDK " + (Get-Content webview2/version.txt)) }
+          L "== tests =="
+          git fetch -q --depth 1 origin catalog 2>$null
+          node tests/run.js 2>&1 | ForEach-Object { L $_ }
+          L "tests exit $LASTEXITCODE"
           L "== compile: legacy =="
           & $csc /nologo /target:winexe /out:legacy.exe /win32icon:xaly.ico @refs Xaly.cs *>&1 | ForEach-Object { L $_ }
           L "exit $LASTEXITCODE"

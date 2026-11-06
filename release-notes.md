@@ -1,1 +1,2 @@
-- Update README.md
+- **Fixed:** opening a game in the Store while offline could freeze the page. Found by the new automatic tests on their first run.
+- **Behind the scenes:** about 250 automatic checks now live in the project and run on GitHub for every change, including two simulated friends chatting, challenging and blocking each other, and the real launcher page opened in a browser. A new version is only released when every check passes.

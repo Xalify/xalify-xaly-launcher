@@ -20,6 +20,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Nothing is released unless every automatic test passes.
+      - name: Run tests
+        shell: pwsh
+        run: |
+          git fetch -q --depth 1 origin catalog 2>$null
+          node tests/run.js
+          if ($LASTEXITCODE -ne 0) { throw "Tests failed, so this version was not released." }
+
       # Works out which version to publish. If main changed but the version in index.html was
       # already released, the next patch version is created automatically (1.5.0 -> 1.5.1), with
       # patch notes taken from the commit messages since the last release.

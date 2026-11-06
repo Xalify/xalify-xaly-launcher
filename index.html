@@ -823,9 +823,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.1";
+var VER="1.7.2";
 var NOTES=[
- {v:"1.7.1",d:"6 Nov 2026",t:["Update README.md"]},
+ {v:"1.7.2",d:"6 Nov 2026",t:["Fixed: opening a game in the Store while offline could freeze the page","Behind the scenes: over 250 automatic checks now run on every change, and a version is only released when they all pass"]},
  {v:"1.7.0",d:"6 Nov 2026",t:["Block people: from their chat, by right-clicking them in your friends list, or from a friend request. They can\u2019t message you, see you online, challenge you or send requests, and they aren\u2019t told","Delete messages: right-click a message or use its \u22EF button. Delete any message for yourself, or your own messages for everyone","Blocked people are listed in Settings \u203A Friends, where you can unblock them"]},
  {v:"1.6.9",d:"5 Nov 2026",t:["Click the Xaly logo for a menu with every page, each part of Settings, Find games, updates, What\u2019s new, feedback, Hide to tray, Sign out and Quit"]},
  {v:"1.6.8",d:"5 Nov 2026",t:["Find games on PC now looks for itch.io games you downloaded yourself (Downloads, Desktop, Documents, Program Files, Games folders, the itch.io app) and adds them with the Store\u2019s name and cover art. Steam, Epic and GOG are no longer scanned","Games from the Store that you download outside Xaly, like Super Smash Bros. Crusade, are added to your library by themselves","A downloaded .zip of a Store game can be unpacked and installed straight from Find games on PC"]},
@@ -2128,9 +2128,9 @@ function renderDetail(){
   var ub=el("button","wb dng","Uninstall");ub.id="ubtn";ub.style.display="none";R.appendChild(ub);
   if(pageUrl(it))R.appendChild(btn("Open source page","wb",function(){T(function(){return X.Open(pageUrl(it));});}));
   var inf=el("div","sdi");
-  var fd0=dlDirFree(),szr=sdRow("Download size",it.dlSize?fmtB(it.dlSize):(isItch(it)||isGh(it))?"Checking\u2026":"\u2014");inf.appendChild(szr);
+  var fd0=dlDirFree(),szr=sdRow("Download size",it.dlSize?fmtB(it.dlSize):(isItch(it)||isGh(it))&&!(it.dlTry&&now()-it.dlTry<600000&&!fetchSize.b[it.id])?"Checking\u2026":"\u2014");inf.appendChild(szr);
   if(fd0.free>=0){var frw=sdRow("Free on "+fd0.drive,fmtB(fd0.free));if(it.dlSize&&fd0.free<needFor(it,it.dlSize))frw.className+=" low";inf.appendChild(frw);}
-  if(!it.dlSize&&(isItch(it)||isGh(it)))fetchSize(it,function(){if(P.page==="detail"&&P.sel===it)renderDetail();});
+  if(!it.dlSize&&(isItch(it)||isGh(it))&&!(it.dlTry&&now()-it.dlTry<600000))fetchSize(it,function(sz){if(sz&&P.page==="detail"&&P.sel===it)setTimeout(renderDetail,0);});
   inf.appendChild(sdRow("Developer",devName(it)));inf.appendChild(sdRow("Source",isGh(it)?"GitHub":isItch(it)?"itch.io":(it.source||host(it.url))));
   inf.appendChild(sdRow("Series",fr));if(it.rel)inf.appendChild(sdRow("Release date",it.rel));inf.appendChild(sdRow("Platform","Windows"));
   R.appendChild(inf);
@@ -3831,7 +3831,9 @@ function needFor(it,size){var k=it.kind&&it.kind!=="page"?it.kind:(it.dlKind||"a
 function fetchSize(it,cb){
   if(it.dlSize){if(cb)cb(it.dlSize);return;}
   if(!(isItch(it)||isGh(it))){if(cb)cb(0);return;}
-  if(fetchSize.b[it.id]){return;}fetchSize.b[it.id]=1;
+  if(fetchSize.b[it.id]){return;}
+  if(it.dlTry&&now()-it.dlTry<600000){if(cb)cb(0);return;}   // a failed lookup isn't retried for 10 minutes
+  fetchSize.b[it.id]=1;it.dlTry=now();
   resolveAny(it,function(err,r){delete fetchSize.b[it.id];if(!err&&r&&r.up&&r.up.sz){it.dlSize=r.up.sz;it.dlKind=r.kind;if(it.live)saveCat();else save();}if(cb)cb(it.dlSize||0);},true);
 }
 fetchSize.b={};

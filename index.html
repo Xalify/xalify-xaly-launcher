@@ -1958,7 +1958,7 @@ function shelf(title,list,onAll,grad,total){
 /* 1.7.8: size shelf cards so every row shows whole cards only, whatever room the page has (friends panel open or not) */
 var fitW=-1;
 function fitShelves(){
-  var pg=$("pStore");if(!pg)return;var vp=pg.querySelector(".shv");if(!vp)return;
+  var pg=$("pStore");if(!pg||!pg.querySelector||!pg.querySelectorAll)return;var vp=pg.querySelector(".shv");if(!vp)return;
   var W=vp.clientWidth;if(!W)return;
   if(W!==fitW){
     fitW=W;var n=Math.max(2,Math.round((W+16)/(232+16))),w=Math.floor((W+16)/n)-16,h=Math.round(w*184/232);
@@ -2081,7 +2081,7 @@ function renderStore(keep){
       else if(f.lf&&LFU[f.lf]){var lb=btn(liveMore[f.lf]?"Loading\u2026":"Load more from itch.io","btn",function(){lb.textContent="Loading\u2026";loadMoreLive(f.lf,function(c,n){P.lim=lim+60;renderStore(true);if(c<=0)toast("That\u2019s everything itch.io has in this list right now");});});mr.appendChild(lb);}
       body.appendChild(mr);}
   }
-  pg.appendChild(body);fitW=-1;fitShelves();pg.scrollTop=top;
+  pg.appendChild(body);fitW=-1;try{fitShelves();}catch(e){}pg.scrollTop=top;
 }
 function openDetail(it){it=directFor(it)||it;P.sel=it;P.si=0;P.dtab="ov";nav("detail");refreshItch(it);}
 function host(u){return (u||"").replace(/^[a-z]+:\/\//i,"").split("/")[0];}

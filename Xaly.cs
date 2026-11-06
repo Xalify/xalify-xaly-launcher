@@ -1269,6 +1269,18 @@ namespace Xaly
 
         // ---- notifications (shown by Windows when the launcher isn't the active window)
         public string Notify(string title, string msg, string tag) { return f.ShowNote(title, msg, tag); }
+        // a small card in the bottom-right corner that stays above games and doesn't take focus from them
+        public string Popup(string title, string msg, string tag, string accent)
+        {
+            try
+            {
+                Color c = Color.FromArgb(46, 230, 240);
+                if (!string.IsNullOrEmpty(accent) && System.Text.RegularExpressions.Regex.IsMatch(accent, "^#[0-9a-fA-F]{6}$")) c = ColorTranslator.FromHtml(accent);
+                new PopupCard(f, title ?? "", msg ?? "", tag ?? "", c).ShowCard();
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
 
         // ---- sounds: short .wav files in the sounds folder next to the app, played by Windows (heard even while a game is focused)
         static System.Media.SoundPlayer player;
@@ -1503,6 +1515,52 @@ namespace Xaly
         }
     }
 
+    public class PopupCard : Form
+    {
+        static readonly List<PopupCard> open = new List<PopupCard>();
+        readonly MainForm mf; readonly string tag; readonly System.Windows.Forms.Timer anim = new System.Windows.Forms.Timer();
+        int age = 0; bool closing = false;
+        protected override bool ShowWithoutActivation { get { return true; } }
+        protected override CreateParams CreateParams
+        {
+            get { CreateParams cp = base.CreateParams; cp.ExStyle |= 0x08000000 | 0x00000080 | 0x00000008; return cp; }   // no activate, tool window, topmost
+        }
+        public PopupCard(MainForm m, string title, string msg, string tg, Color accent)
+        {
+            mf = m; tag = tg;
+            FormBorderStyle = FormBorderStyle.None; StartPosition = FormStartPosition.Manual; ShowInTaskbar = false; TopMost = true;
+            BackColor = Color.FromArgb(22, 26, 36); Size = new Size(360, 86); Opacity = 0; Cursor = Cursors.Hand;
+            Panel bar = new Panel(); bar.BackColor = accent; bar.SetBounds(0, 0, 5, 86); Controls.Add(bar);
+            Label brand = new Label(); brand.Text = "XALY"; brand.ForeColor = accent; brand.Font = new Font("Segoe UI", 7.5f, FontStyle.Bold); brand.AutoSize = true; brand.Location = new Point(20, 10); Controls.Add(brand);
+            Label t = new Label(); t.Text = title.Length > 70 ? title.Substring(0, 70) : title; t.ForeColor = Color.White; t.Font = new Font("Segoe UI", 10.5f, FontStyle.Bold); t.AutoEllipsis = true; t.SetBounds(20, 26, 326, 22); Controls.Add(t);
+            Label b = new Label(); b.Text = msg.Length > 140 ? msg.Substring(0, 140) : msg; b.ForeColor = Color.FromArgb(170, 178, 200); b.Font = new Font("Segoe UI", 9f); b.AutoEllipsis = true; b.SetBounds(20, 49, 326, 32); Controls.Add(b);
+            EventHandler click = delegate(object s, EventArgs e) { mf.ShowMain(); mf.Js("onNotifyClick", tag); StartClose(); };
+            Click += click; foreach (Control k in Controls) k.Click += click;
+            using (System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath())
+            {
+                int r = 14; gp.AddArc(0, 0, r, r, 180, 90); gp.AddArc(Width - r, 0, r, r, 270, 90); gp.AddArc(Width - r, Height - r, r, r, 0, 90); gp.AddArc(0, Height - r, r, r, 90, 90); gp.CloseFigure();
+                Region = new Region(gp);
+            }
+            anim.Interval = 30;
+            anim.Tick += delegate(object s, EventArgs e)
+            {
+                age += anim.Interval;
+                if (!closing) { if (Opacity < 0.97) Opacity = Math.Min(0.97, Opacity + 0.12); if (age > 6000) StartClose(); }
+                else { Opacity -= 0.1; if (Opacity <= 0.05) { anim.Stop(); open.Remove(this); Close(); Restack(); } }
+            };
+        }
+        void StartClose() { closing = true; }
+        static void Restack()
+        {
+            Rectangle wa = Screen.PrimaryScreen.WorkingArea; int y = wa.Bottom - 16;
+            for (int i = open.Count - 1; i >= 0; i--) { PopupCard p = open[i]; y -= p.Height; p.Location = new Point(wa.Right - p.Width - 16, y); y -= 10; }
+        }
+        public void ShowCard()
+        {
+            while (open.Count >= 3) { PopupCard o = open[0]; open.RemoveAt(0); try { o.anim.Stop(); o.Close(); } catch (Exception) { } }
+            open.Add(this); Restack(); Show(); anim.Start();
+        }
+    }
     public class MainForm : Form
     {
         public WebBrowser browser;           // legacy engine (Internet Explorer 11)

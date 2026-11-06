@@ -20,11 +20,11 @@ function getCatalog(cb) {
 }
 
 fs.rmSync(work, { recursive: true, force: true }); fs.mkdirSync(work, { recursive: true });
-const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const html = fs.readFileSync(path.join(root, "index.html"), "utf8").replace(/\r\n/g, "\n");   // Windows checkouts use CRLF
 fs.writeFileSync(path.join(work, "index.html"), html);
 const i = html.indexOf("<script>\n") + 9, j = html.lastIndexOf("</script>");
 fs.writeFileSync(path.join(work, "app.js"), html.slice(i, j));
-for (const f of fs.readdirSync(__dirname)) if (/\.js$/.test(f) && f !== "run.js") fs.copyFileSync(path.join(__dirname, f), path.join(work, f));
+for (const f of fs.readdirSync(__dirname)) if (/\.js$/.test(f) && f !== "run.js") fs.writeFileSync(path.join(work, f), fs.readFileSync(path.join(__dirname, f), "utf8").replace(/\r\n/g, "\n"));
 
 getCatalog(ok => {
   if (!ok) console.log("note: couldn't get the shared store list; tests that use it may fail");

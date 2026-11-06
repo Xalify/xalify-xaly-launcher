@@ -455,9 +455,24 @@ namespace Xaly
                     url = act + q.ToString();
                     continue;
                 }
-                if (page.IndexOf("quota", StringComparison.OrdinalIgnoreCase) >= 0 || page.IndexOf("Too many users", StringComparison.OrdinalIgnoreCase) >= 0)
+                // newer pages: a plain link to the confirmed download instead of a form
+                System.Text.RegularExpressions.Match lm = System.Text.RegularExpressions.Regex.Match(page, "(https://drive\\.usercontent\\.google\\.com/download\\?[^\"'<>\\s]*confirm[^\"'<>\\s]*|/uc\\?export=download[^\"'<>\\s]*confirm=[^\"'<>\\s]*)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (lm.Success && attempt < 2)
+                {
+                    string nx = WebUtility.HtmlDecode(lm.Groups[1].Value).Replace("\\u003d", "=").Replace("\\u0026", "&");
+                    if (nx.StartsWith("/")) nx = "https://drive.google.com" + nx;
+                    if (!string.Equals(nx, url, StringComparison.OrdinalIgnoreCase)) { url = nx; continue; }
+                }
+                System.Text.RegularExpressions.Match tm = System.Text.RegularExpressions.Regex.Match(page, "<title>([^<]*)</title>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                string title = tm.Success ? WebUtility.HtmlDecode(tm.Groups[1].Value).Trim() : "";
+                string text = System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(page, "<(script|style)[\\s\\S]*?</\\1>", " ", System.Text.RegularExpressions.RegexOptions.IgnoreCase), "<[^>]+>", " "), "\\s+", " ").Trim();
+                text = WebUtility.HtmlDecode(text);
+                if (text.Length > 160) text = text.Substring(0, 160);
+                if (title.IndexOf("Quota exceeded", StringComparison.OrdinalIgnoreCase) >= 0 || text.IndexOf("Too many users have viewed or downloaded", StringComparison.OrdinalIgnoreCase) >= 0)
                     throw new IOException("Google Drive says too many people downloaded this file recently. Try again later.");
-                throw new IOException("Google Drive didn't send the file. It may be private or removed.");
+                if (text.IndexOf("unusual traffic", StringComparison.OrdinalIgnoreCase) >= 0)
+                    throw new IOException("Google Drive is blocking automatic downloads from this connection for now. Try again later.");
+                throw new IOException("Google Drive didn't send the file. Google said: " + (title.Length > 0 ? title + ". " : "") + text);
             }
         }
         public string DownloadPause(string id)

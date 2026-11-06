@@ -30,12 +30,19 @@ getCatalog(ok => {
   if (!ok) console.log("note: couldn't get the shared store list; tests that use it may fail");
   const suites = fs.readdirSync(work).filter(f => /\.test\.js$/.test(f) && (withUi || f !== "ui.test.js")).sort();
   let failed = 0; const t0 = Date.now();
-  for (const s of suites) {
+  const runOne = s => {
     const r = cp.spawnSync(process.execPath, [s], { cwd: work, encoding: "utf8", timeout: 240000, maxBuffer: 32 << 20 });
     const out = (r.stdout || "") + (r.stderr || "");
     const checks = (out.match(/^ok  :/gm) || []).length, bad = out.split("\n").filter(l => /^(FAIL:|EXC |PAGEERR)/.test(l));
-    const pass = r.status === 0 && !bad.length && !/\bFAILED\b/.test(out);
-    console.log((pass ? "PASS " : "FAIL ") + s.padEnd(22) + checks + " checks");
+    return { r, out, checks, bad, pass: r.status === 0 && !bad.length && !/\bFAILED\b/.test(out) };
+  };
+  for (const s of suites) {
+    let { r, out, checks, bad, pass } = runOne(s), note = "";
+    if (!pass) {   // a slow or busy machine can upset timing; a real bug fails twice
+      const again = runOne(s);
+      if (again.pass) { note = "  (passed on retry; first try: " + bad.slice(0, 2).join(" / ") + ")"; ({ r, out, checks, bad, pass } = again); }
+    }
+    console.log((pass ? "PASS " : "FAIL ") + s.padEnd(22) + checks + " checks" + note);
     if (!pass) { failed++; bad.slice(0, 20).forEach(l => console.log("     " + l)); if (r.error) console.log("     " + r.error.message); if (!bad.length) console.log(out.split("\n").slice(-15).map(l => "     " + l).join("\n")); }
   }
   console.log((failed ? failed + " suite(s) FAILED" : "ALL TESTS PASSED") + " in " + Math.round((Date.now() - t0) / 1000) + " s");

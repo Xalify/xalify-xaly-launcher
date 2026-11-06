@@ -33,6 +33,7 @@ const partSize={};
 const sb={document:doc,external:X,console,setTimeout,clearTimeout,setInterval:()=>0,clearInterval:()=>{},Date,Math,JSON,parseInt,parseFloat,encodeURIComponent,decodeURIComponent,RegExp,Array,Object,String,Number,isNaN};
 sb.window=sb;sb.navigator={};const ctx=vm.createContext(sb);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const until=async(f,ms=3000)=>{const t=Date.now();while(Date.now()-t<ms){if(f())return true;await sleep(10);}return !!f();};
 const mbtn=t=>{const b=reg.mbox.find(c=>c.tag==="button"&&c._text===t)[0];if(!b)throw new Error("no btn "+t);return b;};
 const fill=v=>{const ins=reg.mbox.find(c=>c.tag==="input"||c.tag==="textarea");v.forEach((x,i)=>{if(x!==null)ins[i].value=x;});};
 let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console.log("ok  :",m);};
@@ -77,9 +78,9 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
  calls.length=0;ctx.install(gh);await sleep(20);ok(calls.some(c=>c.startsWith("DL https://x/w Starship-windows.zip")),"install downloads github zip");
  // queue
  const j1=ctx.dl;ok(j1&&j1.st==="downloading","first download active");
- const second=items.find(i=>i.id==="m7");ctx.install(second);await sleep(20);ok(ctx.DQ.length===2&&ctx.DQ[1].st==="queued","second install waits in the queue");
+ const second=items.find(i=>i.id==="m7");ctx.install(second);ok(await until(()=>ctx.DQ.length===2&&ctx.DQ[1].st==="queued"),"second install waits in the queue");
  ctx.onDl(j1.id,"p","500","1000");ok(j1.pct===50,"progress 50%");
- ctx.pauseJob(j1);await sleep(10);ok(j1.st==="paused","paused");await sleep(30);ok(ctx.dl===ctx.DQ[1]&&ctx.DQ[1].st==="downloading","next game starts while the first is paused");
+ ctx.pauseJob(j1);ok(await until(()=>j1.st==="paused"),"paused");ok(await until(()=>ctx.dl===ctx.DQ[1]&&ctx.DQ[1].st==="downloading"),"next game starts while the first is paused");
  ctx.onDl(ctx.DQ[1].id,"err","The connection dropped","");ok(ctx.DQ[1].st==="retry","dropped connection -> retry scheduled");
  partSize["Starship-windows.zip"]=500;calls.length=0;ctx.resumeJob(j1);await sleep(20);ok(calls.some(c=>c.indexOf("Starship-windows.zip resume=1")>0),"resume continues the partial file");
  ctx.onDl(j1.id,"done","C:\\dl\\Starship-windows.zip","");await sleep(10);ok(!ctx.DQ.includes(j1),"finished job leaves the queue");

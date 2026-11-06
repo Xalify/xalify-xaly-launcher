@@ -71,9 +71,16 @@ ok(await p.evaluate(()=>S.fr.out.length===1&&S.fr.out[0].code===FSB.profiles["u1
   await p.evaluate(()=>sbDelete());await w(100);await fill(['brandnew1']);await click('Delete online account');await w(500);
   ok(await p.evaluate(u=>!FSB.users[u]&&!curAcc.sb&&!!S,uidOld),'deleting the online account keeps the account on this PC');
   // 9. email setup not finished: sign-up falls back to PC-only with a clear message
-  await p.evaluate(()=>{signOut();FSB.confirm=true;var o=window.external.Supa;window.external.Supa=function(id,m,path,b,t){if(path==="/auth/v1/signup"){setTimeout(function(){onHttp(id,"0",JSON.stringify({error_code:"email_address_not_authorized",msg:"Email address not authorized"}),"400");},20);return "ok";}return o(id,m,path,b,t);};createAcc();});await w(150);
+  await p.evaluate(()=>{signOut();FSB.confirm=true;var o=window.external.Supa;window.__realSupa=o;window.external.Supa=function(id,m,path,b,t){if(path==="/auth/v1/signup"){setTimeout(function(){onHttp(id,"0",JSON.stringify({error_code:"email_address_not_authorized",msg:"Email address not authorized"}),"400");},20);return "ok";}return o(id,m,path,b,t);};createAcc();});await w(150);
   await fill(['Friend','Friend_9','friend@gmail.com','secret9','secret9','on']);await click('Create account');await w(1300);
   ok(await p.evaluate(()=>!!S&&curAcc.email==="friend@gmail.com"&&!curAcc.sb),'if email isn\'t set up yet, the account is made on this PC: '+await p.evaluate(()=>$("toast").textContent));
+  // 9b. slow email: the sign-up times out on Supabase's side but the account and email exist
+  await p.evaluate(()=>{signOut();window.external.Supa=window.__realSupa||window.external.Supa;FSB.slowMail=1;createAcc();});await w(150);
+  await fill(['Slow','Slow_Mail','slow@gmail.com','secret5','secret5','on']);await click('Create account');await w(1300);
+  ok(/Confirm your email/.test(await p.evaluate(()=>$("mbox").innerText)),'a slow confirmation email goes straight to the code screen');
+  await fill(['123456']);await click('Confirm');await w(400);
+  ok(await p.evaluate(()=>curAcc.sb&&curAcc.sb.uid&&!curAcc.sb.pending),'and the code still confirms it');
+  await p.evaluate(()=>{FSB.slowMail=0;});
   // 10. the switch
   await p.evaluate(()=>{signOut();ONLINE_ACCOUNTS=0;renderLogin();});
   ok(await p.evaluate(()=>!/I already have an account/.test($("lbox").innerText)&&typeof sbOn==="function"&&!sbOn()),'with the switch off, the online parts are gone');

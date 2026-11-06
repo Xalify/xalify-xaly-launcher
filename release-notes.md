@@ -1,6 +1,1 @@
-- **Online accounts:** create an account with an email, username and password, and sign in on any PC with **Sign in with email**. A 6-digit code confirms your email, and **Forgot password?** resets it with a code too.
-- **Your existing account keeps working exactly as before.** Accounts made on this PC, including ones with no email or password, sign in like they always have. To put one online, go to **Settings › Account › Put account online**. Nothing is lost, and if you already made the same account online on another PC, it links to it.
-- **Add friends by username:** type a username instead of a 9-digit code when adding a friend. Friend codes still work.
-- **Your library stays on your PC.** There's no cloud saving: library, play time and achievements stay on each PC. Use **Account backup** to move them.
-- **Works offline:** your PC remembers your password, so you can still sign in without internet.
-- **You're in control:** change your username or password, disconnect this PC, or delete your online account any time in **Settings › Account**. Deleting it keeps everything on your PC.
+- **Fixed:** creating an online account sometimes showed an error when the confirmation email was slow to send, even though the account was made. It now goes straight to the code screen, and explains that only the newest email works if you click a link.

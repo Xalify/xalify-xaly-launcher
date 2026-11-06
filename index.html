@@ -905,8 +905,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.0";
+var VER="1.8.1";
 var NOTES=[
+ {v:"1.8.1",d:"6 Nov 2026",t:["Fixed: if the confirmation email was slow to send, creating an online account showed an error even though it worked. It now goes straight to the code screen"]},
  {v:"1.8.0",d:"6 Nov 2026",t:["Online accounts: sign up with an email, username and password, and sign in on any PC. Forgot your password? Reset it with a code we email you","Your existing account keeps working exactly as before. Put it online whenever you like in Settings \u203A Account, without losing anything","Add friends by username instead of a 9-digit code","Your library, play time and achievements still stay on each PC. Back them up in Settings \u203A Account to move them","You can still sign in when you\u2019re offline, and you can disconnect or delete your online account at any time"]},
  {v:"1.7.10",d:"6 Nov 2026",t:["Switching between Store and Library is instant now. The Store keeps its page instead of rebuilding it each time, and remembers where you scrolled","The Store builds game rows as you scroll to them, so it opens faster and uses less memory","Xaly gives memory back while it\u2019s minimized or in the tray, like when you\u2019re in a game"]},
  {v:"1.7.9",d:"6 Nov 2026",t:["Fix \u201Cwon\u2019t start\u201D: Xaly checks each game for missing Microsoft runtimes (Visual C++ and DirectX) before it starts, and offers to install them with one click. If a game closes right away, it checks again. You can also run it from a game\u2019s More menu","Clean up leftovers: Settings \u203A Storage finds unfinished downloads, old archives and installers, empty or orphaned game folders and old update files, and frees the space in one click","Friends leaderboard: a new Ranks tab shows who played the most this week, who unlocked the most achievements, and all-time hours. It resets every Monday, and Xaly tells you who won last week"]},
@@ -1410,7 +1411,7 @@ function sbForm(title,intro,fields,okLabel,onOk,links){
 /* 6-digit code from the email: confirms a new account (signup) or a password reset (recovery). onSession(j) gets a signed-in session */
 function sbCodeForm(email,type,onSession,extra){
   sbForm(type==="recovery"?"Reset your password":"Confirm your email",
-    "We sent a 6-digit code to "+email+". Enter it here."+(type==="signup"?" If the email has a link instead, click it, then come back and sign in.":""),
+    "We sent a 6-digit code to "+email+". Enter it here. It can take a minute to arrive, so check spam too."+(type==="signup"?" If the email has a link instead, click it, then come back and sign in. Only the newest email works.":""),
     [{id:"code",label:"Code",ph:"123456"}].concat(extra||[]),type==="recovery"?"Continue":"Confirm",function(v,done){
       var c=(v.code||"").replace(/\D/g,"");if(c.length<6){done("Enter the 6-digit code from the email");return;}
       if(v.n1!==undefined&&(v.n1||"").length<6){done("Pick a new password with at least 6 characters");return;}
@@ -1432,6 +1433,8 @@ function sbSignUp(a,email,pw,user,then){
       if(u.identities&&!u.identities.length){then("exists");return;}   // Supabase hides whether an email is taken; an empty identity list means it is
       a.sb={uid:u.id,email:email,user:user,pending:1,ok:0};saveAcc();then("pending");return;}
     if(sbCode(j)==="user_already_exists"||sbCode(j)==="email_exists"){then("exists");return;}
+    // the email service was slow: the account is usually made and the email still arrives, so carry on to the code screen
+    if(st===504||sbCode(j)==="request_timeout"||(!st&&/time.?out/i.test(String(j||"")))){a.sb={email:email,user:user,pending:1,ok:0};saveAcc();then("pending");return;}
     then("local",sbErr(st,j));
   });
 }

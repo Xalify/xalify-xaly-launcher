@@ -11,6 +11,7 @@
     setTimeout(function(){
       function out(st,o){onHttp(id,st>=200&&st<300?"1":"0",JSON.stringify(o),String(st));}
       if(!DB.online){onHttp(id,"0","Unable to connect","0");return;}
+      if(path==="/auth/v1/signup"&&DB.slowMail&&!byEmail(j.email)){var us={id:uid(),email:j.email,pw:j.password,meta:j.data,conf:false};DB.users[us.id]=us;DB.profiles[us.id]={username:j.data.username,friend_code:null};DB.codes[j.email]="123456";out(504,{code:504,error_code:"request_timeout",msg:"Processing this request timed out, please retry after a moment."});return;}
       if(path==="/auth/v1/signup"){var ex=byEmail(j.email);if(ex){out(200,{id:"fake",email:j.email,identities:[]});return;}
         if(!/^[A-Za-z0-9_]{3,20}$/.test(j.data.username))j.data.username="player_x";
         for(var q in DB.profiles)if(DB.profiles[q].username.toLowerCase()===j.data.username.toLowerCase()){out(500,{msg:"Database error saving new user"});return;}

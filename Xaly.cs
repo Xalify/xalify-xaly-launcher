@@ -290,6 +290,42 @@ namespace Xaly
             }
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
+        // ---- downloads handed to the browser (for Google Drive limits and MediaFire blocks): spot the finished file
+        [DllImport("shell32.dll")]
+        static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint flags, IntPtr token, out IntPtr path);
+        static string UserDownloads()
+        {
+            try
+            {
+                IntPtr p;
+                if (SHGetKnownFolderPath(new Guid("374DE290-123F-4565-9164-39C4925E467B"), 0, IntPtr.Zero, out p) == 0)
+                { string r = Marshal.PtrToStringUni(p); Marshal.FreeCoTaskMem(p); if (!string.IsNullOrEmpty(r)) return r; }
+            }
+            catch (Exception) { }
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+        }
+        // returns "busy|folder|newest finished file since then|its size"
+        public string FindDownload(string sinceMs)
+        {
+            try
+            {
+                DateTime t0 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(double.Parse(sinceMs, System.Globalization.CultureInfo.InvariantCulture));
+                string dir = UserDownloads(), best = ""; DateTime bt = DateTime.MinValue; long bsz = 0; bool busy = false;
+                if (Directory.Exists(dir))
+                    foreach (string p in Directory.GetFiles(dir))
+                    {
+                        FileInfo fi = new FileInfo(p);
+                        DateTime w = fi.LastWriteTimeUtc > fi.CreationTimeUtc ? fi.LastWriteTimeUtc : fi.CreationTimeUtc;
+                        if (w < t0) continue;
+                        string e = fi.Extension.ToLowerInvariant();
+                        if (e == ".crdownload" || e == ".part" || e == ".partial" || e == ".tmp" || e == ".download" || e == ".opdownload") { busy = true; continue; }
+                        if (e != ".zip" && e != ".7z" && e != ".rar" && e != ".exe") continue;
+                        if (w > bt) { bt = w; best = p; bsz = fi.Length; }
+                    }
+                return (busy ? "1" : "0") + "|" + dir + "|" + best + "|" + bsz;
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
         public string PickFolder()
         {
             using (FolderBrowserDialog d = new FolderBrowserDialog())

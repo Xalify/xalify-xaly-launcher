@@ -1,2 +1,3 @@
-- **Fixed: downloads said "Connection lost" for every kind of problem.** They now show what actually went wrong, for example Google Drive's daily download limit.
-- Problems that won't fix themselves in a few seconds (a removed file, a download limit, a private link) no longer retry six times. The download stops right away and shows the reason with a Retry button.
+- **Download in browser:** when Google Drive or MediaFire won't hand a game to Xaly (for example Drive's "too many downloads" limit, which only applies when you're not signed in to Google), the download shows a **Download in browser** button. Your browser, where you're signed in, gets the file, and Xaly installs it as soon as it finishes in your Downloads folder. No need to touch the file yourself.
+- **Pick file…** lets you install a game file you already downloaded.
+- Xaly now checks Google's own message before saying a Drive file hit its download limit, and shows that message when Drive refuses for another reason.

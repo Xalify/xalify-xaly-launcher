@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.10";
+var VER="1.5.11";
 var NOTES=[
+ {v:"1.5.11",d:"5 Nov 2026",t:["When Google Drive or MediaFire won\u2019t give a game to Xaly (for example Drive\u2019s download limit), press Download in browser: your browser gets the file and Xaly installs it as soon as it lands in your Downloads folder","You can also pick a game file you already downloaded","Fixed: Drive\u2019s download limit was sometimes reported when Google said something else. Xaly now shows Google\u2019s own message"]},
  {v:"1.5.10",d:"5 Nov 2026",t:["Fixed: downloads showed \u201cConnection lost\u201d for every kind of problem. They now say what actually went wrong, like Google Drive\u2019s daily download limit","Problems that won\u2019t fix themselves (a removed file, a download limit, a private link) no longer retry over and over: the download stops with a Retry button"]},
  {v:"1.5.9",d:"5 Nov 2026",t:["itch.io games whose download is a Google Drive or MediaFire link now install straight from Xaly, and show up in the Store like any other game","Xaly also finds Google Drive and MediaFire links in a game\u2019s description when there\u2019s no download button","MediaFire downloads are now supported, also in Add game and the paste-a-link box"]},
  {v:"1.5.8",d:"5 Nov 2026",t:["Fixed: Super Smash Bros. Crusade couldn\u2019t be installed when you found it through search. Every copy now uses the working Google Drive download"]},
@@ -2017,7 +2018,7 @@ function setDetailBtn(){
   if(jb){
     if(jb.st==="paused"||jb.st==="error"){b.textContent=(jb.st==="error"?"Download failed \u00B7 Retry":"Paused \u00B7 Resume")+(jb.pct>=0?" ("+jb.pct+"%)":"");b.onclick=function(){resumeJob(jb);};}
     else if(jb===dl){b.textContent=(jb.st==="resolving"?"Preparing\u2026":"Downloading\u2026 "+(jb.pct>=0?jb.pct+"%":""));b.onclick=function(){nav("downloads");};}
-    else{b.textContent=jb.st==="retry"?"Reconnecting\u2026":"Queued #"+(qPos(jb)+1);b.onclick=function(){nav("downloads");};}
+    else{b.textContent=jb.st==="browser"?"Waiting for your browser\u2026":jb.st==="retry"?"Reconnecting\u2026":"Queued #"+(qPos(jb)+1);b.onclick=function(){nav("downloads");};}
   }
   else if(l){b.textContent="Open in library";b.onclick=function(){P.cur=l.id;nav("game");};}
   else if(isItch(it)||isGh(it)){b.textContent=isGh(it)?"Install from GitHub":"Install from itch.io";b.onclick=function(){install(it);};}
@@ -2056,13 +2057,13 @@ function jobOfGame(g){var i;for(i=0;i<DQ.length;i++)if(DQ[i].upd===g)return DQ[i
 function jobById(id){var i;for(i=0;i<DQ.length;i++)if(DQ[i].id===id)return DQ[i];return null;}
 function qPos(j){var n=0,i;for(i=0;i<DQ.length;i++){if(DQ[i]===j)return n;if(DQ[i].st==="queued"||DQ[i].st==="retry")n++;}return n;}
 function newJob(it,o){var j={id:"q"+now().toString(36)+Math.floor(Math.random()*1e5).toString(36),it:it,st:"queued",bytes:0,total:0,speed:0,pct:-1,eta:-1,tries:0,lt:now(),lb:0};var k;for(k in o)j[k]=o[k];return j;}
-function saveDQ(){if(!S)return;S.dq=DQ.filter(function(j){return j.st!=="done";}).map(function(j){return {id:j.id,itId:j.it.id,upd:j.upd?j.upd.id:"",url:j.direct?j.url:"",direct:j.direct?1:0,fn:j.fn||"",kind:j.kind||"",st:j.st,bytes:j.bytes||0,total:j.total||0,err:j.err||""};});save();}
+function saveDQ(){if(!S)return;S.dq=DQ.filter(function(j){return j.st!=="done";}).map(function(j){return {id:j.id,itId:j.it.id,upd:j.upd?j.upd.id:"",url:(j.direct||j.browser)?j.url:"",direct:j.direct?1:0,fn:j.fn||"",kind:j.kind||"",st:j.st,bytes:j.bytes||0,total:j.total||0,err:j.err||"",browser:j.browser||0,bsince:j.bsince||0};});save();}
 function loadDQ(){
   DQ=[];dl=null;
   (S.dq||[]).forEach(function(o){
     var it=storeById(o.itId),g=o.upd?gameBy(o.upd):null;if(!it||(o.upd&&!g))return;
     var j=newJob(it,{id:o.id,upd:g,url:o.url,direct:o.direct,fn:o.fn,kind:o.kind,bytes:o.bytes,total:o.total,err:o.err});
-    j.st=(o.st==="paused"||o.st==="error")?o.st:"queued";
+    j.st=(o.st==="paused"||o.st==="error"||o.st==="browser")?o.st:"queued";j.browser=o.browser||0;j.bsince=o.bsince||0;
     if(j.total>0)j.pct=Math.min(99,Math.floor(j.bytes*100/j.total));
     DQ.push(j);
   });
@@ -2109,19 +2110,45 @@ function goJob(j){
   if(r!=="ok"){dl=null;jobFail(j,r.replace("ERR:",""),false);return;}
   saveDQ();paintDl();
 }
+/* ---------- 1.5.11: let the browser download what Google Drive or MediaFire won't give the launcher ---------- */
+function needsBrowser(j,msg){var u=String(j.url||j.it.url||"");return (driveId(u)&&/too many people|blocking automatic|didn’t send the file|didn't send the file/i.test(msg||""))||(mfFile(u)||/mediafire/i.test(u))&&/MediaFire|HTTP 403|HTTP 429/i.test(msg||"");}
+function browserUrl(j){var u=String(j.url||j.it.url||""),id=driveId(u);return id?"https://drive.usercontent.google.com/download?id="+id+"&export=download&authuser=0":u.replace(/&amp;/g,"&");}
+function browserDl(j){
+  T(function(){return X.Open(browserUrl(j));});
+  if(dl===j)dl=null;
+  j.st="browser";j.bsince=now()-5000;j.bseen=null;j.err="";saveDQ();paintDl();pumpQ();
+  toast("Download "+j.it.name+" in your browser. Xaly installs it as soon as it’s in your Downloads folder.");
+}
+function importDl(j,path){
+  var i=DQ.indexOf(j);if(i>=0)DQ.splice(i,1);saveDQ();
+  toast("Installing "+j.it.name+"…");
+  setTimeout(function(){j.kind="archive";if(j.upd)finishUpdate(j,path);else finish(j.it,path,"archive");paintDl();pumpQ();},50);
+}
+function pickDl(j){var v=T(function(){return X.Pick("Game files|*.zip;*.7z;*.rar;*.exe|All files|*.*");},"");if(v)importDl(j,v);}
+var brT=0;
+function browserTick(){
+  if(now()-brT<2500)return;brT=now();
+  var w=null;DQ.forEach(function(j){if(j.st==="browser"&&(!w||j.bsince<w.bsince))w=j;});if(!w)return;
+  var r=T(function(){return X.FindDownload(String(w.bsince));},"ERR");if(r.indexOf("ERR")===0)return;
+  var f=r.split("|"),busy=f[0]==="1",path=f[2],size=+f[3]||0;w.bdir=f[1];
+  if(!path||busy||!size){w.bseen=null;return;}
+  if(w.bseen&&w.bseen.p===path&&w.bseen.s===size){importDl(w,path);return;}
+  w.bseen={p:path,s:size};
+}
 function retryTxt(j){var s=Math.max(1,Math.round((j.retryAt-now())/1000)),e=String(j.err||"");
   return (/connection|timed out|dropped|unable to connect|remote name|closed|reset/i.test(e)||!e?"Connection lost":e.replace(/\.$/,""))+". Trying again in "+s+" s (try "+j.tries+" of 6)";}
 function jobFail(j,msg,hard){
   // errors that won't fix themselves in a few seconds: show them right away instead of "Connection lost"
   if(/Google Drive|MediaFire|web page|folder|private|removed|can\u2019t download from|HTTP 40[0-4]|HTTP 410/i.test(msg||""))hard=true;
+  if(needsBrowser(j,msg))j.browser=1;
   j.tries=(j.tries||0)+1;j.err=msg;
   var waits=[5,10,20,40,60,120];
   if(!hard&&j.tries<=waits.length){j.st="retry";j.retryAt=now()+waits[j.tries-1]*1000;}
-  else{j.st="error";notify("err","Download failed",j.it.name+": "+msg,null,j.it.image);}
+  else{j.st="error";notify("err","Download failed",j.it.name+": "+msg+(j.browser?" Open Downloads and press \u201cDownload in browser\u201d to get it another way.":""),null,j.it.image);}
   saveDQ();paintDl();pumpQ();
 }
 function dqTick(){
-  if(!S)return;var t=now(),ch=0;
+  if(!S)return;var t=now(),ch=0;browserTick();
   DQ.forEach(function(j){if(j.st==="retry"&&t>=j.retryAt){j.st="queued";ch=1;}});
   if(ch){pumpQ();paintDl();}
   else if(P.page==="downloads"&&DQ.some(function(j){return j.st==="retry";}))renderDownloads();
@@ -2249,12 +2276,14 @@ function renderDownloads(){
       var c=el("div","dq "+j.st+(j===dl?" act":"")),th=el("div","dqt");paint(th,j.it.name,j.it.image||"");c.appendChild(th);
       var m=el("div","dqm");m.appendChild(el("b","",(j.upd?"Update: "+j.upd.name:j.it.name)));
       var st=j===dl?(j.st==="resolving"?"Preparing the download…":j.st==="pausing"?"Pausing…":j.st==="cancelling"?"Cancelling…":(j.speed>0?fmtB(j.speed)+"/s":"Starting…")+(j.eta>=0?"  ·  "+fmtEta(j.eta)+" left":""))
-        :j.st==="paused"?"Paused":j.st==="retry"?retryTxt(j):j.st==="error"?"Failed: "+j.err:"Queued #"+(qPos(j)+1);
+        :j.st==="paused"?"Paused":j.st==="retry"?retryTxt(j):j.st==="error"?"Failed: "+j.err:j.st==="browser"?(j.bseen?"Found "+j.bseen.p.split("\\").pop()+", checking it\u2019s finished\u2026":"Waiting for the download in your browser. Xaly installs it as soon as it lands in "+(j.bdir||"your Downloads folder")+"."):"Queued #"+(qPos(j)+1);
       m.appendChild(el("span","dqs",st));
       m.appendChild(el("span","dqz",fmtB(j.bytes||0)+(j.total?" of "+fmtB(j.total):"")+(j.pct>=0?"  ·  "+j.pct+"%":"")));
       var pb=el("div","pb"),pf=el("div","pf");pf.style.width=(j.pct>=0?j.pct:(j===dl?100:0))+"%";if(j.pct<0&&j===dl)pf.style.opacity=".35";pb.appendChild(pf);m.appendChild(pb);c.appendChild(m);
       var ac=el("div","dqa");
-      if(j.st==="paused"||j.st==="error")ac.appendChild(btn(j.st==="error"?"Retry":"Resume","pri sm",function(){resumeJob(j);}));
+      if(j.st==="error"&&j.browser)ac.appendChild(btn("Download in browser","pri sm",function(){browserDl(j);}));
+      if(j.st==="browser"){ac.appendChild(btn("Open again","btn sm",function(){browserDl(j);}));ac.appendChild(btn("Pick file\u2026","btn sm",function(){pickDl(j);}));}
+      else if(j.st==="paused"||j.st==="error")ac.appendChild(btn(j.st==="error"?"Retry":"Resume",j.browser?"btn sm":"pri sm",function(){resumeJob(j);}));
       else if(j.st!=="cancelling"&&j.st!=="pausing")ac.appendChild(btn("Pause","btn sm",function(){pauseJob(j);}));
       if(i>0&&j!==dl)ac.appendChild(btn("↑","btn sm",function(){moveJob(j,-1);}));
       ac.appendChild(btn("✕","btn sm dng",function(){cancelJob(j);}));
@@ -3996,6 +4025,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("drives",function(){return X.Drives().split("\n").length+" drive(s)";});
   c("freespace",function(){var v=+X.FreeSpace(X.Paths().split("|")[0]);return v>0?"ok "+Math.round(v/1073741824)+" GB":"bad "+v;});
   c("placeguard",function(){return X.PlaceStandalone("C:\\Windows\\notepad.exe","x");});
+  c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
   c("relaylive",function(){
     var tp="xaly-selftest-"+X.RandHex("6"),orm=window.onRelayMsg,ors=window.onRelayState,t0=new Date().getTime();
@@ -4025,7 +4055,6 @@ function selfTest(){   // run by the build server: proves both directions of the
       if(gdo)gdo(i3,k3,a3,b3);
     };
     resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
-    X.DownloadEx("selfgd","https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download&authuser=0","selftest-gd.bin","0");
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
     r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
   };

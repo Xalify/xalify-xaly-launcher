@@ -11,7 +11,7 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   const errs = []; p.on("pageerror", e => errs.push(e.message));
   await p.goto("file://" + require("path").resolve("ui-page.html")); await p.waitForTimeout(500);
   ok(await p.evaluate(() => document.getElementById("login").style.display === "block"), "sign-in screen on first start");
-  await p.evaluate(() => { createAcc(); var i = document.querySelectorAll("#mbox input"); i[0].value = "Tester"; i[1].value = "t@gmail.com"; i[2].value = "secret1"; i[3].value = "secret1";
+  await p.evaluate(() => { ONLINE_ACCOUNTS = 0; createAcc(); var i = document.querySelectorAll("#mbox input"); i[0].value = "Tester"; i[1].value = "t@gmail.com"; i[2].value = "secret1"; i[3].value = "secret1";
     [].slice.call(document.querySelectorAll("#mbox button")).filter(function (x) { return x.textContent == "Create account"; })[0].click(); });
   await p.waitForTimeout(1200);
   ok(await p.evaluate(() => !!S && S.user.name === "Tester"), "account created and signed in");

@@ -42,7 +42,7 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   itch:p=>{ if(p.startsWith("v2/games")) return ["0",JSON.stringify({errors:["invalid key"]}),"401"]; if(p.startsWith("v1/game")) return ["1",JSON.stringify({uploads:[{id:5,filename:"Game_linux.zip",p_linux:true,size:1e6},{id:6,filename:"Game_win.zip",p_windows:true,size:2e6}]})]; if(p.startsWith("v2/uploads")) return ["0",JSON.stringify({errors:["nope"]}),"403"]; if(p.startsWith("v1/upload")) return ["1",JSON.stringify({url:"https://cdn/game.zip"})]; if(p==="profile") return ["1",JSON.stringify({user:{username:"tester"}})]; return ["0","?"];}};
  vm.runInContext(code,ctx);
  ok(reg.login.style.display==="block","login shown first run");
- ctx.createAcc();fill(["Alice","alice@gmail.com","123","123"]);mbtn("Create account").onclick({});ok(!ctx.S,"short password rejected");fill(["Alice","alice@gmail","pw1234","pw1234"]);mbtn("Create account").onclick({});ok(!ctx.S,"bad email rejected");fill(["Alice","Alice@Gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});
+ ctx.ONLINE_ACCOUNTS=0;ctx.createAcc();fill(["Alice","alice@gmail.com","123","123"]);mbtn("Create account").onclick({});ok(!ctx.S,"short password rejected");fill(["Alice","alice@gmail","pw1234","pw1234"]);mbtn("Create account").onclick({});ok(!ctx.S,"bad email rejected");fill(["Alice","Alice@Gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});
  ok(ctx.S&&ctx.S.user.name==="Alice","account created");
  const items=ctx.S.store.items;ok(items.length>=100,"catalog size "+items.length);
  ok(ctx.allStore().filter(ctx.visIt).length===items.filter(i=>i.gh).length,"only games with art are visible before covers load");
@@ -112,7 +112,7 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
  ctx.signIn(ctx.AC.list[0]);fill(["bad"]);mbtn("Sign in").onclick({});ok(ctx.S===null,"wrong password blocked");
  fill(["pw1234"]);mbtn("Sign in").onclick({});ok(ctx.S&&ctx.S.games.length===2,"right password restores data");
  ctx.signOut();ctx.emailSignIn();fill(["alice@gmail.com","nope"]);mbtn("Sign in").onclick({});ok(!ctx.S,"email sign-in wrong password blocked");fill(["ALICE@gmail.com","pw1234"]);mbtn("Sign in").onclick({});ok(ctx.S&&ctx.S.user.name==="Alice","email sign-in works");
- ctx.signOut();ctx.createAcc();fill(["Bob","alice@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});ok(!ctx.S||ctx.S.user.name!=="Bob","duplicate email rejected");fill(["Bob","bob@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});ok(ctx.S.user.name==="Bob"&&ctx.S.games.length===0&&ctx.AC.list.length===2,"second account isolated");
+ ctx.signOut();ctx.ONLINE_ACCOUNTS=0;ctx.createAcc();fill(["Bob","alice@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});ok(!ctx.S||ctx.S.user.name!=="Bob","duplicate email rejected");fill(["Bob","bob@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});ok(ctx.S.user.name==="Bob"&&ctx.S.games.length===0&&ctx.AC.list.length===2,"second account isolated");
  await sleep(2500);ok(true,"no exceptions from stale callbacks");
  console.log(fails?fails+" FAILED":"ALL PASSED");process.exit(fails?1:0);
 })().catch(e=>{console.log("EXC",e.stack);process.exit(2);});

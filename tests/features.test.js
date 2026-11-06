@@ -45,7 +45,7 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   RelayStream:(t,s)=>{streams.push(t);return "ok";},RelayStreamStop:()=>"ok"});
  mock={http:u=>/data\.json$/.test(u)?["1",JSON.stringify({id:777})]:["0","net"],itch:p=>{if(p.startsWith("v1/game"))return ["1",JSON.stringify({uploads:[{id:6,filename:"Big_win.zip",p_windows:true,size:4e9}]})];if(p.startsWith("v2/games"))return ["1",JSON.stringify({uploads:[{id:6,filename:"Big_win.zip",p_windows:true,size:4e9}]})];return ["0","?"];}};
  vm.runInContext(code,ctx);
- ctx.createAcc();fill(["Alice","alice@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});
+ ctx.ONLINE_ACCOUNTS=0;ctx.createAcc();fill(["Alice","alice@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});
  ok(ctx.S&&ctx.S.user,"signed in");
  // ---- move
  const g={id:"gx",name:"Zed",path:"C:\\dl\\Games\\Zed\\bin\\zed.exe",storeId:"m1",seconds:0,added:1};ctx.S.games.push(g);
@@ -281,5 +281,16 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   ctx.S.lb={ws:ws-7*86400000,snap:{"1":{h:12,a:1}}};ctx.S.lbPrev=null;g.sess.push([ws-3*86400000,3600*4]);ctx.lbTick();
   ok(ctx.S.lbPrev&&ctx.S.lbPrev.win==="Bob"&&ctx.S.lbPrev.rank===2&&ctx.S.lb.ws===ws,"on Monday last week's winner is worked out and the board resets");
   ctx.S.friends=sv;ctx.S.games.splice(ctx.S.games.indexOf(g),1);}
+ // ---- 1.8.0 online accounts
+ {ctx.ONLINE_ACCOUNTS=1;ok(ctx.okUser("Bredy_G")&&!ctx.okUser("a b")&&!ctx.okUser("ab")&&!ctx.okUser("x".repeat(21)),"usernames are 3-20 letters, numbers or _");
+  ok(ctx.okUser(ctx.suggestUser("Bré dy!"))&&ctx.okUser(ctx.suggestUser("A")),"a username is suggested from any display name");
+  ok(/isn.t right/.test(ctx.sbErr(400,{error_code:"invalid_credentials"}))&&/internet/.test(ctx.sbErr(0,null))&&/email setup/.test(ctx.sbErr(400,{error_code:"email_address_not_authorized"}))&&/expired/.test(ctx.sbErr(403,{error_code:"otp_expired"})),"online errors are explained in plain words");
+  let sent=null;X.Supa=(id,m,path,body,tok)=>{sent={m,path,body:JSON.parse(body||"{}"),tok};setTimeout(()=>ctx.onHttp(id,"1",JSON.stringify(true),"200"),2);return "ok";};
+  let got=null;ctx.sb("POST","/rest/v1/rpc/username_available",{name:"zz_top"},"",(st,j)=>{got=[st,j];});await sleep(30);
+  ok(sent.path==="/rest/v1/rpc/username_available"&&sent.body.name==="zz_top"&&got[0]===200&&got[1]===true,"requests go through the app with JSON in and out");
+  const a={id:"t1",name:"T",email:"t@x.co",pw:"",sb:{uid:"u",at:"",rt:"r1",exp:0}};
+  X.Supa=(id,m,path,body)=>{setTimeout(()=>ctx.onHttp(id,"1",JSON.stringify({access_token:"A2",refresh_token:"r2",expires_in:3600,user:{id:"u",email:"t@x.co",email_confirmed_at:"x"}}),"200"),2);return "ok";};
+  let tk=null;ctx.sbToken(a,t=>{tk=t;});await sleep(30);ok(tk==="A2"&&a.sb.rt==="r2","an expired session is refreshed on its own");
+  ctx.ONLINE_ACCOUNTS=0;ok(!ctx.sbOn(),"the switch turns online accounts off");ctx.ONLINE_ACCOUNTS=1;}
  console.log(fails?"FAILED "+fails:"ALL PASSED");process.exit(fails?1:0);
 })().catch(e=>{console.log("EXC",e.stack);process.exit(1);});

@@ -130,6 +130,9 @@ button{border:0;font-family:inherit;color:inherit;cursor:pointer;outline:0}
 .rtp{color:#c9cbe0;font-size:13.5px;line-height:1.5;margin:6px 0 10px}.rtl{background:#141925;border-radius:10px;padding:6px 12px;margin-bottom:10px}
 .rti{display:flex;align-items:center;gap:10px;padding:6px 0;color:#e8e8f2;font-size:13.5px}.rti i{font-style:normal;width:16px;text-align:center;color:#2ee6f0}.rti.ok i{color:#3ddc84}.rti.bad i{color:#ef5350}
 .rtn{color:#8d8da6;font-size:12px;line-height:1.45;margin:0 0 8px}.rts{color:#2ee6f0;font-size:13px;min-height:18px;margin-bottom:6px}
+.sbp{color:#b9bccf;font-size:13px;line-height:1.5;margin:4px 0 12px}.sbst{min-height:18px;color:#ff8a80;font-size:13px;margin:10px 0 0;line-height:1.4}.sbst.ok{color:#3ddc84}
+.sbrow{display:block}.sbrow .sl{padding-right:0}.sbbx{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}.sbbx .btn,.sbbx .pri{margin-left:0!important}.sbbx .code{margin-right:6px}
+.sbl{margin:8px 0 0}.sbl a{color:#2ee6f0;font-size:13px;margin-right:16px;text-decoration:none;cursor:pointer}.sbl a:hover{text-decoration:underline}
 .fempty{text-align:center;padding:30px 14px;color:#9a9ab0;font-size:13px;line-height:1.55}
 .fempty b{display:block;color:#fff;font-size:16px;margin-bottom:6px}
 .fcode{display:flex;align-items:center;justify-content:center;margin-top:14px}
@@ -902,8 +905,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.10";
+var VER="1.8.0";
 var NOTES=[
+ {v:"1.8.0",d:"6 Nov 2026",t:["Online accounts: sign up with an email, username and password, and sign in on any PC. Forgot your password? Reset it with a code we email you","Your existing account keeps working exactly as before. Put it online whenever you like in Settings \u203A Account, without losing anything","Add friends by username instead of a 9-digit code","Your library, play time and achievements still stay on each PC. Back them up in Settings \u203A Account to move them","You can still sign in when you\u2019re offline, and you can disconnect or delete your online account at any time"]},
  {v:"1.7.10",d:"6 Nov 2026",t:["Switching between Store and Library is instant now. The Store keeps its page instead of rebuilding it each time, and remembers where you scrolled","The Store builds game rows as you scroll to them, so it opens faster and uses less memory","Xaly gives memory back while it\u2019s minimized or in the tray, like when you\u2019re in a game"]},
  {v:"1.7.9",d:"6 Nov 2026",t:["Fix \u201Cwon\u2019t start\u201D: Xaly checks each game for missing Microsoft runtimes (Visual C++ and DirectX) before it starts, and offers to install them with one click. If a game closes right away, it checks again. You can also run it from a game\u2019s More menu","Clean up leftovers: Settings \u203A Storage finds unfinished downloads, old archives and installers, empty or orphaned game folders and old update files, and frees the space in one click","Friends leaderboard: a new Ranks tab shows who played the most this week, who unlocked the most achievements, and all-time hours. It resets every Monday, and Xaly tells you who won last week"]},
  {v:"1.7.8",d:"6 Nov 2026",t:["Fixed: with the Friends panel open, the last game in each Store row was cut off at the panel. Rows now resize their cards so only whole games show, at any window size"]},
@@ -1213,6 +1217,7 @@ function startSession(a){
   setTimeout(checkRestored,2500);setTimeout(autoFind,25000);
   if(pendingCmd){var pc=pendingCmd;pendingCmd="";setTimeout(function(){runCmd(pc);},1500);}
   if(S.set.tvStart)setTimeout(function(){enterTV();},300);setTimeout(function(){refreshLive(false);},4000);
+  setTimeout(function(){if(curAcc===a)sbAfterLogin(a);},3000);
 }
 function signOut(){
   var pn=playingName();
@@ -1232,13 +1237,14 @@ function renderLogin(){
   var row=el("div");
   AC.list.forEach(function(a){
     var c=el("div","ac"),av=avatar(a.name,a.color,84);av.style.margin="0 auto 12px";c.appendChild(av);
-    c.appendChild(el("div","an",a.name));c.appendChild(el("div","as",a.email||(a.pw?"Password protected":"No password")));
+    c.appendChild(el("div","an",a.name));c.appendChild(el("div","as",sbOn()&&a.sb&&a.sb.uid?"Online \u00B7 @"+(a.sb.user||a.email):a.email||(a.pw?"Password protected":"No password")));
     c.appendChild(btn("Remove","lrm",function(){removeAcc(a);}));
     c.onclick=function(){signIn(a);};row.appendChild(c);
   });
   var add=el("div","ac");add.appendChild(el("div","avp","+"));add.appendChild(el("div","an","Add account"));add.appendChild(el("div","as"," "));add.onclick=createAcc;row.appendChild(add);
   b.appendChild(row);
-  if(AC.list.some(function(a){return a.email;}))b.appendChild(btn("Sign in with email","btn lemail",emailSignIn));
+  if(sbOn())b.appendChild(btn(AC.list.length?"Sign in with email":"I already have an account","btn lemail",sbSignIn));
+  else if(AC.list.some(function(a){return a.email;}))b.appendChild(btn("Sign in with email","btn lemail",emailSignIn));
   var rb=btn("Restore an account from a backup","btn lemail",restoreAcc);b.appendChild(rb);
 }
 function signIn(a){
@@ -1259,9 +1265,10 @@ function emailSignIn(){
   },null);
 }
 function createAcc(){
-  var first=!AC.list.length;
+  var first=!AC.list.length,nm0=first?T(function(){return X.Info();},"Player"):"";
+  if(sbOn()){createAccOnline(first,nm0);return;}
   openForm(first?"Create your account":"Add an account",[
-    {id:"name",label:"Display name",value:first?T(function(){return X.Info();},"Player"):""},
+    {id:"name",label:"Display name",value:nm0},
     {id:"email",label:"Gmail address",ph:"you@gmail.com"},
     {id:"pw",label:"Password (at least 6 characters)",pass:1},{id:"pw2",label:"Repeat password",pass:1}],"Create account",function(v){
     if(!v.name){toast("Please enter a name");return false;}
@@ -1276,6 +1283,38 @@ function createAcc(){
     a.file="data_"+a.id+".json";if(v.pw)a.pw=hashPw(a,v.pw);
     AC.list.push(a);saveAcc();startSession(a);
   },null);
+}
+function createAccOnline(first,nm0){
+  sbForm(first?"Create your account":"Add an account","",[
+    {id:"name",label:"Display name",value:nm0},
+    {id:"user",label:"Username (friends can find you by it)",value:nm0?suggestUser(nm0):"",ph:"letters, numbers or _"},
+    {id:"email",label:"Email",ph:"you@gmail.com"},
+    {id:"pw",label:"Password (at least 6 characters)",pass:1},{id:"pw2",label:"Repeat password",pass:1},
+    {id:"on",label:"Where your account lives",value:"on",opts:[["on","Online: sign in on any PC, reset your password, friends find you by username"],["off","Only on this PC"]]}],"Create account",function(v,done){
+    v.name=trim(v.name||"");v.user=trim(v.user||"");v.email=(v.email||"").toLowerCase();
+    if(!v.name){done("Please enter a name");return;}
+    if(v.name.length>24){done("Names can be up to 24 characters");return;}
+    if(!okEmail(v.email)){done("Please enter a valid email address");return;}
+    if(accByEmail(v.email)){done("There\u2019s already an account with that email on this PC. Use Sign in with email.");return;}
+    if(AC.list.some(function(a){return a.name.toLowerCase()===v.name.toLowerCase();})){done("There\u2019s already an account with that name");return;}
+    if((v.pw||"").length<6){done("Pick a password with at least 6 characters");return;}
+    if(v.pw!==v.pw2){done("The two passwords don\u2019t match");return;}
+    function make(){var a={id:"a"+now(),name:v.name,email:v.email,color:AC.list.length%AV.length,pw:"",file:"",created:now()};a.file="data_"+a.id+".json";a.pw=hashPw(a,v.pw);AC.list.push(a);saveAcc();return a;}
+    if(v.on==="off"){closeForm();startSession(make());return;}
+    if(!okUser(v.user)){done("Usernames are 3\u201320 letters, numbers or _");return;}
+    sb("POST","/rest/v1/rpc/username_available",{name:v.user},"",function(st,free){
+      if(!st){done("Couldn\u2019t reach the online account service. Check your internet, or choose \u201COnly on this PC\u201D for now.");return;}
+      if(st!==200){done(sbErr(st,free));return;}
+      if(free!==true){done("That username is taken. Try another one.");return;}
+      var a={id:"a"+now(),name:v.name,email:v.email,color:AC.list.length%AV.length,pw:"",file:"",created:now()};a.file="data_"+a.id+".json";a.pw=hashPw(a,v.pw);
+      sbSignUp(a,v.email,v.pw,v.user,function(r,msg){
+        if(r==="exists"){done("That email already has an online account. Use \u201CSign in with email\u201D on the first screen.");return;}
+        AC.list.push(a);saveAcc();closeForm();startSession(a);
+        if(r==="pending")setTimeout(function(){sbConfirmLater(a);},600);
+        else if(r==="local")setTimeout(function(){toast(msg+" Your account was made on this PC. Put it online later in Settings \u203A Account.");},600);
+      });
+    });
+  });
 }
 function removeAcc(a){
   openForm("Remove “"+a.name+"” and everything in it?",a.pw?[{id:"pw",label:"Enter its password to confirm",pass:1}]:[],"Remove",function(v){
@@ -1293,6 +1332,254 @@ function changePw(){
     if(v.n1!==v.n2){toast("The two passwords don’t match");return false;}
     a.pw=v.n1?hashPw(a,v.n1):"";saveAcc();toast(a.pw?"Password saved":"Password removed");if(P.page==="settings")renderSettings();
   },null);
+}
+/* ---------- 1.8.0: online accounts (Supabase). No cloud saving: every account still lives on its PC; online adds
+   sign-in on any PC, email-checked passwords with reset, and finding friends by username. ---------- */
+var ONLINE_ACCOUNTS=1;   // THE SWITCH: set to 0 to go back to accounts that only exist on each PC. Everything keeps working locally.
+function sbOn(){return ONLINE_ACCOUNTS===1;}
+function sb(method,path,body,tok,cb){
+  var id="sb"+now()+Math.floor(Math.random()*99999);
+  var r=T(function(){return X.Supa(id,method,path,body?JSON.stringify(body):"",tok||"");},"ERR");
+  if(r.indexOf("ERR")===0){cb(0,null,r);return;}
+  cbs[id]=function(ok,text,st){var j=null;try{j=JSON.parse(text);}catch(e){}cb(ok?(+st||200):(+st||0),j,text);};
+}
+function sbCode(j){return j?(j.error_code||j.code||j.error||""):"";}
+function sbErr(st,j){
+  var c=String(sbCode(j)),m=j?(j.msg||j.message||j.error_description||""):"";
+  if(!st)return "Couldn’t reach the online account service. Check your internet connection.";
+  if(c==="invalid_credentials"||/invalid login/i.test(m))return "That email or password isn’t right";
+  if(c==="email_not_confirmed")return "Confirm your email first. Enter the code from the email we sent you.";
+  if(c==="user_already_exists"||c==="email_exists")return "That email already has an online account. Use Sign in instead.";
+  if(c==="weak_password")return "Pick a stronger password (at least 6 characters).";
+  if(c==="over_email_send_rate_limit"||st===429)return "Too many emails were sent recently. Wait a little and try again.";
+  if(c==="email_address_not_authorized")return "Online accounts aren’t open to everyone yet: the developer still needs to finish email setup.";
+  if(c==="otp_expired"||/expired|invalid.*(otp|token)/i.test(m))return "That code is wrong or has expired. Ask for a new one.";
+  if(c==="signup_disabled")return "New online accounts are switched off right now.";
+  if(c==="validation_failed"&&/email/i.test(m))return "Please enter a valid email address";
+  if(/database error saving new user/i.test(m))return "That username was just taken. Try another one.";
+  return m||("The online account service answered with error "+st+".");
+}
+function okUser(u){return /^[A-Za-z0-9_]{3,20}$/.test(u||"");}
+function suggestUser(n){var u=String(n||"").replace(/[^A-Za-z0-9_]+/g,"_").replace(/^_+|_+$/g,"").substr(0,20);while(u.length<3)u+="_"+Math.floor(Math.random()*10);return u;}
+function sbKeep(a,j){
+  if(!a||!j||!j.access_token)return;
+  var u=j.user||{};a.sb=a.sb||{};
+  a.sb.uid=u.id||a.sb.uid;a.sb.email=(u.email||a.sb.email||"").toLowerCase();a.sb.at=j.access_token;a.sb.rt=j.refresh_token||a.sb.rt;
+  a.sb.exp=now()+((+j.expires_in||3600)*1000);a.sb.ok=u.email_confirmed_at?1:(a.sb.ok||0);delete a.sb.pending;
+  if(u.user_metadata&&u.user_metadata.username&&!a.sb.user)a.sb.user=u.user_metadata.username;
+  saveAcc();
+}
+/* a working access token for an online-linked account, refreshing it when needed; cb(token) or cb(null,reason) */
+function sbToken(a,cb){
+  if(!sbOn()||!a||!a.sb||!a.sb.uid){cb(null,"none");return;}
+  if(a.sb.at&&a.sb.exp>now()+60000){cb(a.sb.at);return;}
+  if(!a.sb.rt){cb(null,"signin");return;}
+  sb("POST","/auth/v1/token?grant_type=refresh_token",{refresh_token:a.sb.rt},"",function(st,j){
+    if(st===200&&j&&j.access_token){sbKeep(a,j);cb(a.sb.at);return;}
+    if(st&&st<500){a.sb.at="";a.sb.rt="";saveAcc();cb(null,"signin");return;}
+    cb(null,"offline");
+  });
+}
+function sbPassword(email,pw,cb){sb("POST","/auth/v1/token?grant_type=password",{email:email,password:pw},"",cb);}
+/* after signing in: keep the profile's friend code and username current */
+function sbAfterLogin(a){
+  if(!sbOn()||!a||!a.sb||!a.sb.uid)return;
+  sbToken(a,function(tok){
+    if(!tok)return;
+    sb("GET","/rest/v1/profiles?select=username,friend_code",null,tok,function(st,j){
+      if(st!==200||!j||!j.length)return;var p=j[0];
+      if(p.username&&p.username!==a.sb.user){a.sb.user=p.username;saveAcc();if(P.page==="settings")renderSettings();}
+      var code=S&&curAcc===a&&S.user&&/^\d{9}$/.test(S.user.code||"")?S.user.code:"";
+      if(code&&p.friend_code!==code)sb("PATCH","/rest/v1/profiles?id=eq."+a.sb.uid,{friend_code:code,updated_at:new Date().toISOString()},tok,function(st2){if(st2>=200&&st2<300){a.sb.code=code;saveAcc();}});
+    });
+  });
+}
+/* a small form we control fully: fields, a status line, extra links and buttons, async submit */
+function sbForm(title,intro,fields,okLabel,onOk,links){
+  openForm(title,fields,okLabel,function(v){
+    var st=$("sbst");if(st){st.textContent="";st.className="sbst";}
+    var row=$("mbox").getElementsByTagName("button"),i;for(i=0;i<row.length;i++)row[i].disabled=true;
+    onOk(v,function(msg,good){var r2=$("mbox").getElementsByTagName("button"),k;for(k=0;k<r2.length;k++)r2[k].disabled=false;var s2=$("sbst");if(s2){s2.textContent=msg||"";s2.className="sbst"+(good?" ok":"");}});
+    return false;
+  },null);
+  var b=$("mbox"),h=b.firstChild;
+  if(intro){var p=el("p","sbp",intro);b.insertBefore(p,h.nextSibling);}
+  var mr=b.lastChild,s=el("div","sbst");s.id="sbst";b.insertBefore(s,mr);
+  if(links&&links.length){var lk=el("div","sbl");links.forEach(function(l){var x=el("a","",l[0]);x.href="#";x.onclick=function(e){if(e&&e.preventDefault)e.preventDefault();l[1]();return false;};lk.appendChild(x);});b.insertBefore(lk,mr);}
+}
+/* 6-digit code from the email: confirms a new account (signup) or a password reset (recovery). onSession(j) gets a signed-in session */
+function sbCodeForm(email,type,onSession,extra){
+  sbForm(type==="recovery"?"Reset your password":"Confirm your email",
+    "We sent a 6-digit code to "+email+". Enter it here."+(type==="signup"?" If the email has a link instead, click it, then come back and sign in.":""),
+    [{id:"code",label:"Code",ph:"123456"}].concat(extra||[]),type==="recovery"?"Continue":"Confirm",function(v,done){
+      var c=(v.code||"").replace(/\D/g,"");if(c.length<6){done("Enter the 6-digit code from the email");return;}
+      if(v.n1!==undefined&&(v.n1||"").length<6){done("Pick a new password with at least 6 characters");return;}
+      var types=type==="recovery"?["recovery"]:["signup","email"];
+      (function tryT(i){
+        sb("POST","/auth/v1/verify",{type:types[i],email:email,token:c},"",function(st,j){
+          if(st===200&&j&&j.access_token){closeForm();onSession(j,v);return;}
+          if(st&&st<500&&i+1<types.length){tryT(i+1);return;}
+          done(sbErr(st,j));});
+      })(0);
+    },[["Send a new code",function(){sb("POST",type==="recovery"?"/auth/v1/recover":"/auth/v1/resend",type==="recovery"?{email:email}:{type:"signup",email:email},"",function(st,j){var s=$("sbst");if(s){s.textContent=st===200?"A new code is on its way.":sbErr(st,j);s.className="sbst"+(st===200?" ok":"");}});}]]);
+}
+/* sign up online for the account a (already on this PC); then(result) with "linked", "pending", "local" or "exists" */
+function sbSignUp(a,email,pw,user,then){
+  sb("POST","/auth/v1/signup",{email:email,password:pw,data:{username:user}},"",function(st,j){
+    if(st===200&&j&&j.access_token){a.sb={user:user,email:email};sbKeep(a,j);then("linked");return;}
+    if(st===200&&j&&(j.id||j.user)){
+      var u=j.user||j;
+      if(u.identities&&!u.identities.length){then("exists");return;}   // Supabase hides whether an email is taken; an empty identity list means it is
+      a.sb={uid:u.id,email:email,user:user,pending:1,ok:0};saveAcc();then("pending");return;}
+    if(sbCode(j)==="user_already_exists"||sbCode(j)==="email_exists"){then("exists");return;}
+    then("local",sbErr(st,j));
+  });
+}
+function sbConfirmLater(a){
+  if(!a||!a.sb||!a.sb.pending)return;
+  sbCodeForm(a.sb.email,"signup",function(j){sbKeep(a,j);if(S&&curAcc===a)sbAfterLogin(a);toast("Email confirmed. Your account is online now.");if(P.page==="settings")renderSettings();});
+}
+/* login screen: sign in with an email, whether the account is on this PC yet or not */
+function sbSignIn(){
+  if(!sbOn()){emailSignIn();return;}
+  sbForm("Sign in","Use the email and password of your Xaly account. If it’s not on this PC yet, it will be added.",
+    [{id:"e",label:"Email",ph:"you@gmail.com"},{id:"pw",label:"Password",pass:1}],"Sign in",function(v,done){
+      var e=(v.e||"").toLowerCase(),pw=v.pw||"",a=accByEmail(e);
+      if(!okEmail(e)){done("Please enter a valid email address");return;}
+      if(a&&!(a.sb&&a.sb.uid)){if(!a.pw||hashPw(a,pw)!==a.pw){done("That password isn’t right");return;}closeForm();startSession(a);return;}
+      sbPassword(e,pw,function(st,j){
+        if(st===200&&j&&j.access_token){
+          if(!a){a=newLocalFrom(j,e);}
+          sbKeep(a,j);a.pw=hashPw(a,pw);a.email=e;saveAcc();closeForm();startSession(a);
+          if(!a.added0){a.added0=1;saveAcc();setTimeout(function(){toast("Signed in. Your library and play time stay on each PC: restore a backup in Settings › Account to bring them here.");},1200);}
+          return;}
+        if(!st&&a){   // offline: the password this PC knows still works
+          if(a.pw&&hashPw(a,pw)===a.pw){closeForm();startSession(a);toast("You’re offline, so you signed in on this PC only.");return;}
+          done("That password isn’t right");return;}
+        if(sbCode(j)==="email_not_confirmed"){closeForm();sbCodeForm(e,"signup",function(j2){var b2=a||newLocalFrom(j2,e);sbKeep(b2,j2);b2.pw=hashPw(b2,pw);b2.email=e;saveAcc();startSession(b2);});return;}
+        done(sbErr(st,j));
+      });
+    },[["Forgot password?",sbForgot]]);
+}
+function newLocalFrom(j,email){
+  var u=(j&&j.user)||{},m=u.user_metadata||{},nm=(m.username||email.split("@")[0]).substr(0,24);
+  var base=nm,n=2;while(AC.list.some(function(x){return x.name.toLowerCase()===nm.toLowerCase();}))nm=base.substr(0,21)+" "+(n++);
+  var a={id:"a"+now(),name:nm,email:email,color:AC.list.length%AV.length,pw:"",file:"",created:now(),sb:{user:m.username||""}};
+  a.file="data_"+a.id+".json";AC.list.push(a);saveAcc();return a;
+}
+function sbForgot(){
+  sbForm("Forgot your password?","Enter your account’s email. We’ll send a code to reset the password.",[{id:"e",label:"Email",ph:"you@gmail.com"}],"Send code",function(v,done){
+    var e=(v.e||"").toLowerCase();if(!okEmail(e)){done("Please enter a valid email address");return;}
+    sb("POST","/auth/v1/recover",{email:e},"",function(st,j){
+      if(st!==200){done(sbErr(st,j));return;}
+      closeForm();
+      sbCodeForm(e,"recovery",function(j2,v2){
+        var pw=v2.n1||"";
+        sb("PUT","/auth/v1/user",{password:pw},j2.access_token,function(st3,j3){
+          if(st3!==200){toast(sbErr(st3,j3));return;}
+          var a=accByEmail(e)||newLocalFrom(j2,e);sbKeep(a,j2);a.pw=hashPw(a,pw);saveAcc();toast("Password changed. You’re signed in.");startSession(a);
+        });
+      },[{id:"n1",label:"New password (at least 6 characters)",pass:1}]);
+    });
+  });
+}
+/* Settings › Account: put an account that's only on this PC online (opt-in, nothing is lost) */
+function sbGoOnline(){
+  var a=curAcc,f=[{id:"e",label:"Email",value:a.email||"",ph:"you@gmail.com"},{id:"u",label:"Username (friends can find you by it)",value:suggestUser(S.user.name)}];
+  f.push(a.pw?{id:"pw",label:"Your password",pass:1}:{id:"pw",label:"Choose a password (at least 6 characters)",pass:1});
+  sbForm("Put your account online","You’ll be able to sign in on any PC with your email and password, reset a forgotten password, and friends can add you by username. Your library and play time stay on this PC.",f,"Continue",function(v,done){
+    var e=(v.e||"").toLowerCase(),u=trim(v.u||""),pw=v.pw||"";
+    if(!okEmail(e)){done("Please enter a valid email address");return;}
+    var o=accByEmail(e);if(o&&o!==a){done("Another account on this PC already uses that email");return;}
+    if(!okUser(u)){done("Usernames are 3–20 letters, numbers or _");return;}
+    if(a.pw&&hashPw(a,pw)!==a.pw){done("That password isn’t right");return;}
+    if(pw.length<6){done("Passwords need at least 6 characters");return;}
+    function link(why){   // the same person on another PC: link to their online account with its password
+      sbPassword(e,pw,function(st2,j2){
+        if(st2===200&&j2&&j2.access_token){a.sb={email:e};sbKeep(a,j2);a.email=e;a.pw=hashPw(a,pw);saveAcc();closeForm();sbAfterLogin(a);renderSettings();toast("Linked to your online account");return;}
+        done(why);});
+    }
+    sb("POST","/rest/v1/rpc/username_available",{name:u},"",function(st,free){
+      if(st!==200){done(sbErr(st,free));return;}
+      if(free!==true){link("That username is taken. Try another one.");return;}
+      sbSignUp(a,e,pw,u,function(r,msg){
+        if(r==="exists"){link("That email already has an online account. Enter its password to link to it.");return;}
+        if(r==="local"){done(msg);return;}
+        a.email=e;a.pw=hashPw(a,pw);saveAcc();closeForm();renderSettings();
+        if(r==="pending")sbConfirmLater(a);else{sbAfterLogin(a);toast("Your account is online");}
+      });
+    });
+  });
+}
+function sbChangePw(){
+  var a=curAcc;
+  sbForm("Change password","This changes it online and on this PC.",[{id:"old",label:"Current password",pass:1},{id:"n1",label:"New password (at least 6 characters)",pass:1},{id:"n2",label:"Repeat new password",pass:1}],"Save",function(v,done){
+    if((v.n1||"").length<6){done("Passwords need at least 6 characters");return;}
+    if(v.n1!==v.n2){done("The two passwords don’t match");return;}
+    sbPassword(a.sb.email,v.old||"",function(st,j){
+      if(st!==200){done(sbErr(st,j));return;}sbKeep(a,j);
+      sb("PUT","/auth/v1/user",{password:v.n1},a.sb.at,function(st2,j2){
+        if(st2!==200){done(sbErr(st2,j2));return;}a.pw=hashPw(a,v.n1);saveAcc();closeForm();toast("Password changed");});
+    });
+  });
+}
+function sbChangeUser(){
+  var a=curAcc;
+  sbForm("Change username","Friends use it to find you.",[{id:"u",label:"Username",value:a.sb.user||""}],"Save",function(v,done){
+    var u=trim(v.u||"");if(!okUser(u)){done("Usernames are 3–20 letters, numbers or _");return;}
+    sbToken(a,function(tok){
+      if(!tok){done("Sign in again to change it");return;}
+      sb("PATCH","/rest/v1/profiles?id=eq."+a.sb.uid,{username:u,updated_at:new Date().toISOString()},tok,function(st,j){
+        if(st>=200&&st<300){a.sb.user=u;saveAcc();closeForm();renderSettings();toast("Username saved");return;}
+        done(st===409||/duplicate|unique/i.test(JSON.stringify(j||""))?"That username is taken. Try another one.":sbErr(st,j));});
+    });
+  });
+}
+function sbDisconnect(){
+  openForm("Stop using your online account on this PC?",[],"Disconnect",function(){
+    var a=curAcc;if(a.sb&&a.sb.at)sb("POST","/auth/v1/logout",{},a.sb.at,function(){});
+    a.sb=null;saveAcc();renderSettings();toast("This account is on this PC only now. Your online account still exists.");
+  },null);
+}
+function sbDelete(){
+  var a=curAcc;
+  sbForm("Delete your online account?","This removes your online account and username for good. This PC keeps your library, play time and friends. Other PCs that use this account keep their copy too, as PC-only accounts.",[{id:"pw",label:"Your password",pass:1}],"Delete online account",function(v,done){
+    sbPassword(a.sb.email,v.pw||"",function(st,j){
+      if(st!==200){done(sbErr(st,j));return;}
+      sb("POST","/rest/v1/rpc/delete_my_account",{},j.access_token,function(st2,j2){
+        if(st2<200||st2>=300){done(sbErr(st2,j2));return;}
+        a.sb=null;saveAcc();closeForm();renderSettings();toast("Your online account was deleted");});
+    });
+  });
+}
+function sbAccountRow(b0){
+  if(!sbOn())return;var a=curAcc,box=el("div","sbbx");
+  var b={appendChild:function(r){r.className="srow sbrow";var t=r.lastChild;if(t!==r.firstChild){r.removeChild(t);r.firstChild.appendChild(t);}b0.appendChild(r);}};
+  if(!a.sb||(!a.sb.uid&&!a.sb.pending)){
+    box.appendChild(btn("Put account online…","pri",sbGoOnline));
+    b.appendChild(srow("Online account","Not online. This account only exists on this PC. Put it online to sign in on any PC, reset a forgotten password, and let friends add you by username.",box));return;}
+  if(a.sb.pending){
+    box.appendChild(btn("Enter code…","pri",function(){sbConfirmLater(a);}));
+    box.appendChild(btn("I clicked the link","btn",function(){sbForm("Sign in to finish","",[{id:"pw",label:"Your password",pass:1}],"Continue",function(v,done){sbPassword(a.sb.email,v.pw||"",function(st,j){if(st===200){sbKeep(a,j);closeForm();sbAfterLogin(a);renderSettings();toast("Your account is online");}else done(sbErr(st,j));});});}));
+    box.appendChild(btn("Disconnect","btn",sbDisconnect));
+    b.appendChild(srow("Online account","Waiting for you to confirm "+a.sb.email+". We emailed you a code.",box));return;}
+  box.appendChild(el("span","code","@"+(a.sb.user||"…")));
+  box.appendChild(btn("Change username","btn",sbChangeUser));box.appendChild(btn("Change password","btn",sbChangePw));
+  box.appendChild(btn("Disconnect","btn",sbDisconnect));box.appendChild(btn("Delete online account","btn dng",sbDelete));
+  b.appendChild(srow("Online account","Online as "+a.sb.email+". Sign in on any PC with it. Your library and play time stay on each PC.",box));
+}
+/* add a friend by username: look up their friend code */
+function addByName(name,nick){
+  var a=curAcc;
+  if(!sbOn()||!a||!a.sb||!a.sb.uid){toast("Put your account online (Settings › Account) to add friends by username, or use their friend code");return;}
+  sbToken(a,function(tok){
+    if(!tok){toast("Sign in again with your online account to search for usernames");return;}
+    sb("POST","/rest/v1/rpc/find_player",{name:name.replace(/^@/,"")},tok,function(st,j){
+      if(st!==200){toast(sbErr(st,j));return;}
+      if(!j||!j.length||!j[0].friend_code){toast("Nobody is using the username “"+name+"” yet");return;}
+      if(addFriend(j[0].friend_code,nick||j[0].username)!==false)closeForm();
+    });
+  });
 }
 var ICO={
   heart:'<path d="M12 20.5s-8-4.8-8-10.6A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 2.9c0 5.8-8 10.6-8 10.6z"/>',
@@ -4902,7 +5189,9 @@ function renderSettings(){
         else{if((v.n1||"").length<6){toast("Pick a password with at least 6 characters");return false;}curAcc.pw=hashPw(curAcc,v.n1);}
         curAcc.email=e;saveAcc();renderSettings();toast("Email saved. You can now sign in with it.");
       },null);}));
-    b.appendChild(srow("Email","Sign in with your Gmail address and password. Accounts are stored on this PC.",er));
+    if(sbOn()&&curAcc.sb&&(curAcc.sb.uid||curAcc.sb.pending)){er.removeChild(er.lastChild);}
+    b.appendChild(srow("Email",sbOn()&&curAcc.sb&&curAcc.sb.uid?"The email of your online account.":"Sign in with your email address and password. Accounts are stored on this PC.",er));
+    sbAccountRow(b);
     var bk=el("div");bk.style.cssText="display:flex;align-items:center";bk.appendChild(btn("Back up\u2026","btn",backupAcc));bk.appendChild(btn("Restore\u2026","btn",restoreAcc));
     b.appendChild(srow("Account backup","Save your library, play time, achievements, friends and settings to one password-protected file, and restore it on another PC."+(S.lastBackup?" Last backup: "+ago(S.lastBackup)+".":" You haven\u2019t made a backup yet."),bk));
     b.appendChild(srow("Account name","This is what your friends see.",(function(){var d=el("div");d.style.cssText="display:flex;align-items:center";d.appendChild(ni);d.appendChild(sv);return d;})()));
@@ -4914,7 +5203,7 @@ function renderSettings(){
     var ss=el("select");[["online","Online"],["away","Away"],["busy","Do not disturb"],["invisible","Invisible"]].forEach(function(o){var op=el("option","",o[1]);op.value=o[0];ss.appendChild(op);});
     ss.value=S.user.status;ss.style.width="180px";ss.onchange=function(){S.user.status=ss.value;save();render();renderFriends();syncNow();};
     b.appendChild(srow("Status","How you appear to friends.",ss));
-    b.appendChild(srow("Password",curAcc&&curAcc.pw?"This account asks for a password when you sign in.":"Optional. Asks for a password when you pick this account on the sign-in screen. It keeps casual users out; it does not encrypt your files.",btn(curAcc&&curAcc.pw?"Change":"Set password","btn",changePw)));
+    if(sbOn()&&curAcc.sb&&curAcc.sb.uid){}else b.appendChild(srow("Password",curAcc&&curAcc.pw?"This account asks for a password when you sign in.":"Optional. Asks for a password when you pick this account on the sign-in screen. It keeps casual users out; it does not encrypt your files.",btn(curAcc&&curAcc.pw?"Change":"Set password","btn",changePw)));
     b.appendChild(srow("Sign out","Go back to the sign-in screen to use a different account. Your library, friends and settings stay saved with this one.",btn("Sign out","btn dng",signOut)));
   }else if(tab==="friends"){
     b.appendChild(el("h2","","Friends"));
@@ -5072,7 +5361,7 @@ $("brand").title="Menu";
 $("fbtn").onclick=function(){if(ovOn)return;var o=$("fp").className==="open";setFP(!o);if(!o){renderFriends(true);if(now()-frPollT>5000)frPoll();}};
 $("fq").onkeyup=renderFriends;
 $("ftF").onclick=function(){P.ftab="";P.chat=null;renderFriends();};$("ftA").onclick=function(){P.ftab="act";P.chat=null;renderFriends();};$("ftC").onclick=function(){P.ftab="ch";P.chat=null;renderFriends();};$("ftR").onclick=function(){P.ftab="rk";P.chat=null;renderFriends();};
-$("fadd").onclick=function(){if(!frOn()){toast(frErr||"Turn on online friends in Settings \u203A Friends first");return;}openForm("Add a friend",[{id:"code",label:"Their friend code (yours is "+fmtCode(S.user.code)+")",ph:"123 456 789"},{id:"nick",label:"Nickname (optional)"}],"Send request",function(v){return addFriend(v.code,v.nick);},null);};
+$("fadd").onclick=function(){if(!frOn()){toast(frErr||"Turn on online friends in Settings \u203A Friends first");return;}var byName=sbOn()&&curAcc&&curAcc.sb&&curAcc.sb.uid;openForm("Add a friend",[{id:"code",label:(byName?"Their username or friend code":"Their friend code")+" (your code is "+fmtCode(S.user.code)+(byName&&curAcc.sb.user?", username @"+curAcc.sb.user:"")+")",ph:byName?"username or 123 456 789":"123 456 789"},{id:"nick",label:"Nickname (optional)"}],"Send request",function(v){if(/[A-Za-z_]/.test(v.code||"")){addByName(trim(v.code),v.nick);return false;}return addFriend(v.code,v.nick);},null);};
 $("dlb").onclick=function(){nav("downloads");};
 $("tDl").onclick=function(){nav("downloads");};$("tTv").onclick=function(){enterTV();};$("tProf").onclick=function(){openProfile("");};$("tSet").onclick=function(){nav("settings",P.page==="settings"?P.tab:"account");};
 $("bell").onclick=function(e){stp(e);toggleNotes();};$("npan").onclick=function(e){stp(e);};
@@ -5178,6 +5467,10 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
   c("peimports",function(){var v="";["C:\\Windows\\System32\\notepad.exe","C:\\Windows\\SysWOW64\\notepad.exe","C:\\Program Files\\Git\\cmd\\git.exe","C:\\Program Files\\dotnet\\dotnet.exe"].forEach(function(x){var q=String(X.ImportList(x)),ar=q.split(":")[0],l=q.substr(ar.length+1).split(",").filter(function(z){return z;});v+=(x.indexOf("SysWOW64")>0?"wow":"")+x.replace(/^.*\\/,"").replace(".exe","")+"="+ar+"/"+l.length+(/vcruntime140/i.test(q)?"+vc":"")+" ";});return v;});
+  r.checks.supa="waiting";r.checks.supauser="waiting";r.checks.supalock="waiting";
+  sb("GET","/auth/v1/settings",null,"",function(st,j){r.checks.supa="status "+st+(j&&j.external?" email="+(j.external.email?"on":"off")+" confirm="+(j.mailer_autoconfirm?"off":"on"):"");});
+  sb("POST","/rest/v1/rpc/username_available",{name:"selftest_"+Math.floor(Math.random()*1e6)},"",function(st,j){r.checks.supauser="status "+st+" free="+JSON.stringify(j);});
+  sb("GET","/rest/v1/profiles?select=username",null,"",function(st,j){r.checks.supalock="status "+st+" "+(st===200?"rows="+(j&&j.length):"blocked");});
   c("runtimes",function(){return "notepad=["+X.NeedsRuntimes("C:\\Windows\\System32\\notepad.exe")+"] cmd=["+X.NeedsRuntimes("C:\\Windows\\SysWOW64\\cmd.exe")+"] missing=["+X.NeedsRuntimes("C:\\nope\\x.exe")+"]";});
   r.checks.leftovers="waiting";var olo=window.onLeftovers,ocl=window.onCleaned;
   window.onLeftovers=function(id,t){if(id!=="selflo"){if(olo)olo(id,t);return;}var l=String(t||"").split("\n").filter(function(x){return x;});r.checks.leftovers=l.length+" found"+(l.length?": "+l.slice(0,3).map(function(x){return x.split("|")[0];}).join(","):"");};

@@ -21,7 +21,7 @@ function client(name){
       else{topics.split(",").forEach(t=>(relay[t]||[]).forEach(m=>out+=JSON.stringify(m)+"\n"));}ctxRef.c.onHttp(id,"1",out,"200");},2);return "ok";}};
   const sb={document:E.doc,external:X,console,setTimeout,clearTimeout,setInterval:()=>0,clearInterval:()=>{},Date,Math,JSON,parseInt,parseFloat,encodeURIComponent,decodeURIComponent,RegExp,Array,Object,String,Number,Boolean,Error,isNaN,navigator:{}};
   sb.window=sb;const c=vm.createContext(sb);ctxRef.c=c;vm.runInContext(E.code,c);
-  c.createAcc();const ins=E.reg.mbox.find(x=>x.tag==="input");ins[0].value=name;ins[1].value=name.toLowerCase()+"@gmail.com";ins[2].value="pw1234";ins[3].value="pw1234";E.reg.mbox.find(x=>x.tag==="button"&&x._text==="Create account")[0].onclick({});
+  c.ONLINE_ACCOUNTS=0;c.createAcc();const ins=E.reg.mbox.find(x=>x.tag==="input");ins[0].value=name;ins[1].value=name.toLowerCase()+"@gmail.com";ins[2].value="pw1234";ins[3].value="pw1234";E.reg.mbox.find(x=>x.tag==="button"&&x._text==="Create account")[0].onclick({});
   return {c,E,X};
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let fails=0;const ok=(v,m)=>{if(!v){fails++;console.log("FAIL:",m);}else console.log("ok  :",m);};

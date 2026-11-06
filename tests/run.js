@@ -28,7 +28,7 @@ for (const f of fs.readdirSync(__dirname)) if (/\.js$/.test(f) && f !== "run.js"
 
 getCatalog(ok => {
   if (!ok) console.log("note: couldn't get the shared store list; tests that use it may fail");
-  const suites = fs.readdirSync(work).filter(f => /\.test\.js$/.test(f) && (withUi || f !== "ui.test.js")).sort();
+  const suites = fs.readdirSync(work).filter(f => /\.test\.js$/.test(f) && (withUi || !/^ui/.test(f))).sort();
   let failed = 0; const t0 = Date.now();
   const runOne = s => {
     const r = cp.spawnSync(process.execPath, [s], { cwd: work, encoding: "utf8", timeout: 240000, maxBuffer: 32 << 20 });

@@ -1166,6 +1166,57 @@ namespace Xaly
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
 
+        // ---- 1.8.0: online accounts on Supabase. The publishable key is public by design: the database only lets
+        // each player reach their own row (row level security), so it is safe to ship inside the launcher.
+        const string SupaUrl = "https://gduigajkcgtxnhvplykt.supabase.co";
+        const string SupaKey = "sb_publishable_F4gL5RPz_5YXBzZcmSSsag_WsULNxzG";
+        // method GET/POST/PUT/PATCH, path under /auth/v1/ or /rest/v1/, JSON body, the player's access token (or "").
+        // Answers onHttp(id, ok, body, status); the body of an error answer is passed on so the page can explain it.
+        public string Supa(string id, string method, string path, string body, string bearer)
+        {
+            if (path == null || !(path.StartsWith("/auth/v1/") || path.StartsWith("/rest/v1/"))) return "ERR:bad path";
+            string m = (method ?? "GET").ToUpperInvariant();
+            if (m != "GET" && m != "POST" && m != "PUT" && m != "PATCH" && m != "DELETE") return "ERR:bad method";
+            Thread t = new Thread(delegate()
+            {
+                string ok = "0", text = "", code = "0";
+                try
+                {
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(SupaUrl + path);
+                    rq.Method = m; rq.Timeout = 20000; rq.ReadWriteTimeout = 20000;
+                    rq.UserAgent = "XalyLauncher";
+                    rq.Accept = "application/json";
+                    rq.Headers["apikey"] = SupaKey;
+                    if (!string.IsNullOrEmpty(bearer)) rq.Headers["Authorization"] = "Bearer " + bearer;
+                    if (m != "GET" && m != "DELETE")
+                    {
+                        byte[] b = Encoding.UTF8.GetBytes(string.IsNullOrEmpty(body) ? "{}" : body);
+                        rq.ContentType = "application/json"; rq.ContentLength = b.Length;
+                        using (Stream st = rq.GetRequestStream()) st.Write(b, 0, b.Length);
+                    }
+                    using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                    using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8))
+                    { text = sr.ReadToEnd(); code = ((int)rs.StatusCode).ToString(); ok = "1"; }
+                }
+                catch (WebException we)
+                {
+                    HttpWebResponse er = we.Response as HttpWebResponse;
+                    if (er != null)
+                    {
+                        code = ((int)er.StatusCode).ToString();
+                        try { using (StreamReader sr = new StreamReader(er.GetResponseStream(), Encoding.UTF8)) text = sr.ReadToEnd(); } catch (Exception) { }
+                        try { er.Close(); } catch (Exception) { }
+                    }
+                    else text = we.Message;
+                }
+                catch (Exception ex) { text = ex.Message; }
+                f.Js("onHttp", id, ok, text, code);
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+
         // ---- itch.io API (the key stays on the C# side; the page only sees the API's answers)
         // Public key from a throwaway itch.io account, so installs work out of the box.
         // Order: the player's own key (Settings > Downloads), then itchkey.txt next to the .exe, then this one.

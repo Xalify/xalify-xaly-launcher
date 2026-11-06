@@ -1,3 +1,6 @@
-- **Faster switching:** going between Store and Library is instant now. The Store keeps its page instead of rebuilding about 560 game cards every time, and remembers where you scrolled. It still refreshes when something changes, such as installing or saving a game. In testing, switching dropped from 120–180 ms to 10–20 ms of frozen time.
-- **Lighter Store:** game rows further down are built just before you scroll to them. The Store has about a quarter of the page elements it had before, so it opens faster and uses less memory for cover images.
-- **Less memory in the background:** while Xaly is minimized or in the tray, like when you're playing a game, it asks the WebView2 engine to give memory back.
+- **Online accounts:** create an account with an email, username and password, and sign in on any PC with **Sign in with email**. A 6-digit code confirms your email, and **Forgot password?** resets it with a code too.
+- **Your existing account keeps working exactly as before.** Accounts made on this PC, including ones with no email or password, sign in like they always have. To put one online, go to **Settings › Account › Put account online**. Nothing is lost, and if you already made the same account online on another PC, it links to it.
+- **Add friends by username:** type a username instead of a 9-digit code when adding a friend. Friend codes still work.
+- **Your library stays on your PC.** There's no cloud saving: library, play time and achievements stay on each PC. Use **Account backup** to move them.
+- **Works offline:** your PC remembers your password, so you can still sign in without internet.
+- **You're in control:** change your username or password, disconnect this PC, or delete your online account any time in **Settings › Account**. Deleting it keeps everything on your PC.

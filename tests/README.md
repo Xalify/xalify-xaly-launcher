@@ -16,5 +16,6 @@ node tests/run.js --ui   # also opens the page in Chromium (npm i playwright && 
 | `features.test.js` | moving games, live chat, activity feed, size checks, Google Drive / MediaFire, browser hand-off, shared store list, speed limit and schedule, find games on PC, account backup, shortcuts, uninstaller, and more |
 | `parsers.test.js` | reading itch.io pages, lists and feeds, update detection, Drive and MediaFire links, name matching |
 | `ui.test.js` | the real page in Chromium: signs in and opens every screen, failing on any JavaScript error |
+| `ui-accounts.test.js` | online accounts end to end against a fake Supabase (`ui-fakesb.js`): email codes, usernames, friends by username, new-PC and offline sign-in, password reset, opt-in, delete, and the off switch |
 
 The native (C#) side is tested on Windows by `--selftest` in `.github/workflows/check.yml`.

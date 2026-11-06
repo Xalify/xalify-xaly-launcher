@@ -1,1 +1,5 @@
-- **Fixed:** creating an online account sometimes showed an error when the confirmation email was slow to send, even though the account was made. It now goes straight to the code screen, and explains that only the newest email works if you click a link.
+- **New sign-in screen:** signing in and creating an account now happen on one page, with **Sign in** and **Create account** tabs. A Xaly panel full of game art sits beside them. No more pop-up forms.
+- **Smarter create account:** usernames are checked as you type, passwords show a strength bar, an eye button shows what you typed, and the "Online account" switch shows clearly whether the account lives online or only on this PC.
+- **Six-box email codes:** type the code and it moves along by itself and submits when it's full, or paste the whole code at once. "Send a new code" waits 30 seconds between emails.
+- **Clearer mistakes:** every problem is explained right under the field it's about.
+- **Cleaner "Who's playing?":** pick your account from a tidy list. Accounts with a password open a "Welcome back" screen showing your avatar.

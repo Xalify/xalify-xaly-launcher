@@ -506,6 +506,12 @@ select::-ms-expand{display:none}
 .classic #recm{left:18px;bottom:56px}
 .classic .sver{position:absolute;right:20px;bottom:16px;margin:0}.classic #ver{margin-right:14px}
 .classic #npan{left:auto;right:20px;top:62px;bottom:auto}
+.classic #dlb.idle{display:flex;align-items:center;justify-content:center;left:50%;width:240px;margin-left:-120px;bottom:12px;height:38px;padding:0 16px;background:transparent;border:1px solid transparent;border-radius:19px;box-sizing:border-box}
+.classic #dlb.idle:hover{background:#151a26;border-color:#232a3a}
+.classic #dlb.idle #dlk,.classic #dlb.idle #dlbar,.classic #dlb.idle #dls,.classic #dlb.idle #dlx{display:none}
+.classic #dlb.idle #dlt{display:flex;align-items:center;justify-content:center;padding:0;font-size:15px;font-weight:500;color:#a3a7bc}
+.classic #dlb.idle:hover #dlt{color:#fff}.classic #dlb.idle #dlt svg{margin-right:9px;flex:0 0 auto}
+.classic #dlb.idle .dlq{font-style:normal;margin-left:8px;font-size:12px;font-weight:700;color:#2ee6f0}
 
 /* ===== v1.2 ===== */
 #top{z-index:7}
@@ -823,8 +829,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.2";
+var VER="1.7.3";
 var NOTES=[
+ {v:"1.7.3",d:"6 Nov 2026",t:["Fixed: Install from itch.io sometimes needed several clicks. One click now always works and the button shows Preparing\u2026 right away","Classic layout: the Downloads button is back in the middle of the bottom bar"]},
  {v:"1.7.2",d:"6 Nov 2026",t:["Fixed: opening a game in the Store while offline could freeze the page","Behind the scenes: over 250 automatic checks now run on every change, and a version is only released when they all pass"]},
  {v:"1.7.0",d:"6 Nov 2026",t:["Block people: from their chat, by right-clicking them in your friends list, or from a friend request. They can\u2019t message you, see you online, challenge you or send requests, and they aren\u2019t told","Delete messages: right-click a message or use its \u22EF button. Delete any message for yourself, or your own messages for everyone","Blocked people are listed in Settings \u203A Friends, where you can unblock them"]},
  {v:"1.6.9",d:"5 Nov 2026",t:["Click the Xaly logo for a menu with every page, each part of Settings, Find games, updates, What\u2019s new, feedback, Hide to tray, Sign out and Quit"]},
@@ -2169,6 +2176,7 @@ function setDetailBtn(){
     else if(jb===dl){b.textContent=(jb.st==="resolving"?"Preparing\u2026":"Downloading\u2026 "+(jb.pct>=0?jb.pct+"%":""));b.onclick=function(){nav("downloads");};}
     else{b.textContent=jb.st==="browser"?"Waiting for your browser\u2026":jb.st==="retry"?"Reconnecting\u2026":"Queued #"+(qPos(jb)+1);b.onclick=function(){nav("downloads");};}
   }
+  else if(it._prep){b.textContent="Preparing\u2026";b.onclick=function(){};}
   else if(l){b.textContent="Open in library";b.onclick=function(){P.cur=l.id;nav("game");};}
   else if(isItch(it)||isGh(it)){b.textContent=isGh(it)?"Install from GitHub":"Install from itch.io";b.onclick=function(){install(it);};}
   else if(k==="page"||!it.url){b.textContent="Not downloadable yet";b.disabled=true;}
@@ -2221,7 +2229,12 @@ function install(it,spaceOk){
   var al=directFor(it);if(al){install(al,spaceOk);return;}
   var k=kindOf(it),ex=jobOf(it);
   if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else{toast(it.name+" is already in your downloads");}return;}
-  if(isItch(it)||isGh(it)){if(!install.chk){install.chk=1;spaceCheck(it,function(){install.chk=0;if(!jobOf(it))addJob(newJob(it,{}));});setTimeout(function(){install.chk=0;},4000);}return;}
+  if(isItch(it)||isGh(it)){
+    if(it._prep)return;   // the click already registered: Preparing…
+    it._prep=1;setDetailBtn();
+    spaceCheck(it,function(){delete it._prep;if(!jobOf(it))addJob(newJob(it,{}));setDetailBtn();});
+    setTimeout(function(){if(it._prep){delete it._prep;setDetailBtn();}},8000);
+    return;}
   var fn=fname(it.url);
   if(k==="page"||!it.url)return;
   if(extOk(it.url)&&it.dlSize&&!spaceOk){spaceCheck(it,function(){if(!jobOf(it))install(it,1);});return;}
@@ -2412,7 +2425,8 @@ function paintDl(){
   var b=$("dlb");
   var wait=DQ.filter(function(x){return x!==dl&&(x.st==="queued"||x.st==="retry");}).length,
       show=dl||DQ.filter(function(x){return x.st==="retry"||x.st==="paused";})[0];
-  if(!show){b.className="";$("tDlp").textContent=wait?String(wait):"";setDetailBtn();return;}
+  if(!show){b.className="idle";$("tDlp").textContent=wait?String(wait):"";
+    $("dlt").innerHTML=ic("download",18)+"<span>Downloads</span>"+(wait?'<em class="dlq">'+wait+" queued</em>":"");setDetailBtn();return;}
   if(show!==dl){
     b.className="act";$("dlt").textContent=(show.upd?show.upd.name:show.it.name);$("dlk").textContent=show.st==="retry"?"RECONNECTING":"PAUSED";
     $("tDlp").textContent=DQ.length>1?DQ.length+"":"\u2016";$("dlfill").style.width=(show.pct>=0?show.pct:0)+"%";
@@ -3831,14 +3845,17 @@ function needFor(it,size){var k=it.kind&&it.kind!=="page"?it.kind:(it.dlKind||"a
 function fetchSize(it,cb){
   if(it.dlSize){if(cb)cb(it.dlSize);return;}
   if(!(isItch(it)||isGh(it))){if(cb)cb(0);return;}
-  if(fetchSize.b[it.id]){return;}
+  if(fetchSize.b[it.id]){if(cb)(fetchSize.w[it.id]=fetchSize.w[it.id]||[]).push(cb);return;}   // already looking: answer this one too
   if(it.dlTry&&now()-it.dlTry<600000){if(cb)cb(0);return;}   // a failed lookup isn't retried for 10 minutes
   fetchSize.b[it.id]=1;it.dlTry=now();
-  resolveAny(it,function(err,r){delete fetchSize.b[it.id];if(!err&&r&&r.up&&r.up.sz){it.dlSize=r.up.sz;it.dlKind=r.kind;if(it.live)saveCat();else save();}if(cb)cb(it.dlSize||0);},true);
+  resolveAny(it,function(err,r){delete fetchSize.b[it.id];if(!err&&r&&r.up&&r.up.sz){it.dlSize=r.up.sz;it.dlKind=r.kind;if(it.live)saveCat();else save();}
+    var w=fetchSize.w[it.id]||[];delete fetchSize.w[it.id];if(cb)cb(it.dlSize||0);w.forEach(function(f){f(it.dlSize||0);});},true);
 }
-fetchSize.b={};
+fetchSize.b={};fetchSize.w={};
 function spaceCheck(it,go){
+  var done=false;setTimeout(function(){if(!done){done=true;go();}},5000);   // a slow lookup never holds up the install
   fetchSize(it,function(size){
+    if(done)return;done=true;
     var fd=dlDirFree();
     if(!size||fd.free<0||fd.free>=needFor(it,size)){go();return;}
     openForm("Not enough space on "+fd.drive,[],"Install anyway",function(){go();},null);

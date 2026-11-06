@@ -238,5 +238,16 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   let un=null;X.UninstallSelf=(g,d,dirs)=>{un=[g,d,dirs];return "ok";};ctx.openUninstall();ok(reg.mbox.textContent.indexOf("Uninstall Xaly Launcher?")>-1,"uninstall dialog");
   mbtn("Uninstall").onclick({});ok(un&&un[0]==="0"&&un[1]==="0","keeps games and data by default");
  }
+ // ---- 1.7.3 one click on Install always works, even while the size is still being looked up
+ {ctx.closeForm();ctx.DQ.length=0;ctx.dl=null;ctx.S.set.sched=0;X.FreeSpace=()=>"900000000000";
+  const slow=JSON.stringify({id:777});const oldHttp=X.Http;
+  X.Http=(id,u)=>{const r=/data\.json$/.test(u)?["1",slow]:mock.http(u);setTimeout(()=>ctx.onHttp(id,r[0],r[1],r[2]||"200"),300);return "ok";};
+  const g=ctx.S.store.items.find(i=>i.id==="m1")||ctx.S.store.items.find(i=>ctx.isItch(i));delete g.dlSize;delete g.dlTry;
+  ctx.openDetail(g);await sleep(20);                       // the page starts looking up the size
+  ctx.install(g);ctx.install(g);ctx.install(g);await sleep(20);   // impatient clicks while it's still looking
+  ok(g._prep===1,"the button switches to Preparing… straight away");
+  await sleep(1500);
+  ok(ctx.DQ.filter(j=>j.it===g).length===1,"one click was enough, and extra clicks didn't queue it twice");
+  X.Http=oldHttp;ctx.DQ.length=0;ctx.dl=null;}
  console.log(fails?"FAILED "+fails:"ALL PASSED");process.exit(fails?1:0);
 })().catch(e=>{console.log("EXC",e.stack);process.exit(1);});

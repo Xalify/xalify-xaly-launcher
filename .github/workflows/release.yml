@@ -97,6 +97,8 @@ jobs:
           if ($env:ITCH_KEY) { [IO.File]::WriteAllText("$PWD/XalyLauncher/itchkey.txt", $env:ITCH_KEY.Trim()) } else { Write-Host "Using the itch.io key built into Xaly.cs" }
           Compress-Archive -Path XalyLauncher -DestinationPath "XalyLauncher-$v.zip"
           $h = (Get-FileHash "XalyLauncher-$v.zip" -Algorithm SHA256).Hash.ToLower()
+          # same file under a fixed name, so a website can always link to .../releases/latest/download/XalyLauncher.zip
+          Copy-Item "XalyLauncher-$v.zip" "XalyLauncher.zip"
           $notes = if (Test-Path release-notes.md) { Get-Content release-notes.md -Raw } else { "Xaly Launcher $v" }
           [IO.File]::WriteAllText("$PWD/notes.md", $notes.Trim() + "`n`nSHA256: $h`n")
 
@@ -107,4 +109,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $v = "${{ steps.ver.outputs.v }}"
-          gh release create "v$v" "XalyLauncher-$v.zip" --title "Xaly Launcher $v" --notes-file notes.md --target "${{ steps.ver.outputs.sha }}"
+          gh release create "v$v" "XalyLauncher-$v.zip" "XalyLauncher.zip" --title "Xaly Launcher $v" --notes-file notes.md --target "${{ steps.ver.outputs.sha }}"

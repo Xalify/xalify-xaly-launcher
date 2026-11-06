@@ -1,1 +1,2 @@
-- **Fixed:** the live controller test in **Settings › Controller** kept running after you left the page. It used a little CPU in the background and caused errors after you signed out. It now stops as soon as you leave the page.
+- The download is now also published as **XalyLauncher.zip**, so a website can link to the newest version with one fixed address.
+- Build.bat shows a clearer message when a build fails.

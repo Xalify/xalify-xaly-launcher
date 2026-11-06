@@ -806,8 +806,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.5";
+var VER="1.6.6";
 var NOTES=[
+ {v:"1.6.6",d:"5 Nov 2026",t:["Fixed: the launcher froze over and over while the Store was filling in games, covers and screenshots. Covers now update in place, and the Store page is rebuilt far less often and faster"]},
  {v:"1.6.5",d:"5 Nov 2026",t:["Download speed limit: cap how fast games download, in Settings \u203A Downloads or right on the Downloads page","Download schedule: only download at set hours, like overnight. Xaly keeps the PC awake while downloads wait or run, and you can still start one right away","Settings \u203A Storage now lists games on every drive, including ones you moved, and each game has a Move button"]},
  {v:"1.6.4",d:"5 Nov 2026",t:["Messages now have their own pop-up and chime, also while you\u2019re in a game. Click the pop-up to open the chat","Turn them off in Settings \u203A General"]},
  {v:"1.6.3",d:"5 Nov 2026",t:["Compare with friends: a game\u2019s page shows your play time and achievements next to a friend\u2019s, like \u201cBob beat Night Shift, you haven\u2019t yet\u201d","Friend challenges: send \u201cGet Marathon in Sonic Time Twisted by Sunday\u201d or your own goal like \u201cBeat night 5\u201d. Achievement goals complete by themselves, and you both get a notification","A pop-up and a sound when a friend comes online or starts playing a game, also while you\u2019re in a game","Achievement pop-ups now also show on top of games"]},
@@ -1477,15 +1478,28 @@ function testKey(){
 var mouseDown=0;
 document.onmousedown=function(){mouseDown=1;};document.onmouseup=function(){mouseDown=0;};
 function typing(){var a=document.activeElement;return !!(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA"));}
+function patchCards(it){   // update one game's cards on screen without rebuilding the page
+  var root=$("pStore");if(!root||!root.querySelectorAll)return 0;
+  var l=root.querySelectorAll('[data-sid="'+String(it.id).replace(/"/g,"")+'"]'),i,n=0;
+  for(i=0;i<l.length;i++){var a=l[i].firstChild;if(a&&a.className==="gca"){paint(a,it.name,it.image||it.hero);n++;}}
+  return n;
+}
+var lastStoreR=0;
 function softRender(it){
+  if(it&&P.page==="store"){patchCards(it);softRender.dirty=1;return;}   // the Store picks up the rest on its next quiet refresh
   if(softRender.t)return;
   softRender.t=setTimeout(function(){
     softRender.t=0;
     if(mouseDown||typing()){softRender(it);return;}   // never rebuild the page while a click or typing is in progress
-    if(P.page==="store"||P.page==="lib"||P.page==="game")render();
+    if(P.page==="store"){
+      if(now()-lastStoreR<15000){softRender.t=setTimeout(function(){softRender.t=0;softRender();},15000-(now()-lastStoreR));return;}
+      softRender.dirty=0;render();return;
+    }
+    if(P.page==="lib"||P.page==="game")render();
     else if(P.page==="detail"&&(!it||it===P.sel))render();
   },1200);
 }
+setInterval(function(){if(softRender.dirty&&P.page==="store"&&now()-lastStoreR>20000&&!mouseDown&&!typing()){var pg=$("pStore");if(pg&&pg.scrollTop<300){softRender.dirty=0;render();}}},5000);
 function queueCovers(){
   S.store.items.forEach(function(it){
     if(S.gone[it.id]||covQ.indexOf(it)>=0)return;
@@ -1802,10 +1816,10 @@ function frOf(it){
 function frGrad(fr){var c=FR[fr]||FR.Indie;return "linear-gradient(135deg,"+c[0]+","+c[1]+")";}
 function closeMenus(){if(SMENU){SMENU.className="sdd";SMENU=null;}}
 function filtering(){return !!(P.sq||P.f.b!=="all"||P.f.fr||P.f.lf);}
-function storeFilter(){
+function storeFilter(vis){
   var q=P.sq.toLowerCase(),f=P.f,w=wishMap();
-  return allStore().filter(function(it){
-    if(!visIt(it))return false;
+  return (vis||allStore()).filter(function(it){
+    if(!vis&&!visIt(it))return false;
     if(q&&(it.name+" "+(it.tagline||"")+" "+(it.genre||"")+" "+frOf(it)+" "+(it.devs||"")).toLowerCase().indexOf(q)<0)return false;
     if(f.lf&&!(it.lf&&it.lf[f.lf]!==undefined))return false;
     if(f.b==="wish"&&!w[it.id])return false;
@@ -1822,6 +1836,7 @@ function wishBtn(it){
 }
 function gcard(it){
   var fr=frOf(it),c=el("div","gc"),a=el("div","gca");paint(a,it.name,it.image||it.hero);c.appendChild(a);
+  c.setAttribute("data-sid",it.id);a.className="gca";
   a.appendChild(wishBtn(it));
   if(inLib(it.id))a.appendChild(el("span","gcin","✓ Installed"));
   var b=el("div","gcb");b.appendChild(el("div","gcs",fr+(it.genre?"  ·  "+it.genre:"")));b.appendChild(el("div","gcn",it.name));
@@ -1887,7 +1902,8 @@ spotlight.re=function(list){clearTimeout(spT);spT=setTimeout(function(){if(spEl&
 function swapSpot(list){var o=spEl;if(!o||!o.parentNode)return;var n=spotlight(list);o.parentNode.replaceChild(n,o);}
 function renderStore(keep){
   var pg=$("pStore"),top=pg.scrollTop,f=P.f;P.f.lf=P.f.lf||"";pg.innerHTML="";SMENU=null;
-  var all=storeFilter(),every=allStore().filter(visIt),body=el("div","xs");
+  lastStoreR=now();
+  var every=allStore().filter(visIt),all=storeFilter(every),body=el("div","xs");
   // header + search
   var hd=el("div","xtop"),tx=el("div","xt");
   tx.appendChild(el("h1","","Discover"));tx.appendChild(el("p","",every.length+" free Windows games from itch.io, updated automatically. One click installs them."));hd.appendChild(tx);
@@ -1922,7 +1938,12 @@ function renderStore(keep){
   if(left)body.appendChild(el("div","xload","Loading game art from itch.io… "+left+" left. Games appear as soon as their pictures arrive."));
   if(!filtering()){
     if(every.length)body.appendChild(spotlight(every));
-    function lfl(k){return all.filter(function(x){return x.lf&&x.lf[k]!==undefined;}).sort(function(a,b){return a.lf[k]-b.lf[k];});}
+    var LFM=null;
+    function lfl(k){
+      if(!LFM){LFM={};all.forEach(function(x){var q;if(x.lf)for(q in x.lf){(LFM[q]=LFM[q]||[]).push(x);}});
+        var q2;for(q2 in LFM)(function(kk){LFM[kk].sort(function(a,b){return a.lf[kk]-b.lf[kk];});})(q2);}
+      return (LFM[k]||[]).slice();
+    }
     function lfShelf(k,title){var l=lfl(k);if(l.length>=4)body.appendChild(shelf(title||LFN[k],l.slice(0,24),function(){f.lf=k;P.lim=60;renderStore();$("pStore").scrollTop=0;},"",l.length));}
     var topR=lfl("top");if(topR.length<4)topR=all.filter(function(x){return x.rt&&x.rt.n>=3;}).sort(function(a,b){return (b.rt.v-a.rt.v)||(b.rt.n-a.rt.n);});
     if(topR.length>=4)body.appendChild(shelf("Top rated on itch.io",topR.slice(0,24),lfl("top").length>=4?function(){f.lf="top";renderStore();$("pStore").scrollTop=0;}:null,"",topR.length));
@@ -4395,11 +4416,6 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("freespace",function(){var v=+X.FreeSpace(X.Paths().split("|")[0]);return v>0?"ok "+Math.round(v/1073741824)+" GB":"bad "+v;});
   c("placeguard",function(){return X.PlaceStandalone("C:\\Windows\\notepad.exe","x");});
   r.checks.sharedcat="waiting";http(SHARED_CAT,function(ok9,t9){var d9=null;try{d9=JSON.parse(t9);}catch(e){}r.checks.sharedcat=d9&&d9.items?d9.items.length+" games, built "+new Date(d9.t).toISOString():"ERR "+String(t9).substr(0,60);});
-  (function(){var big=new Array(30001).join("0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqr");
-    var t0=new Date().getTime();X.Save("perf-test.json",big);var t1=new Date().getTime();var back=X.Data("perf-test.json");var t2=new Date().getTime();X.Delete("perf-test.json");
-    r.checks.perfbridge="save "+Math.round(big.length/1e6*10)/10+" MB: "+(t1-t0)+" ms, read: "+(t2-t1)+" ms, ok="+(back.length===big.length);
-    var h0=new Date().getTime();http(SHARED_CAT,function(ok,t){var h1=new Date().getTime(),d=null;try{d=JSON.parse(t);}catch(e){}var h2=new Date().getTime();
-      r.checks.perfcat="download+hand-over "+(h1-h0)+" ms, parse "+(h2-h1)+" ms, "+(d&&d.items?d.items.length:0)+" games";});})();
   c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
   c("relaylive",function(){

@@ -1,4 +1,2 @@
-- **Download speed limit:** cap how fast games download (256 KB/s up to 50 MB/s) so streaming, calls and online games stay smooth. Set it in Settings › Downloads or right on the Downloads page. Xaly's own updates are never slowed down.
-- **Download schedule:** only download during set hours, like 1:00 AM – 7:00 AM. Games you install at other times wait in the queue (with a **Start now** button if you can't wait). A running download pauses when the time is up and continues by itself the next night.
-- **Keep the PC awake:** while downloads are running or waiting for the schedule, Windows won't go to sleep, so overnight downloads actually happen. The screen can still turn off. You can switch this off.
-- **Move games from Settings › Storage:** every game has a **Move** button, and the Storage tab now also lists games you moved to other drives.
+- **Fixed: the launcher kept freezing while the Store was filling in games.** Every cover, screenshot or background check made Xaly rebuild the whole Store page of 8,000 games, again and again for minutes. Now a cover just updates its own card, and the Store page is rebuilt far less often. In testing, the time the window was frozen during this went from about 5 seconds to about 0.1 second.
+- Rebuilding the Store page is also about 25% faster.

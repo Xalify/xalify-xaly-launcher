@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.8";
+var VER="1.5.9";
 var NOTES=[
+ {v:"1.5.9",d:"5 Nov 2026",t:["itch.io games whose download is a Google Drive or MediaFire link now install straight from Xaly, and show up in the Store like any other game","Xaly also finds Google Drive and MediaFire links in a game\u2019s description when there\u2019s no download button","MediaFire downloads are now supported, also in Add game and the paste-a-link box"]},
  {v:"1.5.8",d:"5 Nov 2026",t:["Fixed: Super Smash Bros. Crusade couldn\u2019t be installed when you found it through search. Every copy now uses the working Google Drive download"]},
  {v:"1.5.7",d:"5 Nov 2026",t:["New in the Store: Super Smash Bros. Crusade, the fan-made Smash with a huge roster","Games hosted on Google Drive now download properly, including big files that show Google\u2019s virus-scan warning","Games packed as .7z or .rar can now be installed, not just .zip","If a link opens a web page instead of a game, the download now stops with a clear message instead of failing at install"]},
  {v:"1.5.6",d:"5 Nov 2026",t:["Fixed: the old Windows scrollbars showed up in the library, menus and pop-ups. Every list now uses the slim Xaly scrollbar","Fixed: the ticked option in the View and Sort menus was squashed and cut off","Fixed: games that are a single .exe couldn\u2019t be uninstalled or moved. They now get their own folder, including ones you already have","Fixed: updating a game after moving it to another drive"]},
@@ -1012,6 +1013,7 @@ function fixState(){
     S.games=S.games.filter(function(g){return !(g.storeId&&/^s\d+$/.test(g.storeId)&&/^steam:/i.test(g.path||""));});
     S.seedV=3;mig=true;
   }
+  if(!S.extV){S.gone={};S.store.items.forEach(function(x){if(x.vok===1)return;delete x.vok;});S.extV=1;mig=true;}
   if((S.seedV||0)<CATV){
     var have2={};S.store.items.forEach(function(x){have2[x.id]=1;});
     seeds().forEach(function(x){if(!have2[x.id])S.store.items.push(x);});
@@ -1345,7 +1347,7 @@ function resolveAny(it,cb,dry){
     itchList(gid,function(err,ups,ver){
       if(err){cb(err,null,"api");return;}
       var best=pickUpload(ups);
-      if(!best){cb("No Windows download (.zip, .exe or .msi) was found for this game on itch.io.",null,"nowin");return;}
+      if(!best){extResolve(it,gid,ups,ver,cb,dry);return;}
       var nm=(best.filename||"game.zip").replace(/[\\\/:*?"<>|]/g,"_");
       var up={src:"itch",gid:gid,uid:best.id,fn:best.filename||"",sz:best.size||0,bid:best.build_id||"",at:best.updated_at||""};
       if(dry){cb(null,{name:nm,kind:kindFor(best._e,nm),up:up});return;}
@@ -1355,6 +1357,58 @@ function resolveAny(it,cb,dry){
       });
     });
   });
+}
+/* ---------- 1.5.9: games whose itch.io download is a Google Drive or MediaFire link ---------- */
+function mfFile(u){return /^https?:\/\/(?:www\.)?mediafire\.com\/(?:file|file_premium|download)\/[\w]+/i.test(String(u||""));}
+function extOk(u){return !!driveId(u)||mfFile(u);}
+function extUrl(u){u=String(u||"").replace(/&amp;/g,"&");return driveId(u)?driveUrl(u):u;}
+function extHost(u){return driveId(u)?"Google Drive":mfFile(u)?"MediaFire":"";}
+function extName(it,gid,uid){return "xaly-"+(gid||"x")+"-"+(uid||String(it.id).replace(/[^\w-]/g,""))+".download";}
+function extResolve(it,gid,ups,ver,cb,dry){
+  var nowin="No Windows download (.zip, .exe or .msi, or a Google Drive or MediaFire link) was found for this game on itch.io.";
+  // 1) the itch.io download button points outside itch.io
+  var ex=null;
+  (ups||[]).forEach(function(u){
+    if(ex||u.storage!=="external"||(u.type&&u.type!=="default"))return;
+    var h=String(u.host||"").toLowerCase(),tr=(u.traits||[]).join(" ")+" "+(u.p_windows?"p_windows":"")+(u.p_osx?" p_osx":"")+(u.p_linux?" p_linux":"")+(u.p_android?" p_android":"");
+    if(!/drive\.google|docs\.google|drive\.usercontent|mediafire/.test(h))return;
+    if(!/p_windows/.test(tr)&&/p_osx|p_linux|p_android/.test(tr))return;
+    if(/\b(mac|osx|linux|android|apk|soundtrack|ost)\b/i.test(u.display_name||""))return;
+    ex=u;
+  });
+  if(ex){
+    var up={src:"itch",gid:gid,uid:ex.id,fn:ex.display_name||ex.filename||"",sz:0,bid:"",at:ex.updated_at||"",ext:1};
+    var kh=/mediafire/i.test(ex.host)?"MediaFire":"Google Drive";
+    if(dry){cb(null,{name:extName(it,gid,ex.id),kind:"archive",host:kh,up:up});return;}
+    itchLink(ex.id,ver,function(e2,url){
+      if(e2){cb(e2,null,"api");return;}
+      if(!extOk(url)){cb("This game downloads from "+host(url)+", which Xaly can’t download from yet.",null,"nowin");return;}
+      up.xu=url;cb(null,{url:extUrl(url),name:extName(it,gid,ex.id),kind:"archive",host:extHost(url),up:up});
+    });
+    return;
+  }
+  // 2) a Google Drive or MediaFire link in the game's description
+  http(pageUrl(it),function(ok,t){
+    if(!ok||!t){cb(nowin,null,"net");return;}
+    var link=pageExtLink(t);
+    if(!link){cb(nowin,null,"nowin");return;}
+    var up={src:"itch",gid:gid,uid:"desc",fn:link,sz:0,bid:"",at:"",ext:1,xu:link};
+    cb(null,{url:dry?"":extUrl(link),name:extName(it,gid,"d"),kind:"archive",host:extHost(link),up:up});
+  });
+}
+function pageExtLink(html){
+  var d=String(html||""),i=d.search(/formatted_description|download_instructions/);if(i>0)d=d.substr(i);
+  var re=/https?:\/\/(?:drive\.google\.com\/(?:file\/d\/[\w-]{10,}[^"'<\s]*|(?:uc|open)\?[^"'<\s]*id=[\w-]{10,}[^"'<\s]*)|drive\.usercontent\.google\.com\/download\?[^"'<\s]*id=[\w-]{10,}[^"'<\s]*|(?:www\.)?mediafire\.com\/(?:file|file_premium|download)\/[^"'<\s]+)/gi,m,all=[];
+  while((m=re.exec(d))&&all.length<12)all.push(m[0].replace(/&amp;/g,"&"));
+  if(!all.length)return "";
+  // prefer a link that mentions Windows or PC, skip ones that look like other platforms or soundtracks
+  var best="",bs=-99;
+  var prevEnd=0;
+  all.forEach(function(u,i){var at=d.indexOf(u.replace(/&/g,"&amp;"),prevEnd);if(at<0)at=d.indexOf(u,prevEnd);if(at<0)at=prevEnd;
+    var st=Math.max(prevEnd,at-120),ctx=(d.substring(st,at).replace(/<[^>]+>/g," ")+" "+(function(x){try{return decodeURIComponent(x);}catch(e){return x;}})(u)).toLowerCase(),s=-i;prevEnd=at+u.length;
+    if(/windows|\bpc\b|\.exe|win64|win32/.test(ctx))s+=20;if(/\b(mac|osx|linux|android|apk|soundtrack|ost)\b/.test(ctx))s-=30;
+    if(s>bs){bs=s;best=u;}});
+  return bs>-20?best:"";
 }
 var verQ=[],verBusy=0;
 function queueVerify(){
@@ -1897,11 +1951,11 @@ function renderDetail(){
     if(isGh(it))L.appendChild(el("div","note","This one installs the newest Windows build from its GitHub releases page. Recompiled and ported games contain no game data: you need your own legally owned copy of the original game, which the game asks for the first time you start it."));
     if(kindOf(it)==="page"&&!it.remote&&!isItch(it)&&!isGh(it)){
       L.appendChild(el("div","note","This one is listed from "+(it.source||host(it.url))+". Their pages don't hand out direct file links, so there is no one-click install yet. If you have the direct download link (ending in .zip, .exe or .msi), paste it here and the launcher will download and install it."));
-      var pr=el("div","paste"),inp=el("input");inp.setAttribute("type","text");inp.setAttribute("placeholder","Paste a direct .zip, .exe or .msi link, or a Google Drive link");
+      var pr=el("div","paste"),inp=el("input");inp.setAttribute("type","text");inp.setAttribute("placeholder","Paste a direct .zip, .exe or .msi link, or a Google Drive or MediaFire link");
       pr.appendChild(inp);pr.appendChild(btn("Use link","btn",function(){
         var vv=trim(inp.value),m=vv.split("#")[0].split("?")[0].match(/\.(zip|exe|msi)$/i);
-        if(driveId(vv)){it.page=pageUrl(it);it.url=vv;it.kind="archive";it.host="Google Drive";save();render();return;}
-        if(!/^https?:\/\//i.test(vv)||!m){toast("That link needs to end in .zip, .exe or .msi, or be a Google Drive link");return;}
+        if(extOk(vv)){it.page=pageUrl(it);it.url=vv;it.kind="archive";it.host=extHost(vv);save();render();return;}
+        if(!/^https?:\/\//i.test(vv)||!m){toast("That link needs to end in .zip, .exe or .msi, or be a Google Drive or MediaFire link");return;}
         var e=m[1].toLowerCase();it.page=pageUrl(it);it.url=vv;it.kind=e==="zip"?"archive":e==="exe"?"standalone":"installer";save();render();
       }));L.appendChild(pr);
     }
@@ -2019,8 +2073,8 @@ function install(it,spaceOk){
   if(isItch(it)||isGh(it)){if(!install.chk){install.chk=1;spaceCheck(it,function(){install.chk=0;if(!jobOf(it))addJob(newJob(it,{}));});setTimeout(function(){install.chk=0;},4000);}return;}
   var fn=fname(it.url);
   if(k==="page"||!it.url)return;
-  if(driveId(it.url)&&it.dlSize&&!spaceOk){spaceCheck(it,function(){if(!jobOf(it))install(it,1);});return;}
-  if(driveId(it.url)){addJob(newJob(it,{direct:1,url:driveUrl(it.url),fn:"xaly-"+String(it.id).replace(/[^\w-]/g,"")+(k==="standalone"?".exe":".download"),kind:k==="installer"?"installer":k==="standalone"?"standalone":"archive"}));return;}
+  if(extOk(it.url)&&it.dlSize&&!spaceOk){spaceCheck(it,function(){if(!jobOf(it))install(it,1);});return;}
+  if(extOk(it.url)){addJob(newJob(it,{direct:1,url:extUrl(it.url),fn:"xaly-"+String(it.id).replace(/[^\w-]/g,"")+(k==="standalone"?".exe":".download"),kind:k==="installer"?"installer":k==="standalone"?"standalone":"archive"}));return;}
   if(k==="standalone"&&!/\.exe$/i.test(fn)){toast("A standalone game must link straight to an .exe");return;}
   if(k==="archive"&&!/\.zip$/i.test(fn)){toast("A game archive must link straight to a .zip");return;}
   if(k==="installer"&&!/\.(exe|msi)$/i.test(fn)){toast("An installer must link straight to an .exe or .msi");return;}
@@ -2043,7 +2097,7 @@ function startJob(j){
     if(dl!==j||j.st!=="resolving")return;
     if(err){dl=null;j.resolving=0;jobFail(j,err,code==="nogame"||code==="nowin");return;}
     if(j.fn&&j.fn!==r.name){T(function(){return X.DownloadCancel("",j.fn);});j.bytes=0;}   // a different file now: start fresh
-    j.url=r.url;j.fn=r.name;j.kind=r.kind;j.up=r.up||null;
+    j.url=r.url;j.fn=r.name;j.kind=r.kind;j.up=r.up||null;if(r.host&&!j.it.host)j.it.host=r.host;
     goJob(j);
   });
 }
@@ -3225,6 +3279,7 @@ var finUp=null,guBusy=0;
 function upChanged(o,n){
   if(!o||!n)return false;
   if(o.src==="gh"||n.src==="gh")return !!n.tag&&n.tag!==o.tag;
+  if(o.ext||n.ext)return String(o.uid)!==String(n.uid)||(!!o.at&&!!n.at&&o.at!==n.at)||(!!o.xu&&!!n.xu&&extUrl(o.xu)!==extUrl(n.xu));
   if(o.bid&&n.bid)return String(o.bid)!==String(n.bid)||o.uid!==n.uid;
   return o.uid!==n.uid||o.fn!==n.fn||(!!o.sz&&!!n.sz&&o.sz!==n.sz);
 }
@@ -3959,10 +4014,14 @@ function selfTest(){   // run by the build server: proves both directions of the
     var gdo=window.onDl;window.onDl=function(i3,k3,a3,b3){
       if(i3==="selfgd"){if(k3==="p"&&+a3>0&&!r.gdDone){r.gdDone=1;r.checks.gdrive="file "+(+b3>0?Math.round(b3/1048576)+" MB":"size ?")+", type "+T(function(){return X.SniffFile("selftest-gd.bin");},"?");T(function(){return X.DownloadCancel("selfgd","selftest-gd.bin");});}
         else if(k3!=="p"&&!r.gdDone){r.gdDone=1;r.checks.gdrive=k3+" "+a3;}return;}
+      if(i3==="selfmf"){if(k3==="p"&&+a3>0&&!r.mfDone){r.mfDone=1;r.checks.mediafire="file "+(+b3>0?Math.round(b3/1048576)+" MB":"size ?")+", type "+T(function(){return X.SniffFile("selftest-mf.bin");},"?");T(function(){return X.DownloadCancel("selfmf","selftest-mf.bin");});}
+        else if(k3!=="p"&&!r.mfDone){r.mfDone=1;r.checks.mediafire=k3+" "+a3;}return;}
       if(i3==="selfhtml"){if(k3!=="p")r.checks.htmlguard=k3+" "+a3;return;}
       if(gdo)gdo(i3,k3,a3,b3);
     };
     X.DownloadEx("selfgd",driveUrl("https://drive.google.com/file/d/1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A/view"),"selftest-gd.bin","0");
+    X.DownloadEx("selfmf","https://www.mediafire.com/file/tw4ud7nmgskwcqc/FNiFG_1_%2526_2.zip/file","selftest-mf.bin","0");
+    resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
     r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
   };

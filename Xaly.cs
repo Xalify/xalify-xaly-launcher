@@ -409,7 +409,8 @@ namespace Xaly
             for (int attempt = 0; ; attempt++)
             {
                 HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
-                rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) XalyLauncher";
+                rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+                rq.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"; rq.Headers["Accept-Language"] = "en-US,en;q=0.9";
                 rq.Timeout = 30000; rq.ReadWriteTimeout = 30000; rq.AllowAutoRedirect = true; rq.CookieContainer = jar;
                 if (have > 0) rq.AddRange(have);
                 job.rq = rq;
@@ -422,6 +423,21 @@ namespace Xaly
                 using (StreamReader sr = new StreamReader(rs.GetResponseStream()))
                 { char[] b = new char[400000]; int n = sr.ReadBlock(b, 0, b.Length); page = new string(b, 0, n); }
                 bool google = host.EndsWith("google.com") || host.EndsWith("googleusercontent.com");
+                if (host.EndsWith("mediafire.com"))
+                {
+                    // MediaFire: the file page holds the real link in its download button, sometimes base64-scrambled
+                    System.Text.RegularExpressions.Match dm = System.Text.RegularExpressions.Regex.Match(page, "href=\"(https?://download\\d+\\.mediafire\\.com/[^\"]+)\"", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    string nx = dm.Success ? WebUtility.HtmlDecode(dm.Groups[1].Value) : null;
+                    if (nx == null)
+                    {
+                        System.Text.RegularExpressions.Match sm = System.Text.RegularExpressions.Regex.Match(page, "data-scrambled-url=\"([^\"]+)\"");
+                        if (sm.Success) { try { nx = Encoding.UTF8.GetString(Convert.FromBase64String(sm.Groups[1].Value)); } catch (Exception) { nx = null; } }
+                    }
+                    if (nx != null && attempt < 2 && nx.StartsWith("http")) { url = nx; continue; }
+                    if (page.IndexOf("folder", StringComparison.OrdinalIgnoreCase) >= 0 && url.IndexOf("/folder/", StringComparison.OrdinalIgnoreCase) >= 0)
+                        throw new IOException("This MediaFire link is a folder. Xaly can only download single files.");
+                    throw new IOException("MediaFire didn't give a download link. The file may have been removed.");
+                }
                 if (!google) throw new IOException("The link opened a web page instead of a game file.");
                 System.Text.RegularExpressions.Match fm = System.Text.RegularExpressions.Regex.Match(page, "<form[^>]*download-form[^>]*>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (fm.Success && attempt < 2)

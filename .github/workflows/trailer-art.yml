@@ -1,0 +1,10 @@
+name: Trailer art
+on: push
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 fetch.py
+      - uses: actions/upload-artifact@v4
+        with: {name: trailer-art, path: out, retention-days: 1}

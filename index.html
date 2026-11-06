@@ -752,7 +752,7 @@ body.tvmode #modal{z-index:160}
 .tvn{font-size:17px;font-weight:700;margin:16px 4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.75;transition:opacity .15s}
 .tvs{font-size:14px;color:#8e95ad;margin:3px 4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .15s}
 .tvt.f .tvn,.tvt.f .tvs{opacity:1}
-.tvf .tva{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#182035,#0f1422)}
+.tkf .tva{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#182035,#0f1422)}
 .tvpb{position:absolute;left:14px;right:14px;bottom:14px;height:8px;border-radius:5px;background:rgba(0,0,0,.55);overflow:hidden}.tvpb i{display:block;height:100%;background:linear-gradient(90deg,#00b8d4,#2ee6f0);border-radius:5px;transition:width .5s}
 .tvb{position:absolute;left:14px;top:14px;background:#0a84ff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:800;letter-spacing:1px;z-index:1}.tvb.pl{background:#1fbf75}.tvb.in{background:rgba(0,0,0,.6)}
 .tvempty{display:inline-block;padding:40px 36px;border:2px dashed #262e42;border-radius:18px;color:#8e95ad;font-size:18px;white-space:normal;max-width:620px}
@@ -1025,9 +1025,10 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.9";
+var VER="1.8.10";
 var NOTES=[
- {v:"1.8.9",d:"6 Nov 2026",t:["Choose the drive: installing a game asks which drive it goes on, showing the free space on each. You can also pick one drive for every game in Settings \u203A Downloads","TV mode redesigned: Home, Library, Store, Friends and Downloads tabs (LB/RB), a backdrop that slowly drifts between game art, bigger tiles, full-screen game pages with screenshots, and installing with the drive picker","The Xaly overlay glides over your game instead of flashing, and never takes focus from the game, so fullscreen games no longer minimise or change screen mode when you open it. Use the arrow keys, Enter and Esc, or a controller, while it\u2019s open"]},
+{v:"1.8.10",d:"6 Nov 2026",t:["Fixed: in TV mode, store games were invisible, so the Store tab and Home’s Popular right now row looked empty"]},
+{v:"1.8.9",d:"6 Nov 2026",t:["Choose the drive: installing a game asks which drive it goes on, showing the free space on each. You can also pick one drive for every game in Settings \u203A Downloads","TV mode redesigned: Home, Library, Store, Friends and Downloads tabs (LB/RB), a backdrop that slowly drifts between game art, bigger tiles, full-screen game pages with screenshots, and installing with the drive picker","The Xaly overlay glides over your game instead of flashing, and never takes focus from the game, so fullscreen games no longer minimise or change screen mode when you open it. Use the arrow keys, Enter and Esc, or a controller, while it\u2019s open"]},
  {v:"1.8.8",d:"6 Nov 2026",t:["Games opened on 1.8.6 that picked artwork as their logo are checked again right away and get the right art"]},
  {v:"1.8.7",d:"6 Nov 2026",t:["Fixed: the picture above the Install button no longer swaps from one image to another when you open a game. It waits for the game\u2019s page and shows the final art once","Pictures from a game\u2019s description are only used as its logo when they\u2019re the title image at the very top, so artwork and screenshots aren\u2019t mistaken for logos"]},
  {v:"1.8.6",d:"6 Nov 2026",t:["Every game page now shows real art above the Install button. Xaly uses the game\u2019s banner, or the title logo from the top of its description, or its cover art"]},
@@ -5380,7 +5381,7 @@ function tvRender(){
   if(TV.drive)tvDrive();else if(TV.sheet)tvSheet();else if(TV.menu)tvMenu();else{$("tvsheet").className="";$("tvsheet").innerHTML="";clearInterval(tvShotT);}
 }
 function tvTile(it,ri,ci){
-  var t=el("div","tvt tv"+it.k),a=el("div","tva");t._cls="tvt tv"+it.k;
+  var t=el("div","tvt tk"+it.k),a=el("div","tva");t._cls="tvt tk"+it.k;
   if(it.k==="f"){var f=it.o;a.appendChild(avatar(fname2(f),f.color,96,pstate(f),f.av||""));t.appendChild(a);
     t.appendChild(el("div","tvn",fname2(f)));t.appendChild(el("div","tvs",pstate(f)==="offline"?"Offline":f.playing?"Playing "+f.playing:pstate(f)==="away"?"Away":"Online"));}
   else{

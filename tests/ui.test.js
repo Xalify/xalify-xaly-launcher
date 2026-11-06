@@ -33,6 +33,14 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     ok(errs.length === before, name + (errs.length === before ? "" : " \u2014 " + errs.slice(before).join(" | ")));
   }
   ok(await p.evaluate(() => document.querySelectorAll("#pStore .gc").length >= 0), "store renders");
+  // TV mode: every kind of tile must actually be visible (1.8.10: store tiles were see-through)
+  const tvVis = await p.evaluate(() => {
+    var out = {}; enterTV();
+    ["home", "store", "lib"].forEach(function (t) { tvTab(t); var ts = [].slice.call(document.querySelectorAll("#tvrows .tvt"));
+      out[t] = ts.length ? ts.filter(function (x) { var o = 1, e = x; while (e && e !== document.body) { o *= +getComputedStyle(e).opacity; e = e.parentNode; } return o > 0.3 && x.getBoundingClientRect().height > 50; }).length + "/" + ts.length : "none"; });
+    exitTV(); return out;
+  });
+  ok(/^([1-9]\d*)\/\1$/.test(tvVis.store) && /^[1-9]/.test(tvVis.home), "TV mode store tiles are visible: " + JSON.stringify(tvVis));
   await b.close();
   console.log(fails ? "FAILED " + fails : "ALL PASSED"); process.exit(fails ? 1 : 0);
 })().catch(e => { console.log("EXC", e.stack); process.exit(1); });

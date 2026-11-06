@@ -415,6 +415,7 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .sdc small{display:block;color:#8d8da6;font-size:12px;margin-bottom:4px}.sdc b{font-size:15px}
 .sdlogo{height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px;margin-bottom:6px}
 .sdlimg{max-width:100%;max-height:140px;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
+.sdlogo.cov{height:auto;padding:0;margin-bottom:16px}.sdcov{width:100%;padding-top:42%;border-radius:14px;background-size:cover;background-position:center 30%;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
 .tlogo{max-width:100%;padding:6px 10px;border-radius:12px}.tlogo.box{padding:12px 16px}
 .tlm{font-weight:900;letter-spacing:2px;text-transform:uppercase;line-height:1.1;color:transparent;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));word-wrap:break-word}
 .tls{margin-top:6px;color:#d6d8ea;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.85}
@@ -984,8 +985,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.5";
+var VER="1.8.6";
 var NOTES=[
+ {v:"1.8.6",d:"6 Nov 2026",t:["Every game page now shows real art above the Install button. Xaly uses the game\u2019s banner, or the title logo from the top of its description, or its cover art"]},
  {v:"1.8.5",d:"6 Nov 2026",t:["Every game page now shows logo art above the Install button: the game\u2019s own banner from itch.io when it has one, or a title logo in the game\u2019s colours","Game pages show the developer\u2019s real name, and clicking it opens more of their games on itch.io"]},
  {v:"1.8.4",d:"6 Nov 2026",t:["Games on Google Drive that Drive won\u2019t give to apps (like Super Smash Bros. Crusade) now open in your browser automatically, and Xaly installs them as soon as the download finishes","Accounts that stay on this PC no longer need an email or password: just pick a name"]},
  {v:"1.8.3",d:"6 Nov 2026",t:["Settings redesigned: a sidebar with icons, settings grouped into clear sections, and a search box that finds any setting","General is split into General, Appearance and Notifications, so things are easier to find","Switch account: jump to another account on this PC from Settings, the menu under your name, or the Xaly logo menu","Account settings open with your profile card, showing your username, email and online status"]},
@@ -2210,7 +2212,7 @@ function nextCover(){
   });
 }
 function refreshItch(it){
-  if(!isItch(it)||refreshItch.b[it.id]||(it.cmT&&now()-it.cmT<6*3600000&&it.logoT))return;
+  if(!isItch(it)||refreshItch.b[it.id]||(it.cmT&&now()-it.cmT<6*3600000&&it.logoV===2))return;
   refreshItch.b[it.id]=1;var mine=S;
   http(pageUrl(it),function(ok,t){delete refreshItch.b[it.id];if(S!==mine||!ok||!t)return;itchExtras(it,t);save();if(it.live)saveCat();if(P.page==="detail"&&P.sel===it)renderDetail();});
 }
@@ -2722,7 +2724,11 @@ function itchLogoDev(it,t){
   var hd=t.match(/<div[^>]+id=["']header["'][^>]*>([\s\S]*?)<\/div>/i),lg="";
   if(hd){var im=hd[1].match(/<img[^>]+src=["']([^"']+)["']/i);if(im)lg=im[1].replace(/&amp;/g,"&");}
   if(lg&&!/^https:\/\//i.test(lg))lg="";
-  it.logo=lg;it.logoT=now();
+  it.logo=lg;it.logoT=now();it.logoV=2;
+  // no banner: the first images at the top of the description are usually the title logo
+  var cands=[],ds=t.match(/class=["'][^"']*formatted_description[^"']*["'][^>]*>([\s\S]{0,20000})/i);
+  if(ds){var ri=/<img[^>]+src=["'](https:\/\/[^"']+)["']/gi,mi;while((mi=ri.exec(ds[1]))&&cands.length<3)cands.push(mi[1].replace(/&amp;/g,"&"));}
+  it.logoC=cands;
   var au=t.match(/<td[^>]*>\s*Authors?\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i),names=[];
   if(au){var ra=/<a[^>]*>([\s\S]*?)<\/a>/gi,mm;while((mm=ra.exec(au[1]))&&names.length<4){var n=htmlText(mm[1]);if(n)names.push(n);}if(!names.length&&htmlText(au[1]))names.push(htmlText(au[1]));}
   if(!names.length){var ul=t.match(/<meta[^>]+name=["']author["'][^>]*content=["']([^"']+)["']/i);if(ul)names.push(htmlText(ul[1]));}
@@ -2810,9 +2816,24 @@ function renderDetail(){
 /* the game's logo art: the itch.io banner when there is one, otherwise a title logo drawn in the game's colours */
 function gameLogo(it,fr){
   var lg=el("div","sdlogo");
-  if(it.logo){var im=document.createElement("img");im.alt=it.name;im.className="sdlimg";
-    im.onerror=function(){if(im.parentNode){lg.removeChild(im);lg.appendChild(titleLogo(it,fr));}};im.src=it.logo;lg.appendChild(im);return lg;}
-  lg.appendChild(titleLogo(it,fr));return lg;
+  function art(){   // the game's own cover art, framed
+    var cv=it.image||it.hero;if(!cv){lg.appendChild(titleLogo(it,fr));return;}
+    var c=el("div","sdcov");paint(c,it.name,cv);lg.className="sdlogo cov";lg.appendChild(c);
+  }
+  function img(u,bad){var im=document.createElement("img");im.alt=it.name;im.className="sdlimg";
+    im.onerror=function(){if(im.parentNode)lg.removeChild(im);bad();};im.src=u;lg.appendChild(im);}
+  if(it.logo){img(it.logo,function(){it.logo="";art();});return lg;}
+  var cs=(it.logoC||[]).slice(),k=0;
+  if(it.logoArt===0||!cs.length){art();return lg;}
+  // try the description images: the first wide one is taken as the logo
+  (function next(){
+    if(k>=cs.length){it.logoArt=0;save();if(it.live)saveCat();art();return;}
+    var u=cs[k++],pr=new Image();
+    pr.onload=function(){var w=pr.naturalWidth||pr.width,h=pr.naturalHeight||pr.height;
+      if(w>=200&&h>0&&w/h>=1.6&&w/h<=8){it.logo=u;save();if(it.live)saveCat();if(lg.parentNode||P.sel===it)img(u,function(){it.logo="";art();});}else next();};
+    pr.onerror=next;pr.src=u;
+  })();
+  return lg;
 }
 function titleLogo(it,fr){
   var nm=String(it.name||""),w=el("div","tlogo"),main=nm,sub="";

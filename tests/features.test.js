@@ -305,6 +305,8 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   ctx.itchLogoDev(it,page);ok(it.logo==="https://img.itch.zone/aW1nLzE=/original/Logo.png"&&it.devName==="Grave Hour Studios, Léa & Co","the banner art and every author are read from the page");
   const it2={id:"lg2",name:"No Banner",url:"https://x.itch.io/nb"};ctx.itchLogoDev(it2,'<div id="header" class="header"><h1 class="game_title">No Banner</h1></div><tr><td>Author</td><td><a href="https://x.itch.io">Xavier</a></td></tr>');
   ok(it2.logo===""&&it2.devName==="Xavier"&&it2.logoT>0,"a page without a banner gets the drawn title logo");
+  const it3={id:"lg3",name:"Desc Logo",url:"https://y.itch.io/d"};ctx.itchLogoDev(it3,'<div id="header" class="header"><h1>Desc Logo</h1></div><div class="formatted_description user_formatted"><p><img src="https://img.itch.zone/a/title.png" loading="lazy"></p><p>Hi</p><img src="https://img.itch.zone/b/shot1.png"><img src="https://img.itch.zone/c/shot2.png"><img src="https://img.itch.zone/d/shot3.png"></div>');
+  ok(it3.logo===""&&it3.logoC.length===3&&it3.logoC[0]==="https://img.itch.zone/a/title.png"&&it3.logoV===2,"without a banner, the first description images are kept as logo candidates");
   ctx.P.sel=it;ctx.nav("detail");ok(reg.pDet.textContent.indexOf("Grave Hour Studios")>-1,"the game page shows the developer");}
  console.log(fails?"FAILED "+fails:"ALL PASSED");process.exit(fails?1:0);
 })().catch(e=>{console.log("EXC",e.stack);process.exit(1);});

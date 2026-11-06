@@ -356,7 +356,7 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .s2a{position:absolute;top:50%;margin-top:-22px;width:44px;height:44px;border-radius:22px;background:rgba(0,0,0,.45);color:#fff;font-size:26px;line-height:38px;padding:0;opacity:0;transition:opacity .2s}
 .spot2:hover .s2a{opacity:1}.s2a.l{left:14px}.s2a.r{right:14px}.s2a:hover{background:rgba(0,0,0,.7)}
 .shf{margin-bottom:26px}
-.shv{overflow:hidden;white-space:nowrap;margin-right:-38px;padding-right:38px}
+.shv{overflow:hidden;white-space:nowrap}
 .sht{white-space:nowrap}
 .seeall{background:transparent;color:#8fdcea;font-weight:700;font-size:13.5px;padding:6px 10px;border-radius:8px;margin-right:6px}.seeall:hover{background:#1a1a28}
 .sha{width:34px;height:34px;border-radius:17px;background:#1f1f2e;color:#fff;font-size:20px;line-height:28px;padding:0;margin-left:6px}.sha:hover{background:#2c2c42}
@@ -884,8 +884,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.7";
+var VER="1.7.8";
 var NOTES=[
+ {v:"1.7.8",d:"6 Nov 2026",t:["Fixed: with the Friends panel open, the last game in each Store row was cut off at the panel. Rows now resize their cards so only whole games show, at any window size"]},
  {v:"1.7.7",d:"6 Nov 2026",t:["Fixed: the scrollbar lagged behind when the Friends panel opened or closed. Scrollbars now move smoothly with the page"]},
  {v:"1.7.6",d:"6 Nov 2026",t:["Give feedback works now: it opens a short form right inside the launcher, and your message goes straight to the developer"]},
  {v:"1.7.5",d:"6 Nov 2026",t:["New in-game overlay (Shift+Tab): your game blurred in the background, a live session timer, your next achievement with how far to go, all achievements for the game, screenshots with a gallery, per-game notes, challenges and friends"]},
@@ -1947,13 +1948,28 @@ function shelf(title,list,onAll,grad,total){
   var sp=el("div");sp.style.flex="1 1 0%";h.appendChild(sp);
   if(onAll)h.appendChild(btn("See all","seeall",onAll));
   var vp=el("div","shv"),tr=el("div","sht");list.forEach(function(it){tr.appendChild(gcard(it));});vp.appendChild(tr);
-  function scr(d){var to=Math.max(0,Math.min(vp.scrollWidth-vp.clientWidth,vp.scrollLeft+d*(vp.clientWidth-80)));animScroll(vp,to);}
+  function scr(d){var cw=vp._cw,to=vp.scrollLeft+d*(vp._step||(vp.clientWidth-80));if(cw)to=Math.round(to/cw)*cw;to=Math.max(0,Math.min(vp.scrollWidth-vp.clientWidth,to));animScroll(vp,to);}
   h.appendChild(btn("‹","sha",function(){scr(-1);}));h.appendChild(btn("›","sha",function(){scr(1);}));
   s.appendChild(h);s.appendChild(vp);
   if(P.shs&&P.shs[title])setTimeout(function(){vp.scrollLeft=P.shs[title];},0);
   vp.onscroll=function(){P.shs=P.shs||{};P.shs[title]=vp.scrollLeft;};
   return s;
 }
+/* 1.7.8: size shelf cards so every row shows whole cards only, whatever room the page has (friends panel open or not) */
+var fitW=-1;
+function fitShelves(){
+  var pg=$("pStore");if(!pg)return;var vp=pg.querySelector(".shv");if(!vp)return;
+  var W=vp.clientWidth;if(!W)return;
+  if(W!==fitW){
+    fitW=W;var n=Math.max(2,Math.round((W+16)/(232+16))),w=Math.floor((W+16)/n)-16,h=Math.round(w*184/232);
+    var st=$("fitcss");if(!st){st=document.createElement("style");st.id="fitcss";document.getElementsByTagName("head")[0].appendChild(st);}
+    var css="#pStore .shv .gc{width:"+w+"px}#pStore .shv .gca{height:"+h+"px}";
+    if(st.styleSheet)st.styleSheet.cssText=css;else st.textContent=css;
+    fitShelves.cw=w+16;fitShelves.n=n;
+  }
+  var l=pg.querySelectorAll(".shv"),i;for(i=0;i<l.length;i++){var v=l[i];if(v._cw===fitShelves.cw)continue;v._cw=fitShelves.cw;v._step=fitShelves.cw*fitShelves.n;v.scrollLeft=Math.round(v.scrollLeft/v._cw)*v._cw;}
+}
+try{window.addEventListener("resize",function(){fitShelves();});}catch(e){}
 function spotPicks(list){
   var ok=list.filter(function(x){return x.image||x.hero;}),ids=P.spl||[],have={},out=[],i;
   ok.forEach(function(x){have[x.id]=x;});
@@ -2065,7 +2081,7 @@ function renderStore(keep){
       else if(f.lf&&LFU[f.lf]){var lb=btn(liveMore[f.lf]?"Loading\u2026":"Load more from itch.io","btn",function(){lb.textContent="Loading\u2026";loadMoreLive(f.lf,function(c,n){P.lim=lim+60;renderStore(true);if(c<=0)toast("That\u2019s everything itch.io has in this list right now");});});mr.appendChild(lb);}
       body.appendChild(mr);}
   }
-  pg.appendChild(body);pg.scrollTop=top;
+  pg.appendChild(body);fitW=-1;fitShelves();pg.scrollTop=top;
 }
 function openDetail(it){it=directFor(it)||it;P.sel=it;P.si=0;P.dtab="ov";nav("detail");refreshItch(it);}
 function host(u){return (u||"").replace(/^[a-z]+:\/\//i,"").split("/")[0];}
@@ -3226,7 +3242,7 @@ function shareGame(it){
   },null);
 }
 function storeById(id){var a=allStore(),i;for(i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
-function setFP(o){$("fp").className=o?"open":"";$("fbtn").className=o?"on":"";$("main").className=o?"fopen":"";if(typeof sbFollow==="function")sbFollow(450);}
+function setFP(o){$("fp").className=o?"open":"";$("fbtn").className=o?"on":"";$("main").className=o?"fopen":"";if(typeof sbFollow==="function")sbFollow(450);setTimeout(fitShelves,240);}
 function sendRc(f){   // delivery and read receipts, one per conversation at a time
   if(!f.lastIn)return;var rd=chatOpen()&&P.chat===f.code&&S.set.readRc!==0;
   if(rd&&f.rdSent!==f.lastIn){f.rdSent=f.dlSent=f.lastIn;frSend(f,{t:"rc",s:"r",id:f.lastIn});}
@@ -3400,6 +3416,7 @@ function sbUpd(c,active){
   if(active){if(s.bar.className.indexOf("drag")<0)s.bar.className="sbar act";clearTimeout(s.t);s.t=setTimeout(function(){if(s.bar.className.indexOf("drag")<0)s.bar.className="sbar";},1000);}
 }
 function sbTick(){
+  try{fitShelves();}catch(e){}
   var l=document.querySelectorAll(SBSEL),i;for(i=0;i<l.length;i++){sbAttach(l[i]);sbUpd(l[i]);}
   sbL=sbL.filter(function(c){if(document.body.contains(c))return true;if(c._sb&&c._sb.bar.parentNode)c._sb.bar.parentNode.removeChild(c._sb.bar);return false;});
 }

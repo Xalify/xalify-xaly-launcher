@@ -1,1 +1,1 @@
-- **Fixed:** the scrollbar lagged behind when you opened or closed the Friends panel. Scrollbars now move smoothly with the page during any slide or resize.
+- **Fixed:** with the Friends panel open, the last game in each Store row was cut off at the panel's edge. Store rows now resize their cards so only whole games show, whether the panel is open or not and at any window size.

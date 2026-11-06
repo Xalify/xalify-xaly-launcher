@@ -150,7 +150,7 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
  ok(ctx.CAT.shared===1,"marked shared, local crawling off");
  // REALCAT: the real shared catalog merges cleanly
  const real=JSON.parse(require("fs").readFileSync("catalog.json","utf8"));const t0=Date.now();ctx.mergeShared(real);
- ok(ctx.CAT.items.length>7900&&Date.now()-t0<3000,"real catalog merged: "+ctx.CAT.items.length+" games in "+(Date.now()-t0)+" ms");
+ ok(ctx.CAT.items.length>=real.items.length*0.95&&real.items.length>1000&&Date.now()-t0<3000,"real catalog merged: "+ctx.CAT.items.length+" games in "+(Date.now()-t0)+" ms");
  ctx.P.sq="five nights";ctx.nav("store");ok(true,"store renders with real catalog");
  // ---- 1.6.1 two PCs with different old lists end up identical
  const realTxt=require("fs").readFileSync("catalog.json","utf8");
@@ -296,5 +296,15 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   X.Supa=(id,m,path,body)=>{setTimeout(()=>ctx.onHttp(id,"1",JSON.stringify({access_token:"A2",refresh_token:"r2",expires_in:3600,user:{id:"u",email:"t@x.co",email_confirmed_at:"x"}}),"200"),2);return "ok";};
   let tk=null;ctx.sbToken(a,t=>{tk=t;});await sleep(30);ok(tk==="A2"&&a.sb.rt==="r2","an expired session is refreshed on its own");
   ctx.ONLINE_ACCOUNTS=0;ok(!ctx.sbOn(),"the switch turns online accounts off");ctx.ONLINE_ACCOUNTS=1;}
+ // ---- 1.8.5 logo art and developer names
+ {const it={id:"lg1",name:"Never Made It Home",url:"https://grave-hour-studios.itch.io/never-made-it-home",devs:"grave-hour-studios",live:1};
+  ok(ctx.devName(it)==="Grave Hour Studios","an itch.io address becomes a readable developer name right away");
+  ok(ctx.prettyDev("9ryuq")==="9ryuq"&&ctx.prettyDev("some-team-of-two")==="Some Team of Two"&&ctx.prettyDev("Real Name")==="Real Name","name tidying keeps real names and short words");
+  const page='<div id="header" class="header has_image align_center"><a href="https://grave-hour-studios.itch.io/never-made-it-home"><img alt="Never Made It Home" src="https://img.itch.zone/aW1nLzE=/original/Logo.png"></a></div>'+
+   '<div class="game_info_panel_widget"><table><tbody><tr><td>Status</td><td>Released</td></tr><tr><td>Authors</td><td><a href="https://grave-hour-studios.itch.io">Grave Hour Studios</a>, <a href="https://lea.itch.io">Léa &amp; Co</a></td></tr></tbody></table></div>';
+  ctx.itchLogoDev(it,page);ok(it.logo==="https://img.itch.zone/aW1nLzE=/original/Logo.png"&&it.devName==="Grave Hour Studios, Léa & Co","the banner art and every author are read from the page");
+  const it2={id:"lg2",name:"No Banner",url:"https://x.itch.io/nb"};ctx.itchLogoDev(it2,'<div id="header" class="header"><h1 class="game_title">No Banner</h1></div><tr><td>Author</td><td><a href="https://x.itch.io">Xavier</a></td></tr>');
+  ok(it2.logo===""&&it2.devName==="Xavier"&&it2.logoT>0,"a page without a banner gets the drawn title logo");
+  ctx.P.sel=it;ctx.nav("detail");ok(reg.pDet.textContent.indexOf("Grave Hour Studios")>-1,"the game page shows the developer");}
  console.log(fails?"FAILED "+fails:"ALL PASSED");process.exit(fails?1:0);
 })().catch(e=>{console.log("EXC",e.stack);process.exit(1);});

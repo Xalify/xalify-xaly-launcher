@@ -413,11 +413,17 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .sdg{display:flex;flex-wrap:wrap;margin:-4px 0 6px}
 .sdc{background:#181824;border-radius:12px;padding:14px 18px;margin:0 12px 12px 0;min-width:150px}
 .sdc small{display:block;color:#8d8da6;font-size:12px;margin-bottom:4px}.sdc b{font-size:15px}
-.sdlogo{height:130px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px}
+.sdlogo{height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px;margin-bottom:6px}
+.sdlimg{max-width:100%;max-height:140px;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
+.tlogo{max-width:100%;padding:6px 10px;border-radius:12px}.tlogo.box{padding:12px 16px}
+.tlm{font-weight:900;letter-spacing:2px;text-transform:uppercase;line-height:1.1;color:transparent;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));word-wrap:break-word}
+.tls{margin-top:6px;color:#d6d8ea;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.85}
 .sdlogo span{font-size:26px;font-weight:800;letter-spacing:5px;text-transform:uppercase;line-height:1.25;text-shadow:0 2px 14px rgba(0,0,0,.6)}
 .sdbd{display:flex;align-items:center;border:1px solid #2a2a3c;border-radius:12px;padding:12px 14px;margin-bottom:14px;background:#14141e}
 .sdbi{width:40px;height:40px;border-radius:9px;margin-right:12px;text-align:center;line-height:40px;font-weight:800;font-size:15px;color:#fff;flex:0 0 auto}
-.sdbd b{display:block}.sdbd span{display:block;color:#9a9ab0;font-size:12.5px;margin-top:2px}
+.sdbd>div:not(.sdbi){flex:1 1 0%;min-width:0}.sdbd b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sdbd span{display:block;color:#9a9ab0;font-size:12.5px;margin-top:2px}
+.sdby{display:block;color:#7d7d96;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:1px}
+.sdbd.link{cursor:pointer}.sdbd.link:hover{border-color:rgba(46,230,240,.45)}.sdbd .sdgo{flex:0 0 auto;color:#6f6f88;font-size:22px;margin:0 0 0 8px}
 .sdtg{display:inline-block;background:#2a2a3c;border-radius:14px;padding:4px 12px;font-size:12px;font-weight:700;margin:0 8px 14px 0}
 .sdpr{font-size:22px;font-weight:800;margin:0 0 16px}
 .sdr .pri{width:100%;padding:14px 10px;font-size:15px}
@@ -978,8 +984,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.4";
+var VER="1.8.5";
 var NOTES=[
+ {v:"1.8.5",d:"6 Nov 2026",t:["Every game page now shows logo art above the Install button: the game\u2019s own banner from itch.io when it has one, or a title logo in the game\u2019s colours","Game pages show the developer\u2019s real name, and clicking it opens more of their games on itch.io"]},
  {v:"1.8.4",d:"6 Nov 2026",t:["Games on Google Drive that Drive won\u2019t give to apps (like Super Smash Bros. Crusade) now open in your browser automatically, and Xaly installs them as soon as the download finishes","Accounts that stay on this PC no longer need an email or password: just pick a name"]},
  {v:"1.8.3",d:"6 Nov 2026",t:["Settings redesigned: a sidebar with icons, settings grouped into clear sections, and a search box that finds any setting","General is split into General, Appearance and Notifications, so things are easier to find","Switch account: jump to another account on this PC from Settings, the menu under your name, or the Xaly logo menu","Account settings open with your profile card, showing your username, email and online status"]},
  {v:"1.8.2",d:"6 Nov 2026",t:["New sign-in screen: sign in and create an account on one page, with a Xaly panel full of games","Usernames are checked as you type, passwords show how strong they are, and an eye button shows what you typed","Email codes go in six boxes that move on by themselves; paste the whole code at once if you like","Pick your account from a cleaner list, and every mistake is explained right under the field it\u2019s about"]},
@@ -2175,6 +2182,7 @@ function itchExtras(it,t){
   }
   var od=t.match(/<meta[^>]+property=["']og:description["'][^>]*content=["']([^"']*)["']/i);
   if(od&&it.live){var dd=htmlText(od[1]);if(dd&&dd.length>(it.tagline||"").length)it.desc=dd+(frOf(it)!=="Indie"?FAN:"");}
+  itchLogoDev(it,t);
   var rv=t.match(/"ratingValue"\s*:\s*"?([\d.]+)/),rc=t.match(/"ratingCount"\s*:\s*"?(\d+)/);
   if(rv)it.rt={v:Math.min(5,+rv[1]),n:rc?+rc[1]:0};
   var buy=t.match(/<span class="dollars[^"]*"[^>]*>([^<]*)<\/span>/i);
@@ -2202,7 +2210,7 @@ function nextCover(){
   });
 }
 function refreshItch(it){
-  if(!isItch(it)||refreshItch.b[it.id]||(it.cmT&&now()-it.cmT<6*3600000))return;
+  if(!isItch(it)||refreshItch.b[it.id]||(it.cmT&&now()-it.cmT<6*3600000&&it.logoT))return;
   refreshItch.b[it.id]=1;var mine=S;
   http(pageUrl(it),function(ok,t){delete refreshItch.b[it.id];if(S!==mine||!ok||!t)return;itchExtras(it,t);save();if(it.live)saveCat();if(P.page==="detail"&&P.sel===it)renderDetail();});
 }
@@ -2709,8 +2717,26 @@ function sdSlides(it){
   if(!a.length)a.push({t:"",f:""});return a;
 }
 function sdRow(l,v){var r=el("div","ir");r.appendChild(el("span","",l));r.appendChild(el("span","",v));return r;}
+/* 1.8.5: the page's banner (most itch games put their logo art there) and the real author names */
+function itchLogoDev(it,t){
+  var hd=t.match(/<div[^>]+id=["']header["'][^>]*>([\s\S]*?)<\/div>/i),lg="";
+  if(hd){var im=hd[1].match(/<img[^>]+src=["']([^"']+)["']/i);if(im)lg=im[1].replace(/&amp;/g,"&");}
+  if(lg&&!/^https:\/\//i.test(lg))lg="";
+  it.logo=lg;it.logoT=now();
+  var au=t.match(/<td[^>]*>\s*Authors?\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i),names=[];
+  if(au){var ra=/<a[^>]*>([\s\S]*?)<\/a>/gi,mm;while((mm=ra.exec(au[1]))&&names.length<4){var n=htmlText(mm[1]);if(n)names.push(n);}if(!names.length&&htmlText(au[1]))names.push(htmlText(au[1]));}
+  if(!names.length){var ul=t.match(/<meta[^>]+name=["']author["'][^>]*content=["']([^"']+)["']/i);if(ul)names.push(htmlText(ul[1]));}
+  if(names.length)it.devName=names.join(", ").substr(0,80);
+}
+/* turn an itch.io address like "grave-hour-studios" into "Grave Hour Studios" until the real name loads */
+function prettyDev(slug){
+  var s0=String(slug||"");if(!/^[a-z0-9][a-z0-9_-]*$/.test(s0))return s0;
+  return s0.split(/[-_]+/).filter(function(w){return w;}).map(function(w){return w.length<=2&&/^(of|by|in|on|to|an|a|the|and)$/.test(w)?w:w.charAt(0).toUpperCase()+w.substr(1);}).join(" ").replace(/^./,function(c){return c.toUpperCase();});
+}
+function devSlug(it){var m=(pageUrl(it)||it.url||"").match(/^https?:\/\/([^.\/]+)\.itch\.io\//i);return m?m[1].toLowerCase():"";}
 function devName(it){
-  if(it.devs)return it.devs;var m=(pageUrl(it)||it.url||"").match(/^https?:\/\/([^.\/]+)\.itch\.io\//i);if(m)return m[1];
+  if(it.devName)return it.devName;
+  if(it.devs)return prettyDev(it.devs);var sl=devSlug(it);if(sl)return prettyDev(sl);
   if(it.gh)return it.gh.split("/")[0];return it.source||host(it.url)||"—";
 }
 function renderDetail(){
@@ -2756,10 +2782,12 @@ function renderDetail(){
     L.appendChild(el("div","sdh","System requirements"));L.appendChild(reqCard(it));
   }
   /* right: buy box */
-  var lg=el("div","sdlogo"),ln=el("span","",it.name);ln.style.backgroundImage=frGrad(fr);ln.style.color="#fff";lg.appendChild(ln);R.appendChild(lg);
-  var bd=el("div","sdbd"),bi=el("div","sdbi",fr.charAt(0));bi.style.background=frGrad(fr);bd.appendChild(bi);
-  var bt=el("div");bt.appendChild(el("b","",fr==="Recomp"?"Native PC port":fr==="Indie"?"Indie game":"Fan game"));
-  bt.appendChild(el("span","",fr==="Recomp"?"Needs your own copy of the original game":"Not affiliated with the original rights holders"));bd.appendChild(bt);R.appendChild(bd);
+  R.appendChild(gameLogo(it,fr));
+  var dn=devName(it),bd=el("div","sdbd"),bi=el("div","sdbi",(dn||fr).replace(/[^A-Za-z0-9]/g,"").charAt(0).toUpperCase()||fr.charAt(0));bi.style.background=frGrad(fr);bd.appendChild(bi);
+  var bt=el("div");bt.appendChild(el("small","sdby","Developer"));bt.appendChild(el("b","",dn&&dn!=="\u2014"?dn:"Unknown developer"));
+  bt.appendChild(el("span","",fr==="Recomp"?"Native PC port \u00B7 needs your own copy of the original game":fr==="Indie"?"Indie game":"Fan game \u00B7 not affiliated with the original rights holders"));bd.appendChild(bt);
+  var dsl=devSlug(it);if(dsl){bd.className+=" link";bd.title="See more games by "+dn+" on itch.io";bd.appendChild(el("span","sdgo","\u203A"));bd.onclick=function(){T(function(){return X.Open("https://"+dsl+".itch.io");});};}
+  R.appendChild(bd);
   R.appendChild(el("span","sdtg",kindOf(it)==="page"||it.host?"Direct download":KINDS[kindOf(it)]));if(it.host)R.appendChild(el("span","sdtg","via "+it.host));
   if(it.genre)R.appendChild(el("span","sdtg",it.genre));
   R.appendChild(el("div","sdpr",priceOf(it)));
@@ -2778,6 +2806,21 @@ function renderDetail(){
   R.appendChild(inf);
   if(!it.remote)R.appendChild(btn("Edit store entry","wb",function(){storeForm(it);}));
   setDetailBtn();
+}
+/* the game's logo art: the itch.io banner when there is one, otherwise a title logo drawn in the game's colours */
+function gameLogo(it,fr){
+  var lg=el("div","sdlogo");
+  if(it.logo){var im=document.createElement("img");im.alt=it.name;im.className="sdlimg";
+    im.onerror=function(){if(im.parentNode){lg.removeChild(im);lg.appendChild(titleLogo(it,fr));}};im.src=it.logo;lg.appendChild(im);return lg;}
+  lg.appendChild(titleLogo(it,fr));return lg;
+}
+function titleLogo(it,fr){
+  var nm=String(it.name||""),w=el("div","tlogo"),main=nm,sub="";
+  var cut=nm.match(/^(.{3,}?)\s*(?:[:\-\u2013\u2014|]|\s(?=v?\d[\d.]*\w*$))\s*(.+)$/i);if(cut&&cut[2].length<=40){main=cut[1];sub=cut[2];}
+  var big=el("div","tlm",main);big.style.fontSize=(main.length>22?22:main.length>14?28:main.length>8?34:40)+"px";
+  if(ENGINE==="ie"){big.style.color="#fff";w.style.background=frGrad(fr);w.className+=" box";}else big.style.backgroundImage=frGrad(fr);
+  w.appendChild(big);if(sub)w.appendChild(el("div","tls",sub));
+  return w;
 }
 function revDate(d){if(!d)return "";var m=d.match(/^(\d{4})-(\d\d)-(\d\d)/);if(!m)return d;var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return M[+m[2]-1]+" "+(+m[3])+", "+m[1];}
 function reviewBox(it,max){
@@ -5820,6 +5863,8 @@ function selfTest(){   // run by the build server: proves both directions of the
     };
     resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
+    r.checks.itchlogo="waiting";var lgOut=[],lgUrls=["https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a","https://cavemanon.itch.io/volcaldera-ashfall","https://seenthai.itch.io/this-role-you","https://9ryuq.itch.io/morihime","https://grave-hour-studios.itch.io/never-made-it-home"];
+    lgUrls.forEach(function(u,ix){http(u,function(ok,t){var o={};if(ok&&t)itchLogoDev(o,t);lgOut[ix]=u.split("/")[3].substr(0,14)+"="+(ok?"dev:"+(o.devName||"none")+",logo:"+(o.logo?"yes":"no"):"fetch failed");if(lgOut.filter(function(x){return x;}).length===lgUrls.length)r.checks.itchlogo=lgOut.join(" | ");});});
     r.checks.gdrive="waiting";X.DownloadEx("selfgd","https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download&authuser=0","selftest-gd.bin","0");
     // speed limit: 512 KB/s for 4 seconds, then the normal download test runs unlimited
     var limB=0,limT0=0,lo=window.onDl;X.SetSpeedLimit("524288");X.KeepAwake("1");

@@ -13,6 +13,6 @@ jobs:
           openssl rand -hex 32 > k.txt
           openssl enc -aes-256-cbc -pbkdf2 -salt -in art.tgz -out art.bin -pass file:k.txt
           openssl pkeyutl -encrypt -pubin -inkey pub.pem -in k.txt -out k.bin
-          rm -rf out art.tgz k.txt
+          split -b 45m art.bin art.part. && rm -rf out art.tgz k.txt art.bin
           git config user.name "github-actions" && git config user.email "actions@github.com"
-          git add art.bin k.bin && git commit -qm "encrypted art" && git push origin HEAD:trailer-art
+          git add art.part.* k.bin && git commit -qm "encrypted art" && git push origin HEAD:trailer-art

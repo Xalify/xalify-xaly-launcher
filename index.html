@@ -981,12 +981,12 @@ function seeds(){
    ["i20", "Indie", "Horror", "DO NOT PLAY", "You were warned.", "A short experimental horror game.", "https://experimentalphase.itch.io/do-not-play"],
    ["i21", "Indie", "Horror", "We Found It On itch.io", "Something was found.", "A found-footage style horror game.", "https://enderactually.itch.io/we-found-it-on-itchio"],
    ["i22", "Indie", "Adventure", "Lost Constellation", "A winter story from the Night in the Woods team.", "A free story from the Night in the Woods universe, made by Infinite Fall.", "https://finji.itch.io/lost-constellation"],
-   ["ssb1", "Smash", "Fighting", "Super Smash Bros. Crusade", "The fan-made Smash Bros. with a huge roster.", "A free Super Smash Bros. fan game in development since 2008. Pick from a huge roster of fighters from Nintendo and other classic series and battle friends locally or online. Made in GameMaker by the Crusade team. This is version 0.9.6a, downloaded from the team's Google Drive.", "https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a", "https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download"],
+   ["ssb1", "Smash", "Fighting", "Super Smash Bros. Crusade", "The fan-made Smash Bros. with a huge roster.", "A free Super Smash Bros. fan game in development since 2008. Pick from a huge roster of fighters from Nintendo and other classic series and battle friends locally or online. Made in GameMaker by the Crusade team. This is version 0.9.6a, downloaded from the team's Google Drive.", "https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a", "https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download", 1739587584],
    ["i23", "Indie", "Adventure", "Hello Charlotte", "A surreal horror adventure.", "A dark, surreal RPG Maker horror adventure.", "https://etherane.itch.io/hello-charlotte"]];
   return L.map(function(a){
     var gh=/^gh:/.test(a[6]),o={id:a[0],fr:a[1],genre:a[2],name:a[3],source:gh?"GitHub":"itch.io",tagline:a[4],desc:a[5]+((a[1]==="Indie"||a[1]==="Recomp")?"":FAN),url:gh?"https://github.com/"+a[6].substr(3):a[6],price:"Free",kind:"page",featured:true,image:gh?ghImg(a[6].substr(3)):"",launch:""};
     if(gh)o.gh=a[6].substr(3);
-    if(a[7]){o.page=a[6];o.url=a[7];o.kind="archive";o.host=/google\./.test(a[7])?"Google Drive":"";}
+    if(a[7]){o.page=a[6];o.url=a[7];o.kind="archive";o.host=/google\./.test(a[7])?"Google Drive":"";if(a[8])o.dlSize=a[8];}
     return o;
   });
 }
@@ -1016,6 +1016,7 @@ function fixState(){
     seeds().forEach(function(x){if(!have2[x.id])S.store.items.push(x);});
     var sid={};seeds().forEach(function(x){sid[x.id]=1;});
     S.store.items.forEach(function(x){if(sid[x.id])x.auto=1;});
+    seeds().forEach(function(x){if(x.dlSize)S.store.items.forEach(function(y){if(y.id===x.id&&!y.dlSize)y.dlSize=x.dlSize;});});
     S.seedV=CATV;mig=true;
   }
   S.store.items.forEach(function(x){if(x.gh&&!x.image)x.image=ghImg(x.gh);});
@@ -1999,12 +2000,13 @@ function loadDQ(){
     DQ.push(j);
   });
 }
-function install(it){
+function install(it,spaceOk){
   var k=kindOf(it),ex=jobOf(it);
   if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else{toast(it.name+" is already in your downloads");}return;}
   if(isItch(it)||isGh(it)){if(!install.chk){install.chk=1;spaceCheck(it,function(){install.chk=0;if(!jobOf(it))addJob(newJob(it,{}));});setTimeout(function(){install.chk=0;},4000);}return;}
   var fn=fname(it.url);
   if(k==="page"||!it.url)return;
+  if(driveId(it.url)&&it.dlSize&&!spaceOk){spaceCheck(it,function(){if(!jobOf(it))install(it,1);});return;}
   if(driveId(it.url)){addJob(newJob(it,{direct:1,url:driveUrl(it.url),fn:"xaly-"+String(it.id).replace(/[^\w-]/g,"")+(k==="standalone"?".exe":".download"),kind:k==="installer"?"installer":k==="standalone"?"standalone":"archive"}));return;}
   if(k==="standalone"&&!/\.exe$/i.test(fn)){toast("A standalone game must link straight to an .exe");return;}
   if(k==="archive"&&!/\.zip$/i.test(fn)){toast("A game archive must link straight to a .zip");return;}

@@ -1,3 +1,4 @@
-- **Fixed: ugly scrollbars.** The old Windows scrollbars with arrows showed up in the library, drop-down menus, pop-ups and the login screen. Every list now uses the slim Xaly scrollbar, and the View menu is no longer cut off.
-- **Fixed: single .exe games** couldn't be uninstalled or moved to another drive. They now get their own folder like every other game, and ones you already have are moved there automatically the next time you open Xaly.
-- Fixed: updating a single .exe game after moving it to another drive.
+- **New in the Store: Super Smash Bros. Crusade** (ver. 0.9.6a), the fan-made Smash with a huge roster. It's a 1.66 GB download straight from the Crusade team's Google Drive.
+- **Google Drive downloads:** games hosted on Google Drive now download properly, including big files where Google shows its "can't scan for viruses" page.
+- **.7z and .rar games** can now be installed, not just .zip. Xaly uses 7-Zip if you have it, otherwise Windows' own unpacker.
+- If a download link opens a web page instead of a game, Xaly now stops with a clear message instead of failing when installing.

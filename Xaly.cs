@@ -889,6 +889,8 @@ namespace Xaly
             if (arch == "x86") return Path.Combine(win, "SysWOW64");
             return Path.Combine(win, Environment.Is64BitProcess ? "System32" : "Sysnative");
         }
+        // read-only: the DLLs an .exe loads at start (used by the self-test to prove the reader works)
+        public string ImportList(string exe) { try { string a; List<string> l = PeImports(exe, out a); return a + ":" + string.Join(",", l.ToArray()); } catch (Exception ex) { return "ERR:" + ex.Message; } }
         // returns the runtimes the game is missing, like "vc14-x64,dx", or "" when nothing known is missing
         public string NeedsRuntimes(string exe)
         {

@@ -759,6 +759,7 @@ html,body{overflow:hidden}
 .fgl{max-height:340px;overflow-y:auto;margin:0 -6px 14px;padding:0 6px}
 #mbox label.fgr,.fgr{display:flex!important;flex-direction:row;align-items:center;padding:8px 6px;margin:0;border-radius:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400;color:#e8ebf5}.fgr:hover{background:#151a26}.fgr.have{opacity:.5;cursor:default}
 #mbox .fgr input{width:18px!important;height:18px;min-width:18px;margin:0 12px 0 0;padding:0;flex:0 0 auto;display:inline-block;accent-color:#2ee6f0}
+.fgth{width:64px;height:36px;border-radius:6px;flex:0 0 auto;margin-right:12px;background-size:cover;background-position:center}
 .fgt{min-width:0}.fgt b{display:block;font-size:13.5px}.fgt span{display:block;color:#7d8299;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px}
 .lemail+.lemail{margin-left:10px}
 </style>
@@ -814,8 +815,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.7";
+var VER="1.6.8";
 var NOTES=[
+ {v:"1.6.8",d:"5 Nov 2026",t:["Find games on PC now looks for itch.io games you downloaded yourself (Downloads, Desktop, Documents, Program Files, Games folders, the itch.io app) and adds them with the Store\u2019s name and cover art. Steam, Epic and GOG are no longer scanned","Games from the Store that you download outside Xaly, like Super Smash Bros. Crusade, are added to your library by themselves","A downloaded .zip of a Store game can be unpacked and installed straight from Find games on PC"]},
  {v:"1.6.7",d:"5 Nov 2026",t:["Find games on your PC: Library \u203A Find games on PC adds your Steam, Epic Games, GOG and itch.io app games, plus any folder you pick, in one go","Account backup: save your library, play time, achievements and friends to a password-protected file and restore it on another PC (Settings \u203A Account, or the sign-in screen)","Desktop and Start menu shortcuts for any game, from its \u22EF menu. They start the game through Xaly, so play time still counts","Xaly Launcher now shows up in Windows Settings \u203A Apps with a proper uninstaller, and in the Start menu"]},
  {v:"1.6.6",d:"5 Nov 2026",t:["Fixed: the launcher froze over and over while the Store was filling in games, covers and screenshots. Covers now update in place, and the Store page is rebuilt far less often and faster"]},
  {v:"1.6.5",d:"5 Nov 2026",t:["Download speed limit: cap how fast games download, in Settings \u203A Downloads or right on the Downloads page","Download schedule: only download at set hours, like overnight. Xaly keeps the PC awake while downloads wait or run, and you can still start one right away","Settings \u203A Storage now lists games on every drive, including ones you moved, and each game has a Move button"]},
@@ -1110,7 +1112,7 @@ function startSession(a){
   loadDQ();setTimeout(function(){pumpQ();paintDl();},4000);
   if(!S.achInit){S.games.forEach(function(g){checkAch(g,true);});S.achInit=1;save();}
   queueCovers();loadFeed();syncNow();queueVerify();setTimeout(function(){checkGameUpdates(false);},20000);
-  setTimeout(checkRestored,2500);
+  setTimeout(checkRestored,2500);setTimeout(autoFind,25000);
   if(pendingCmd){var pc=pendingCmd;pendingCmd="";setTimeout(function(){runCmd(pc);},1500);}
   if(S.set.tvStart)setTimeout(function(){enterTV();},300);setTimeout(function(){refreshLive(false);},4000);
 }
@@ -2695,7 +2697,7 @@ function renderLib(){
   var fb=el("button","lpill");fb.innerHTML=ic("filter",18)+"Filter and sort";
   fb.onclick=function(e){stp(e);var it=[{h:"Sort by"}];SORTS.forEach(function(s){it.push({t:s[1],on:(P.sort||"name")===s[0],fn:function(){P.sort=s[0];renderLib();}});});ctxMenu(fb,it);};
   h.appendChild(fb);
-  var fg=btn("Find games on PC","lpill",function(){findGames("");});fg.style.marginLeft="12px";fg.title="Add games from Steam, Epic, GOG, the itch.io app and your own folders";h.appendChild(fg);
+  var fg=btn("Find games on PC","lpill",function(){findGames("");});fg.style.marginLeft="12px";fg.title="Add itch.io games you downloaded yourself, with their cover art";h.appendChild(fg);
   var ab=btn("+  Add game","pri",function(){gameForm(null);});ab.style.marginLeft="10px";h.appendChild(ab);pg.appendChild(h);
   var list=libList();
   if(!S.games.length){var m=el("div","msg","Your library is empty.\nGet a game from the Store, or let Xaly find the games already on this PC.");m.style.whiteSpace="pre-line";pg.appendChild(m);
@@ -2790,7 +2792,7 @@ function buildGameDetail(c,g){
     it.push({sep:1});
     if(gameDir(g))it.push({t:"Move to another drive\u2026",fn:function(){moveGame(g);}});
     if(gameDir(g))it.push({t:"Uninstall (delete files)",cls:"dng",fn:function(){uninstallGame(g);}});
-    it.push({t:"Remove from library (keep files)",cls:"dng",fn:function(){S.games.splice(S.games.indexOf(g),1);if(P.cur===g.id)P.cur=null;if(P.page==="game")P.page="lib";save();render();}});
+    it.push({t:"Remove from library (keep files)",cls:"dng",fn:function(){if(g.found){S.scanIgnore=S.scanIgnore||{};S.scanIgnore[String(g.path||"").toLowerCase()]=1;if(g.storeId)S.scanIgnore[g.storeId]=1;}S.games.splice(S.games.indexOf(g),1);if(P.cur===g.id)P.cur=null;if(P.page==="game")P.page="lib";save();render();}});
     ctxMenu(mb,it);};
   bar.appendChild(mb);
   if(gameDir(g)){var mvb=btn(g.moving?"Moving\u2026 "+(g.moving.pct>=0?g.moving.pct+"%":""):"Move","lpill",function(){moveGame(g);});mvb.style.marginLeft="0";bar.appendChild(mvb);
@@ -3955,54 +3957,100 @@ function friendAlert(f,kind,game){
   if(S.set.sounds!==0&&S.set.nSound!==0)playSnd("friend");
   if(!popup(title,msg,"friend:"+f.code))showCard({id:rid(),k:"ok",title:title,msg:msg,gid:"",img:"",t:now()});
 }
-/* ---------- 1.6.7: find games on this PC ---------- */
+/* ---------- 1.6.8: find itch.io games already on this PC ----------
+   The launcher looks for game folders, .exe files and .zip downloads in Downloads, Desktop, Documents, Program Files,
+   Games folders and the itch.io app, and matches them against the Store's games by name. Matches join the library
+   with the Store's name and cover art. Sure matches are added automatically. */
+var NOISE={demo:1,windows:1,win:1,win32:1,win64:1,x64:1,x86:1,pc:1,build:1,beta:1,alpha:1,release:1,final:1,game:1,the:1,setup:1,portable:1,full:1,fixed:1,patched:1,update:1,latest:1,new:1,official:1,launcher:1,exe:1,zip:1,copy:1,en:1,english:1,itch:1,io:1,itchio:1};
+function normName(t){
+  t=String(t||"").toLowerCase().replace(/&amp;/g,"&").replace(/['’`]/g,"").replace(/\.(exe|zip)$/,"");
+  t=t.replace(/\b(v|ver|version)\.?\s*\d+(\.\d+)*[a-z]?\b/g," ").replace(/\b\d+\.\d+(\.\d+)*[a-z]?\b/g," ").replace(/\(\s*\d*\s*\)/g," ");
+  return t.split(/[^a-z0-9]+/).filter(function(w){return w&&!NOISE[w];}).join("");
+}
+var matchIx=null,matchN=-1;
+function buildMatch(){
+  var a=allStore();if(matchIx&&matchN===a.length)return matchIx;
+  var ix={},list=[];
+  a.forEach(function(it){if(!it.image&&!it.hero)return;if(!(it.kind==="page"?(isItch(it)||isGh(it)):it.url))return;
+    var nk=normName(it.name),m=/^https?:\/\/[^\/]+\.itch\.io\/([^\/?#]+)/i.exec(pageUrl(it)||it.url||"");
+    if(nk.length>=4&&!ix[nk])ix[nk]={it:it,name:1};
+    if(m){var sk=normName(m[1].replace(/-/g," "));if(sk.length>=4&&!ix[sk])ix[sk]={it:it,name:0};}
+    list.push({it:it,k:nk});});
+  matchIx={ix:ix,list:list};matchN=a.length;return matchIx;
+}
+// returns {it, sure} for the best Store match of a found game, or null
+function matchGame(names){
+  var M=buildMatch(),best=null,bl=0,i,ns=String(names||"").split(";").map(normName).filter(function(x){return x.length>=4;});
+  var hit=null,hl=0;
+  for(i=0;i<ns.length;i++){var e=M.ix[ns[i]];if(e&&ns[i].length>hl&&ns[i].length>=5){hit=e;hl=ns[i].length;}}
+  // a sure match: the Store name itself, or a long web address; short web addresses only count as "check this"
+  if(hit)return {it:hit.it,sure:hit.name===1||hl>=10};
+  ns.forEach(function(n){if(n.length<8)return;M.list.forEach(function(x){var k=x.k;if(k.length<8)return;
+    if((n.indexOf(k)>=0||k.indexOf(n)>=0)&&Math.min(n.length,k.length)>bl&&Math.min(n.length,k.length)/Math.max(n.length,k.length)>=0.7){bl=Math.min(n.length,k.length);best=x.it;}});});
+  return best?{it:best,sure:false}:null;
+}
+function parseFound(payload){
+  var out=[],seen={};
+  String(payload||"").split("\n").forEach(function(l){if(!l)return;var f=l.split("|");if(f.length<5)return;
+    var x={kind:f[0],where:f[1],path:f[2],names:f[3],dir:f[4]},m=matchGame(x.names);if(!m)return;
+    x.it=m.it;x.sure=m.sure;
+    var have=inLib(x.it.id)||libHas(x.path,"");if(have&&!have.missing)x.have=1;
+    var k=x.it.id+"|"+(x.kind==="zip"?"z":"g");if(seen[k]){if(x.kind!=="zip"&&seen[k].kind==="zip")seen[k].skip=1;else return;}seen[k]=x;out.push(x);});
+  return out.filter(function(x){return !x.skip;});
+}
 var scanPCcb=null;
+window.onScanPC=function(payload){if(scanPCcb){var f=scanPCcb;scanPCcb=null;f(payload);}};
+function libHas(path,key){var p=String(path||"").toLowerCase(),i;for(i=0;i<S.games.length;i++){var g=S.games[i];if((key&&g.key===key)||(p&&String(g.path||"").toLowerCase()===p))return g;}return null;}
+function scanPC(cb){loadCat();S.scanDirs=S.scanDirs||[];scanPCcb=cb;var r=T(function(){return X.ScanPC(S.scanDirs.join("\n"));},"ERR");if(r.indexOf("ERR")===0){scanPCcb=null;cb("");}}
 function findGames(extra){
   if(!S)return;
   openForm("Find games on this PC",[],"Close",function(){},null);
   var bx=$("mbox"),bs=bx.getElementsByTagName("button");bs[bs.length-1].style.display="none";bs[0].textContent="Close";
-  var w=el("div","fgw");w.appendChild(el("div","fgs","Looking in Steam, Epic Games, GOG, the itch.io app and Games folders on your drives…"));
-  var sp=el("div","fgspin");w.appendChild(sp);bx.insertBefore(w,bx.childNodes[1]);
+  var w=el("div","fgw");w.appendChild(el("div","fgs","Looking for itch.io games in your Downloads, Desktop, Documents, Program Files, Games folders and the itch.io app…"));
+  w.appendChild(el("div","fgspin"));bx.insertBefore(w,bx.childNodes[1]);
   S.scanDirs=S.scanDirs||[];if(extra&&S.scanDirs.indexOf(extra)<0){S.scanDirs.push(extra);save();}
-  scanPCcb=function(payload){showFound(payload);};
-  var r=T(function(){return X.ScanPC(S.scanDirs.join("\n"));},"ERR");
-  if(r.indexOf("ERR")===0){w.innerHTML="";w.appendChild(el("div","fgs","Couldn’t search this PC: "+r.replace("ERR:","")));}
+  scanPC(function(payload){showFound(parseFound(payload));});
 }
-window.onScanPC=function(payload){if(scanPCcb){var f=scanPCcb;scanPCcb=null;f(payload);}};
-function libHas(path,key){var p=String(path||"").toLowerCase(),i;for(i=0;i<S.games.length;i++){var g=S.games[i];if((key&&g.key===key)||String(g.path||"").toLowerCase()===p)return g;}return null;}
-function showFound(payload){
+function showFound(list){
   var bx=$("mbox");if(!bx||$("modal").className.indexOf("open")<0)return;
-  var list=[];String(payload||"").split("\n").forEach(function(l){if(!l)return;var f=l.split("|");if(f.length<5)return;list.push({src:f[0],name:f[1],path:f[2],icon:f[3],key:f[4]});});
   bx.innerHTML="";bx.appendChild(el("h3","","Find games on this PC"));
-  var nNew=list.filter(function(x){return !libHas(x.path,x.key);}).length;
-  bx.appendChild(el("div","fgs",list.length?("Found "+list.length+" game"+(list.length===1?"":"s")+(nNew!==list.length?", "+(list.length-nNew)+" already in your library":"")+". Untick anything that isn’t a game."):"No games found in the usual places. Pick the folder where you keep your games."));
-  var sel={},box=el("div","fgl"),groups={};
-  list.forEach(function(x){(groups[x.src]=groups[x.src]||[]).push(x);});
-  var k;for(k in groups){box.appendChild(el("div","fsec",k+" ("+groups[k].length+")"));
-    groups[k].sort(function(a,b){return a.name.toLowerCase()<b.name.toLowerCase()?-1:1;}).forEach(function(x){
-      var have=libHas(x.path,x.key),r=el("label","fgr"+(have?" have":"")),cb=el("input");cb.setAttribute("type","checkbox");cb.checked=!have;cb.disabled=!!have;if(!have)sel[x.path]=x;
-      cb.onchange=function(){if(cb.checked)sel[x.path]=x;else delete sel[x.path];upd();};
-      r.appendChild(cb);var t=el("div","fgt");t.appendChild(el("b","",x.name));t.appendChild(el("span","",have?"Already in your library":(x.path.indexOf("://")>0?(x.icon||x.path):x.path)));r.appendChild(t);box.appendChild(r);});}
+  var fresh=list.filter(function(x){return !x.have;});
+  bx.appendChild(el("div","fgs",list.length?("Found "+list.length+" game"+(list.length===1?"":"s")+" from the Store on this PC"+(fresh.length!==list.length?", "+(list.length-fresh.length)+" already in your library":"")+". Untick anything that doesn’t look right."):"No games from the Store were found. If you keep games somewhere else, pick that folder."));
+  var sel={},box=el("div","fgl");
+  list.sort(function(a,b){return (a.have?1:0)-(b.have?1:0)||(b.sure?1:0)-(a.sure?1:0)||(a.it.name<b.it.name?-1:1);}).forEach(function(x){
+    var r=el("label","fgr"+(x.have?" have":"")),cb=el("input");cb.setAttribute("type","checkbox");cb.checked=!x.have&&x.sure;cb.disabled=!!x.have;if(cb.checked)sel[x.path]=x;
+    cb.onchange=function(){if(cb.checked)sel[x.path]=x;else delete sel[x.path];upd();};r.appendChild(cb);
+    var th=el("div","fgth");paint(th,x.it.name,x.it.image||x.it.hero);r.appendChild(th);
+    var t=el("div","fgt");t.appendChild(el("b","",x.it.name));
+    t.appendChild(el("span","",x.have?"Already in your library":(x.kind==="zip"?"Downloaded .zip in "+x.where+" — Xaly unpacks it":"In "+x.where+": "+x.path)+(x.sure?"":"  ·  check this is the right game")));r.appendChild(t);box.appendChild(r);});
   bx.appendChild(box);
   var row=el("div","mrow"),pick=btn("Scan another folder…","btn",function(){var d=T(function(){return X.PickFolder();},"");if(d)findGames(d);});pick.style.cssText="float:left";row.appendChild(pick);
   row.appendChild(btn("Cancel","btn",closeForm));
-  var go=btn("Add","pri",function(){addFound(sel);});row.appendChild(go);bx.appendChild(row);
+  var go=btn("Add","pri",function(){var l=[],q;for(q in sel)l.push(sel[q]);closeForm();addFound(l,false);});row.appendChild(go);bx.appendChild(row);
   function upd(){var n=0,q;for(q in sel)n++;go.textContent=n?"Add "+n+" game"+(n===1?"":"s"):"Add";go.disabled=!n;}
   upd();
 }
-function storeByName(n){n=String(n||"").toLowerCase().replace(/[^a-z0-9]+/g,"");if(n.length<4)return null;var a=allStore(),i;for(i=0;i<a.length;i++)if(a[i].name.toLowerCase().replace(/[^a-z0-9]+/g,"")===n)return a[i];return null;}
-function addFound(sel){
-  var n=0,q;
-  for(q in sel){var x=sel[q];if(libHas(x.path,x.key))continue;
-    var steam=/^steam:(\d+)$/.exec(x.key||""),it=storeByName(x.name);
-    var g={id:rid(),name:x.name.substr(0,90),path:x.path,args:"",fav:0,seconds:0,plays:0,last:0,added:now(),key:x.key||"",src:x.src,iconPath:x.icon||"",
-      image:steam?"https://cdn.cloudflare.steamstatic.com/steam/apps/"+steam[1]+"/header.jpg":(it&&it.image)||""};
-    if(it&&!inLib(it.id))g.storeId=it.id;
-    S.games.push(g);getIcon(g);n++;}
-  closeForm();save();render();
-  toast(n?n+" game"+(n===1?" was":"s were")+" added to your library":"Nothing new to add");
+function addFound(list,auto){
+  var added=[];
+  list.forEach(function(x){
+    if(x.have||inLib(x.it.id)&&!inLib(x.it.id).missing)return;
+    if(x.kind==="zip"){if(!auto){toast("Unpacking "+x.it.name+"…");setTimeout(function(){finish(x.it,x.path,"archive");},50);added.push(x.it.name);}return;}
+    var old=inLib(x.it.id);
+    if(old){old.path=x.path;delete old.missing;added.push(x.it.name);return;}
+    var g={id:rid(),name:x.it.name,path:x.path,args:"",fav:0,seconds:0,plays:0,last:0,added:now(),storeId:x.it.id,image:x.it.image||x.it.hero||"",found:1};
+    S.games.push(g);getIcon(g);added.push(x.it.name);
+  });
+  save();render();
+  if(auto){if(added.length)notify("ok","Found "+(added.length===1?added[0]:added.length+" games")+" on your PC",(added.length===1?"It was":"They were")+" added to your library with "+(added.length===1?"its":"their")+" cover art"+(added.length>1?": "+added.slice(0,4).join(", ")+(added.length>4?"…":""):"")+".",null,"");}
+  else toast(added.length?added.length+" game"+(added.length===1?" was":"s were")+" added to your library":"Nothing new to add");
 }
-
+function autoFind(){
+  if(!S||S.set.autoFind===0||SELFTEST)return;
+  if(S.autoFindT&&now()-S.autoFindT<6*3600000)return;
+  S.autoFindT=now();save();
+  var ig=S.scanIgnore||{};
+  scanPC(function(payload){if(!S)return;addFound(parseFound(payload).filter(function(x){return x.sure&&!x.have&&x.kind!=="zip"&&!ig[x.path.toLowerCase()]&&!ig[x.it.id];}),true);});
+}
 /* ---------- account backup ---------- */
 function backupAcc(){
   if(!S||!curAcc)return;
@@ -4093,7 +4141,7 @@ function openUninstall(){
     var r=T(function(){return X.UninstallSelf(v.g==="del"?"1":"0",v.d==="del"?"1":"0",dirs.join("\n"));},"ERR");
     if(r.indexOf("ERR")===0){toast("Couldn’t uninstall: "+r.replace("ERR:",""));return false;}
   },null);
-  var bx=$("mbox");bx.insertBefore(el("div","fbm","This removes Xaly Launcher, its shortcuts and its start-up entry. Games you added from other places (Steam, Epic, your own folders) are never touched."),bx.childNodes[1]);
+  var bx=$("mbox");bx.insertBefore(el("div","fbm","This removes Xaly Launcher, its shortcuts and its start-up entry. Games you added from your own folders are never touched."),bx.childNodes[1]);
 }
 function appSetup(){   // runs at start-up: Apps & features entry, Start menu shortcut once
   if(SELFTEST)return;
@@ -4448,6 +4496,7 @@ function renderSettings(){
     snd.appendChild(btn("\u25B6 Download","btn",function(){T(function(){return X.PlaySound("download");});}));
     snd.appendChild(btn("\u25B6 Achievement","btn",function(){T(function(){return X.PlaySound("achievement");});}));snd.lastChild.style.marginLeft="8px";
     snd.appendChild(sw(S.set.sounds!==0,function(v){S.set.sounds=v?1:0;save();}));snd.lastChild.style.marginLeft="14px";
+    b.appendChild(srow("Add games I download myself","Every few hours Xaly looks in Downloads, Desktop, Documents, Program Files and Games folders for games from the Store, and adds them to your library with their cover art. Games you remove are never added again.",sw(S.set.autoFind!==0,function(v){S.set.autoFind=v?1:0;if(v){S.autoFindT=0;autoFind();}save();})));
     var ld=T(function(){return X.HasShortcut("desktop","Xaly Launcher","");},"0")==="1",ls=T(function(){return X.HasShortcut("start","Xaly Launcher","");},"0")==="1";
     b.appendChild(srow("Desktop shortcut","A Xaly Launcher icon on your desktop.",sw(ld,function(v){T(function(){return v?X.MakeShortcut("desktop","Xaly Launcher","",""):X.RemoveShortcut("desktop","Xaly Launcher","");});})));
     b.appendChild(srow("Start menu shortcut","Find Xaly Launcher in the Start menu and Windows search.",sw(ls,function(v){T(function(){return v?X.MakeShortcut("start","Xaly Launcher","",""):X.RemoveShortcut("start","Xaly Launcher","");});AC.smLnk=1;saveAcc();})));
@@ -4559,7 +4608,7 @@ function init(){
   setInterval(syncNow,25000);
   setTimeout(function(){checkUpdate("start");},700);
   setTimeout(function(){if(AC&&AC.crashRep!==0&&!SELFTEST)T(function(){return X.SendCrashes(VER);});},15000);setInterval(function(){checkUpdate(false);},6*3600000);
-  setInterval(dqTick,1000);setInterval(chalTick,60000);
+  setInterval(dqTick,1000);setInterval(chalTick,60000);setInterval(function(){autoFind();},30*60000);
   setInterval(function(){if(!S)return;var k;for(k in run)checkAch(gameBy(k));},60000);setTimeout(whatsNew,1600);
   setInterval(function(){refreshLive(false);},10*60000+5000);
   setInterval(function(){if(S&&(!S.guT||now()-S.guT>6*3600000))checkGameUpdates(false);},15*60000);

@@ -1262,102 +1262,64 @@ namespace Xaly
             }
             return best;
         }
+        // names a game folder or .exe goes by: folder names, the .exe's file name, and the product name built into the .exe
+        static string ExeNames(string exe, string top)
+        {
+            List<string> n = new List<string>();
+            if (!string.IsNullOrEmpty(top)) n.Add(top);
+            try { string pd = Path.GetFileName(Path.GetDirectoryName(exe)); if (pd != top) n.Add(pd); } catch (Exception) { }
+            n.Add(Path.GetFileNameWithoutExtension(exe));
+            try
+            {
+                FileVersionInfo v = FileVersionInfo.GetVersionInfo(exe);
+                if (!string.IsNullOrEmpty(v.ProductName)) n.Add(v.ProductName);
+                if (!string.IsNullOrEmpty(v.FileDescription)) n.Add(v.FileDescription);
+            }
+            catch (Exception) { }
+            return string.Join(";", n.ToArray()).Replace("|", " ");
+        }
+        // finds games people downloaded themselves (Downloads, Desktop, Documents, Program Files, Games folders,
+        // the itch.io app, folders they picked); the page matches them against the Store's itch.io games
         public string ScanPC(string extra)
         {
-            string ours = Path.GetFullPath(Path.Combine(f.DownloadsDir, "Games")).ToLowerInvariant();
+            string ours = Path.GetFullPath(f.DownloadsDir).TrimEnd('\\').ToLowerInvariant();
             Thread t = new Thread(delegate()
             {
                 StringBuilder sb = new StringBuilder();
                 Dictionary<string, bool> done = new Dictionary<string, bool>();
-                Action<string, string, string, string, string> add = delegate(string src, string name, string path, string args, string idk)
-                {
-                    if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(name)) return;
-                    string key = (idk ?? path).ToLowerInvariant();
-                    if (done.ContainsKey(key)) return; done[key] = true;
-                    sb.Append(Line(src, name, path, args, idk));
-                };
-                // Steam
-                try
-                {
-                    string sp = RegStr(Registry.CurrentUser, @"Software\Valve\Steam", "SteamPath");
-                    if (!string.IsNullOrEmpty(sp))
-                    {
-                        sp = sp.Replace('/', '\\');
-                        List<string> libs = new List<string>(); libs.Add(sp);
-                        string vdf = Path.Combine(sp, @"steamapps\libraryfolders.vdf");
-                        if (File.Exists(vdf)) foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(vdf), "\"path\"\\s+\"([^\"]+)\"")) libs.Add(m.Groups[1].Value.Replace("\\\\", "\\"));
-                        foreach (string lib in libs)
-                        {
-                            string sa = Path.Combine(lib, "steamapps");
-                            if (!Directory.Exists(sa)) continue;
-                            foreach (string acf in Directory.GetFiles(sa, "appmanifest_*.acf"))
-                            {
-                                string a = File.ReadAllText(acf);
-                                string id = System.Text.RegularExpressions.Regex.Match(a, "\"appid\"\\s+\"(\\d+)\"").Groups[1].Value;
-                                string nm = System.Text.RegularExpressions.Regex.Match(a, "\"name\"\\s+\"([^\"]+)\"").Groups[1].Value;
-                                string dir = System.Text.RegularExpressions.Regex.Match(a, "\"installdir\"\\s+\"([^\"]+)\"").Groups[1].Value;
-                                if (id == "" || nm == "" || id == "228980" || System.Text.RegularExpressions.Regex.IsMatch(nm, "Redistributable|Steam Linux Runtime|Proton|SteamVR|Steamworks|Dedicated Server|Soundtrack", System.Text.RegularExpressions.RegexOptions.IgnoreCase)) continue;
-                                string gd = Path.Combine(Path.Combine(sa, "common"), dir);
-                                if (!Directory.Exists(gd)) continue;
-                                add("Steam", nm, "steam://rungameid/" + id, GameExe(gd) ?? "", "steam:" + id);
-                            }
-                        }
-                    }
-                }
-                catch (Exception) { }
-                // Epic Games
-                try
-                {
-                    string man = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Epic\EpicGamesLauncher\Data\Manifests");
-                    if (Directory.Exists(man))
-                        foreach (string it in Directory.GetFiles(man, "*.item"))
-                        {
-                            string j = File.ReadAllText(it);
-                            Func<string, string> jf = delegate(string k) { return System.Text.RegularExpressions.Regex.Unescape(System.Text.RegularExpressions.Regex.Match(j, "\"" + k + "\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").Groups[1].Value); };
-                            string nm = jf("DisplayName"), loc = jf("InstallLocation"), exe = jf("LaunchExecutable"), app = jf("AppName"), ns = jf("CatalogNamespace"), cid = jf("CatalogItemId");
-                            if (nm == "" || loc == "" || !Directory.Exists(loc) || j.IndexOf("\"bIsIncompleteInstall\": true") >= 0) continue;
-                            string full = exe != "" ? Path.Combine(loc, exe) : GameExe(loc);
-                            add("Epic Games", nm, "com.epicgames.launcher://apps/" + Uri.EscapeDataString(ns + ":" + cid + ":" + app) + "?action=launch&silent=true", full ?? "", "epic:" + app);
-                        }
-                }
-                catch (Exception) { }
-                // GOG Galaxy / GOG installers
-                foreach (string gk in new string[] { @"SOFTWARE\WOW6432Node\GOG.com\Games", @"SOFTWARE\GOG.com\Games" })
-                {
-                    try
-                    {
-                        using (RegistryKey k = Registry.LocalMachine.OpenSubKey(gk))
-                        {
-                            if (k == null) continue;
-                            foreach (string id in k.GetSubKeyNames())
-                                using (RegistryKey g = k.OpenSubKey(id))
-                                {
-                                    string nm = (g.GetValue("gameName") ?? g.GetValue("GAMENAME") ?? "").ToString(), exe = (g.GetValue("exe") ?? g.GetValue("EXE") ?? "").ToString(), dir = (g.GetValue("path") ?? g.GetValue("PATH") ?? "").ToString();
-                                    if (exe != "" && !Path.IsPathRooted(exe) && dir != "") exe = Path.Combine(dir, exe);
-                                    if ((exe == "" || !File.Exists(exe)) && Directory.Exists(dir)) exe = GameExe(dir);
-                                    if (!string.IsNullOrEmpty(exe) && File.Exists(exe)) add("GOG", nm, exe, "", "gog:" + id);
-                                }
-                        }
-                    }
-                    catch (Exception) { }
-                }
-                // folders: the itch.io app, "Games" folders on every drive, and folders the player picked
                 List<KeyValuePair<string, string>> roots = new List<KeyValuePair<string, string>>();
+                roots.Add(new KeyValuePair<string, string>("Downloads", UserDownloads()));
+                roots.Add(new KeyValuePair<string, string>("Desktop", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)));
+                roots.Add(new KeyValuePair<string, string>("Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)));
                 roots.Add(new KeyValuePair<string, string>("itch.io app", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"itch\apps")));
-                try { foreach (DriveInfo d in DriveInfo.GetDrives()) if (d.DriveType == DriveType.Fixed && d.IsReady) { roots.Add(new KeyValuePair<string, string>("Games folder", Path.Combine(d.RootDirectory.FullName, "Games"))); } } catch (Exception) { }
-                foreach (string x in (extra ?? "").Split('\n')) if (x.Trim() != "") roots.Add(new KeyValuePair<string, string>("Folder", x.Trim()));
+                roots.Add(new KeyValuePair<string, string>("Program Files", Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)));
+                string pf86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)"); if (!string.IsNullOrEmpty(pf86)) roots.Add(new KeyValuePair<string, string>("Program Files", pf86));
+                try { foreach (DriveInfo d in DriveInfo.GetDrives()) if (d.DriveType == DriveType.Fixed && d.IsReady) roots.Add(new KeyValuePair<string, string>("Games folder", Path.Combine(d.RootDirectory.FullName, "Games"))); } catch (Exception) { }
+                foreach (string x in (extra ?? "").Split('\n')) if (x.Trim() != "") roots.Add(new KeyValuePair<string, string>("Your folder", x.Trim()));
                 foreach (KeyValuePair<string, string> r in roots)
                 {
                     try
                     {
-                        if (!Directory.Exists(r.Value)) continue;
+                        if (string.IsNullOrEmpty(r.Value) || !Directory.Exists(r.Value)) continue;
                         foreach (string d in Directory.GetDirectories(r.Value))
                         {
-                            if (Path.GetFullPath(d).ToLowerInvariant().StartsWith(ours)) continue;
+                            string full = Path.GetFullPath(d).TrimEnd('\\').ToLowerInvariant();
+                            if (full == ours || full.StartsWith(ours + "\\") || Path.GetFileName(full) == "xaly games" || done.ContainsKey(full)) continue;
+                            done[full] = true;
+                            string dn = Path.GetFileName(d), low = dn.ToLowerInvariant();
+                            if (r.Key == "Program Files" && (low == "windows nt" || low.StartsWith("microsoft") || low.StartsWith("windows") || low == "common files" || low == "internet explorer" || low == "dotnet" || low == "nvidia corporation" || low == "steam" || low == "epic games")) continue;
                             string exe = GameExe(d);
-                            if (exe != null) add(r.Key, Path.GetFileName(d), exe, "", null);
+                            if (exe != null) sb.Append(Line("folder", r.Key, exe, ExeNames(exe, dn), d));
                         }
-                        foreach (string e in Directory.GetFiles(r.Value, "*.exe")) add(r.Key, Path.GetFileNameWithoutExtension(e), e, "", null);
+                        foreach (string e in Directory.GetFiles(r.Value, "*.exe"))
+                        {
+                            string n = Path.GetFileName(e).ToLowerInvariant();
+                            if (n.IndexOf("setup") >= 0 || n.IndexOf("install") >= 0 || n.IndexOf("unins") >= 0) continue;
+                            sb.Append(Line("exe", r.Key, e, ExeNames(e, ""), ""));
+                        }
+                        if (r.Key == "Downloads" || r.Key == "Desktop" || r.Key == "Your folder")
+                            foreach (string z in Directory.GetFiles(r.Value, "*.zip"))
+                                sb.Append(Line("zip", r.Key, z, Path.GetFileNameWithoutExtension(z), ""));
                     }
                     catch (Exception) { }
                 }

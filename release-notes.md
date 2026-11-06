@@ -1,2 +1,2 @@
-- The download is now also published as **XalyLauncher.zip**, so a website can link to the newest version with one fixed address.
-- Build.bat shows a clearer message when a build fails.
+- Publish a fixed-name XalyLauncher.zip with each release
+- Build.bat: clearer message when the build fails

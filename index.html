@@ -749,6 +749,10 @@ html,body{overflow:hidden}
 .chm{flex:1 1 0%;min-width:0;margin:0 8px 0 10px}.chm small{display:block;color:#7d8299;font-size:11px}.chm b{display:block;font-size:13px;line-height:1.35}.chm span{display:block;color:#9aa1b8;font-size:11.5px;margin-top:2px}
 .chr.done .chm span{color:#3ddc84}.chr.expired,.chr.declined,.chr.failed{opacity:.6}
 .chr .sm{margin-left:4px;flex:0 0 auto}
+
+.dqk{display:flex;align-items:center;flex-wrap:wrap;margin-bottom:12px}.dqk>span{color:#9aa1b8;font-size:13px;margin-right:10px}.dqk>span:nth-of-type(2){margin-left:18px}
+.ssel{width:auto!important;min-width:130px;max-width:220px;flex:0 0 auto;background:#141925;color:#e8ebf5;border:1px solid #262d40;border-radius:8px;padding:6px 10px;font-size:13px}
+.iact{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-end;width:auto!important;flex:0 0 auto!important;min-width:70px}.iact .btn.sm{margin-right:12px;white-space:nowrap}
 </style>
 <style id="theme"></style>
 </head>
@@ -802,8 +806,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.4";
+var VER="1.6.5";
 var NOTES=[
+ {v:"1.6.5",d:"5 Nov 2026",t:["Download speed limit: cap how fast games download, in Settings \u203A Downloads or right on the Downloads page","Download schedule: only download at set hours, like overnight. Xaly keeps the PC awake while downloads wait or run, and you can still start one right away","Settings \u203A Storage now lists games on every drive, including ones you moved, and each game has a Move button"]},
  {v:"1.6.4",d:"5 Nov 2026",t:["Messages now have their own pop-up and chime, also while you\u2019re in a game. Click the pop-up to open the chat","Turn them off in Settings \u203A General"]},
  {v:"1.6.3",d:"5 Nov 2026",t:["Compare with friends: a game\u2019s page shows your play time and achievements next to a friend\u2019s, like \u201cBob beat Night Shift, you haven\u2019t yet\u201d","Friend challenges: send \u201cGet Marathon in Sonic Time Twisted by Sunday\u201d or your own goal like \u201cBeat night 5\u201d. Achievement goals complete by themselves, and you both get a notification","A pop-up and a sound when a friend comes online or starts playing a game, also while you\u2019re in a game","Achievement pop-ups now also show on top of games"]},
  {v:"1.6.2",d:"5 Nov 2026",t:["Every launcher now switches to a new Store list at the same moment, so two PCs never show a different number of games, not even right after the list is refreshed"]},
@@ -1085,6 +1090,7 @@ function startSession(a){
   $("login").style.display="none";setFP(false);
   applyAccent();applyLayout();
   if(S.set.dlDir)T(function(){return X.SetDownloads(S.set.dlDir);});
+  applySpeed();awakeOn=false;
   setTimeout(adoptLoose,1500);
   T(function(){return X.SetTray(S.set.tray?"1":"0");});
   S.set.startup=T(function(){return X.StartupGet();},"0")==="1"?1:0;
@@ -2181,12 +2187,46 @@ function install(it,spaceOk){
 }
 function addJob(j){
   DQ.push(j);saveDQ();
-  if(dl)toast(j.it.name+" was added to your download queue"+(qPos(j)?" (#"+(qPos(j)+1)+")":""));
+  if(!mayRun(j))toast(j.it.name+" will download at "+hm(sFrom())+" (your download schedule). Open Downloads to start it now.");
+  else if(dl)toast(j.it.name+" was added to your download queue"+(qPos(j)?" (#"+(qPos(j)+1)+")":""));
   pumpQ();paintDl();
+}
+/* ---------- 1.6.5: download speed limit and schedule ---------- */
+var SPD=[[0,"No limit"],[262144,"256 KB/s"],[524288,"512 KB/s"],[1048576,"1 MB/s"],[2097152,"2 MB/s"],[5242880,"5 MB/s"],[10485760,"10 MB/s"],[26214400,"25 MB/s"],[52428800,"50 MB/s"]];
+function applySpeed(){T(function(){return X.SetSpeedLimit(String(S&&S.set.spd||0));});}
+function spdName(v){var i;for(i=0;i<SPD.length;i++)if(SPD[i][0]===v)return SPD[i][1];return v?fmtB(v)+"/s":"No limit";}
+function hm(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60;return (h%12||12)+":"+(mm<10?"0":"")+mm+(h<12?" AM":" PM");}
+function sFrom(){return S.set.sFrom==null?60:S.set.sFrom;}
+function sTo(){return S.set.sTo==null?420:S.set.sTo;}
+function schedOn(){return !!(S&&S.set.sched===1);}
+function schedOk(){if(!schedOn())return true;var d=new Date(),m=d.getHours()*60+d.getMinutes(),a=sFrom(),b=sTo();return a===b?true:a<b?(m>=a&&m<b):(m>=a||m<b);}
+function schedTxt(){return hm(sFrom())+" \u2013 "+hm(sTo());}
+function mayRun(j){return j.now||schedOk();}
+function timeOpts(){var o=[],m;for(m=0;m<1440;m+=30)o.push([m,hm(m)]);return o;}
+function selEl(opts,val,fn){var s=el("select","ssel");opts.forEach(function(o){var op=el("option","",o[1]);op.value=String(o[0]);if(String(o[0])===String(val))op.selected=true;s.appendChild(op);});s.onchange=function(){fn(s.value);};return s;}
+var awakeOn=false;
+function schedTick(){
+  if(!S)return;
+  if(dl&&dl.st==="downloading"&&!mayRun(dl)){dl.schedP=1;pauseJob(dl);notify("ok","Downloads paused","Your download schedule ("+schedTxt()+") has ended. They continue at "+hm(sFrom())+".",null,"");}
+  if(schedOk()){var go=0;DQ.forEach(function(j){if(j.st==="paused"&&j.schedP){j.schedP=0;j.st="queued";go=1;}});if(go){saveDQ();pumpQ();paintDl();}}
+  var waiting=DQ.some(function(j){return j.st==="queued"||j.st==="retry"||j.st==="downloading"||j.st==="resolving"||(j.st==="paused"&&j.schedP);});
+  var want=S.set.awake!==0&&waiting;
+  if(want!==awakeOn){awakeOn=want;T(function(){return X.KeepAwake(want?"1":"0");});}
+}
+function startNow(j){j.now=1;if(j.st==="paused"||j.st==="error"){j.schedP=0;resumeJob(j);}else{saveDQ();pumpQ();paintDl();}}
+function schedRows(b){
+  b.appendChild(srow("Download speed limit","Cap how fast games download, so streaming, calls and other games stay smooth. Xaly\u2019s own updates aren\u2019t slowed down.",selEl(SPD,S.set.spd||0,function(v){S.set.spd=+v;save();applySpeed();toast(+v?"Downloads are capped at "+spdName(+v):"No speed limit");})));
+  var sr=el("div");sr.style.cssText="display:flex;align-items:center;flex-wrap:wrap";
+  sr.appendChild(sw(schedOn(),function(v){S.set.sched=v?1:0;save();schedTick();pumpQ();paintDl();renderSettings();toast(v?"Downloads now run "+schedTxt():"Downloads run any time");}));
+  if(schedOn()){var a=selEl(timeOpts(),sFrom(),function(v){S.set.sFrom=+v;save();schedTick();pumpQ();paintDl();});a.style.marginLeft="12px";sr.appendChild(a);
+    var tx=el("span",""," to ");tx.style.margin="0 8px";sr.appendChild(tx);
+    sr.appendChild(selEl(timeOpts(),sTo(),function(v){S.set.sTo=+v;save();schedTick();pumpQ();paintDl();}));}
+  b.appendChild(srow("Download on a schedule","Only download during these hours, for example overnight. Games you install at other times wait in the queue, and you can still start one right away from Downloads.",sr));
+  b.appendChild(srow("Keep the PC awake for downloads","While downloads are running or waiting for the schedule, Windows won\u2019t go to sleep. The screen can still turn off. Leave Xaly open.",sw(S.set.awake!==0,function(v){S.set.awake=v?1:0;save();awakeOn=!v;schedTick();})));
 }
 function pumpQ(){
   if(!S||dl||UPD.st==="dl")return;
-  var i,j=null;for(i=0;i<DQ.length;i++)if(DQ[i].st==="queued"){j=DQ[i];break;}
+  var i,j=null;for(i=0;i<DQ.length;i++)if(DQ[i].st==="queued"&&mayRun(DQ[i])){j=DQ[i];break;}
   if(!j)return;startJob(j);
 }
 function startJob(j){
@@ -2245,7 +2285,7 @@ function jobFail(j,msg,hard){
   saveDQ();paintDl();pumpQ();
 }
 function dqTick(){
-  if(!S)return;var t=now(),ch=0;browserTick();
+  if(!S)return;var t=now(),ch=0;browserTick();schedTick();
   DQ.forEach(function(j){if(j.st==="retry"&&t>=j.retryAt){j.st="queued";ch=1;}});
   if(ch){pumpQ();paintDl();}
   else if(P.page==="downloads"&&DQ.some(function(j){return j.st==="retry";}))renderDownloads();
@@ -2373,11 +2413,12 @@ function renderDownloads(){
       var c=el("div","dq "+j.st+(j===dl?" act":"")),th=el("div","dqt");paint(th,j.it.name,j.it.image||"");c.appendChild(th);
       var m=el("div","dqm");m.appendChild(el("b","",(j.upd?"Update: "+j.upd.name:j.it.name)));
       var st=j===dl?(j.st==="resolving"?"Preparing the download…":j.st==="pausing"?"Pausing…":j.st==="cancelling"?"Cancelling…":(j.speed>0?fmtB(j.speed)+"/s":"Starting…")+(j.eta>=0?"  ·  "+fmtEta(j.eta)+" left":""))
-        :j.st==="paused"?"Paused":j.st==="retry"?retryTxt(j):j.st==="error"?"Failed: "+j.err:j.st==="browser"?(j.bseen?"Found "+j.bseen.p.split("\\").pop()+", checking it\u2019s finished\u2026":"Waiting for the download in your browser. Xaly installs it as soon as it lands in "+(j.bdir||"your Downloads folder")+"."):"Queued #"+(qPos(j)+1);
+        :j.st==="paused"?(j.schedP?"Paused by your schedule. Continues at "+hm(sFrom()):"Paused"):j.st==="queued"&&!mayRun(j)?"Scheduled. Starts at "+hm(sFrom()):j.st==="retry"?retryTxt(j):j.st==="error"?"Failed: "+j.err:j.st==="browser"?(j.bseen?"Found "+j.bseen.p.split("\\").pop()+", checking it\u2019s finished\u2026":"Waiting for the download in your browser. Xaly installs it as soon as it lands in "+(j.bdir||"your Downloads folder")+"."):"Queued #"+(qPos(j)+1);
       m.appendChild(el("span","dqs",st));
       m.appendChild(el("span","dqz",fmtB(j.bytes||0)+(j.total?" of "+fmtB(j.total):"")+(j.pct>=0?"  ·  "+j.pct+"%":"")));
       var pb=el("div","pb"),pf=el("div","pf");pf.style.width=(j.pct>=0?j.pct:(j===dl?100:0))+"%";if(j.pct<0&&j===dl)pf.style.opacity=".35";pb.appendChild(pf);m.appendChild(pb);c.appendChild(m);
       var ac=el("div","dqa");
+      if(j!==dl&&((j.st==="queued"&&!mayRun(j))||(j.st==="paused"&&j.schedP)))ac.appendChild(btn("Start now","pri sm",function(){startNow(j);}));
       if(j.st==="error"&&j.browser)ac.appendChild(btn("Download in browser","pri sm",function(){browserDl(j);}));
       if(j.st==="browser"){ac.appendChild(btn("Open again","btn sm",function(){browserDl(j);}));ac.appendChild(btn("Pick file\u2026","btn sm",function(){pickDl(j);}));}
       else if(j.st==="paused"||j.st==="error")ac.appendChild(btn(j.st==="error"?"Retry":"Resume",j.browser?"btn sm":"pri sm",function(){resumeJob(j);}));
@@ -2394,6 +2435,9 @@ function renderDownloads(){
     pg.appendChild(box);
   }
   var sp=el("div","dsec");sp.appendChild(el("h4","","Download speed"));var si=el("div","in");
+  var qc=el("div","dqk");qc.appendChild(el("span","","Limit"));qc.appendChild(selEl(SPD,S.set.spd||0,function(v){S.set.spd=+v;save();applySpeed();renderDownloads();}));
+  qc.appendChild(el("span","",schedOn()?"Schedule: "+schedTxt()+(schedOk()?" (running now)":" (waiting)"):"Schedule: any time"));
+  qc.appendChild(btn(schedOn()?"Change":"Set a schedule","btn sm",function(){nav("settings","downloads");P.tab="downloads";renderSettings();}));si.appendChild(qc);
   si.appendChild(el("div","lb","\u21E9  Download"));si.appendChild(el("div","vl",dl&&dl.speed>0?fmtB(dl.speed)+"/s":"0 B/s"));
   si.appendChild(el("div","lb","\u25A3  Write"));si.appendChild(el("div","vl",dl&&dl.speed>0?fmtB(dl.speed)+"/s":"0 B/s"));
   si.lastChild.style.marginBottom="0";sp.appendChild(si);pg.appendChild(sp);
@@ -2503,7 +2547,8 @@ function renderStorageTab(b){
   /* overview card */
   var card=el("div","stc"),rg=el("div","srg"),rc=el("div","src"),info=el("div","sinf");
   var hold=el("div");rg.appendChild(hold);rc.appendChild(el("b","","0%"));rc.appendChild(el("span","","USED"));rg.appendChild(rc);
-  var path=el("div","spath",isDef?dir:"Xaly isn’t installed on this drive");info.appendChild(path);
+  var movedHere=!isDef&&S.games.some(function(g){var d=gameDir(g);return d&&d.toLowerCase().indexOf(cur.root.toLowerCase())===0;});
+  var path=el("div","spath",isDef?dir:movedHere?cur.root+"Xaly Games":"Xaly isn’t installed on this drive");info.appendChild(path);
   var sb=el("div","sbar2");
   var parts=isDef?[["Games",SC?SC.games:0,XC],["Downloads",SC?SC.dl:0,"#2f8cff"],["Cache",SC?SC.cache:0,"#f5b942"],["App data",SC?SC.data:0,"#1fbf75"],["Other",SC?other:used-0,OTH]]:[["Used",used,OTH]];
   if(isDef&&!SC)parts[4][1]=used;
@@ -2531,13 +2576,20 @@ function renderStorageTab(b){
       var lg=null,si=null,i;
       for(i=0;i<S.games.length;i++){var gp=S.games[i].path||"";if(gp.toLowerCase().indexOf(g.path.toLowerCase())===0){lg=S.games[i];break;}}
       var all=allStore();for(i=0;i<all.length;i++){if(lg&&lg.storeId===all[i].id||!lg&&all[i].name&&g.name.toLowerCase()===all[i].name.replace(/[\\\/:*?"<>|]/g,"_").toLowerCase()){si=all[i];break;}}
-      items.push({k:"game",name:lg?lg.name:(si?si.name:g.name),size:g.size,path:g.path,img:lg?coverOf(lg):(si?si.image:""),last:lg?lg.last:0,plays:lg?lg.seconds:0});
+      items.push({k:"game",g:lg,name:lg?lg.name:(si?si.name:g.name),size:g.size,path:g.path,img:lg?coverOf(lg):(si?si.image:""),last:lg?lg.last:0,plays:lg?lg.seconds:0});
     });
     if(SC.dl>0)items.push({k:"dl",name:"Downloaded installers & archives",size:SC.dl,path:dir,sub:"DOWNLOADS FOLDER"});
     if(SC.cache>0)items.push({k:"cache",name:"Xaly cache",size:SC.cache,sub:"ICONS & PARTIAL DOWNLOADS"});
   }
+  // games moved to this drive (X:\Xaly Games\...)
+  S.games.forEach(function(g){
+    var d=gameDir(g);if(!d||d.toLowerCase().indexOf(cur.root.toLowerCase())!==0)return;
+    if(items.some(function(x){return x.path&&x.path.toLowerCase()===d.toLowerCase();}))return;
+    if(!g.dsz||now()-(g.dszT||0)>3600000){g.dsz=+T(function(){return X.DirBytes(d);},"0")||0;g.dszT=now();}
+    items.push({k:"game",g:g,name:g.name,size:g.dsz,path:d,img:coverOf(g),last:g.last||0,plays:g.seconds||0,moved:1});
+  });
   var srt=P.ssort;items.sort(function(a,c2){if(srt==="name")return a.name.toLowerCase()<c2.name.toLowerCase()?-1:1;if(srt==="played")return (c2.last||0)-(a.last||0);return c2.size-a.size;});
-  var ih=el("div","ihd");ih.appendChild(el("span","it","Items"));ih.appendChild(el("span","ic",isDef&&SC?items.length:"0"));ih.appendChild(el("div","il"));
+  var ih=el("div","ihd");ih.appendChild(el("span","it","Items"));ih.appendChild(el("span","ic",String(items.length)));ih.appendChild(el("div","il"));
   var SO={size:"Size on Disk",name:"Name",played:"Last Played"},sw=el("div","ssort"),sbt=el("button","ssb2","▾  "+SO[srt]+"  ≡");
   sbt.onclick=function(e){stp(e);if(SMENU&&SMENU.parentNode===sw){closeMenus();return;}popMenu(sw,function(p){["size","name","played"].forEach(function(k){p.appendChild(btn(SO[k],"sdi",function(){closeMenus();P.ssort=k;P.skipAnim=1;renderSettings();}));});});};
   sw.appendChild(sbt);ih.appendChild(sw);b.appendChild(ih);
@@ -2549,18 +2601,20 @@ function renderStorageTab(b){
     sbr.appendChild(btn("Delete","btn dng",function(){openForm("Delete "+chosen.length+(chosen.length===1?" game":" games")+" from this PC? ("+fmtB(sz)+")",[],"Delete",function(){delGames(chosen);});}));b.appendChild(sbr);
   }
   var bars=[],maxS=1;items.forEach(function(x){if(x.size>maxS)maxS=x.size;});
-  if(!isDef)b.appendChild(el("div","msg","Xaly doesn’t store anything on this drive yet.\nTap the star next to it in the drive list to install games here."));
+  if(!isDef&&!items.length)b.appendChild(el("div","msg","Xaly doesn’t store anything on this drive yet.\nMove a game here with its Move button, or tap the star next to the drive to install new games here."));
+  else if(!isDef){}
   else if(!SC){b.appendChild(el("div","msg","Measuring your games…"));if(!scanning)scanStorage();}
   else if(!items.length)b.appendChild(el("div","msg","Nothing here yet. Games you install from the Store will appear with their size."));
   items.forEach(function(x){
     var r=el("div","irow"),th=el("div","ith");
     if(x.k==="game")paint(th,x.name,x.img);else{th.className="ith ico";th.textContent=x.k==="dl"?"\u2193":"\u21BB";}
     var tx=el("div","itx");tx.appendChild(el("div","inm",x.name));
-    if(x.k==="game"){tx.appendChild(el("div","isub","UNPACKED BY XALY"));if(x.last)tx.appendChild(el("div","isub","LAST PLAYED  "+fmtDate(x.last).toUpperCase()));else tx.appendChild(el("div","isub","NEVER PLAYED"));}
+    if(x.k==="game"){tx.appendChild(el("div","isub",x.g&&x.g.moving?"MOVING\u2026 "+(x.g.moving.pct>=0?x.g.moving.pct+"%":""):x.moved?"MOVED HERE BY XALY":"UNPACKED BY XALY"));if(x.last)tx.appendChild(el("div","isub","LAST PLAYED  "+fmtDate(x.last).toUpperCase()));else tx.appendChild(el("div","isub","NEVER PLAYED"));}
     else tx.appendChild(el("div","isub",x.sub));
     var mbw=el("div","imb"),mbi=el("i");mbi.style.background="linear-gradient(90deg,"+ac[0]+","+ac[1]+")";mbi.style.width="0%";mbw.appendChild(mbi);tx.appendChild(mbw);bars.push({i:mbi,w:Math.max(2,x.size*100/maxS)});
     r.appendChild(th);r.appendChild(tx);r.appendChild(el("div","isz",fmtB(x.size)));
     var act=el("div","iact");
+    if(x.k==="game"&&x.g)act.appendChild(btn(x.g.moving?"Moving\u2026":"Move","btn sm",function(){if(x.g.moving)showMove(x.g);else moveGame(x.g);}));
     if(x.k==="game"){var ck=el("div","chk"+(P.ssel[x.path]?" on":""),P.ssel[x.path]?"✓":"");ck.onclick=function(e){stp(e);if(P.ssel[x.path])delete P.ssel[x.path];else P.ssel[x.path]=1;P.skipAnim=1;renderSettings();};act.appendChild(ck);
       r.onclick=function(){T(function(){return X.Open(x.path);});};r.title="Open folder";}
     else if(x.k==="dl"){act.appendChild(btn("Open","btn",function(){T(function(){return X.Open(x.path);});}));}
@@ -3656,12 +3710,12 @@ function paintMove(g){
 }
 window.onMove=function(id,kind,a,b){
   if(!S)return;var g=gameBy(id);if(!g||!g.moving)return;var m=g.moving;
-  if(kind==="p"){m.b=+a;m.t=+b;m.pct=m.t?Math.min(99,Math.floor(m.b*100/m.t)):-1;paintMove(g);return;}
+  if(kind==="p"){var op=m.pct;m.b=+a;m.t=+b;m.pct=m.t?Math.min(99,Math.floor(m.b*100/m.t)):-1;paintMove(g);if(P.page==="settings"&&P.tab==="storage"&&Math.floor(op/5)!==Math.floor(m.pct/5)){P.skipAnim=1;renderSettings();}return;}
   delete g.moving;if($("mvfill"))closeForm();
   if(kind==="done"){
     var parts=String(a).split("|"),nd=parts[0];
     if(g.path&&g.path.toLowerCase().indexOf(m.from.toLowerCase())===0)g.path=nd+g.path.substr(m.from.length);
-    sizeQ[g.id]=0;save();
+    sizeQ[g.id]=0;g.dsz=0;SC=null;scanning=false;save();
     notify("ok","Moved "+g.name,"It’s now in "+nd+"."+(parts[1]?" The old folder couldn’t be fully removed ("+parts[1]+"), you can delete it by hand.":""),g,gArt(g));
   }else if(kind==="cancel")toast("Move cancelled. "+g.name+" stayed where it was.");
   else notify("err","Couldn’t move "+g.name,a||"Something went wrong. The game stayed where it was.",g,gArt(g));
@@ -4223,6 +4277,7 @@ function renderSettings(){
     b.appendChild(el("h2","","Downloads"));
     var pp=T(function(){return X.Paths();},"|").split("|");
     b.appendChild(srow("Download folder",pp[0],btn("Open","btn",function(){T(function(){return X.Open(pp[0]);});})));
+    schedRows(b);
     var fd=el("div");fd.style.cssText="display:flex;align-items:center";var fi2=el("input");fi2.setAttribute("type","text");fi2.value=S.set.feed;fi2.setAttribute("placeholder","https://\u2026/games.json");fd.appendChild(fi2);
     fd.appendChild(btn("Save","btn",function(){S.set.feed=trim(fi2.value);save();loadFeed();toast("Store feed saved");}));
     b.appendChild(srow("Store feed (optional)","A web address that returns a JSON list of games. They appear in the Store next to the ones you add.",fd));
@@ -4371,7 +4426,15 @@ function selfTest(){   // run by the build server: proves both directions of the
     };
     resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
-    r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
+    // speed limit: 512 KB/s for 4 seconds, then the normal download test runs unlimited
+    var limB=0,limT0=0,lo=window.onDl;X.SetSpeedLimit("524288");X.KeepAwake("1");
+    window.onDl=function(i4,k4,a4,b4){if(i4==="selflim"){if(k4==="p"){if(!limT0&&+a4>0)limT0=new Date().getTime();limB=+a4;}return;}if(lo)lo(i4,k4,a4,b4);};
+    X.DownloadEx("selflim","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-lim.bin","0");
+    setTimeout(function(){
+      var secs=limT0?(new Date().getTime()-limT0)/1000:0;r.checks.speedlimit=secs?Math.round(limB/1024/secs)+" KB/s with a 512 KB/s cap":"no data";
+      X.DownloadCancel("selflim","selftest-lim.bin");X.SetSpeedLimit("0");X.KeepAwake("0");window.onDl=lo;
+      r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
+    },6000);
   };
   c("http",function(){return X.Http(id,"https://api.github.com/repos/"+UPD_REPO);});
   setTimeout(function(){if(!done){r.checks.timeout="no answer within 60s";fin();}},60000);

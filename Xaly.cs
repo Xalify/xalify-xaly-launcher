@@ -374,6 +374,15 @@ namespace Xaly
         }
         // ---- resumable downloads: keep a .part file, continue it with an HTTP Range request
         class DlJob { public volatile int stop; public HttpWebRequest rq; }
+        static long speedLimit = 0;   // bytes per second, 0 = no limit
+        public string SetSpeedLimit(string bps) { long v; speedLimit = long.TryParse(bps, out v) && v > 0 ? Math.Max(16384, v) : 0; return "ok"; }
+        [DllImport("kernel32.dll")] static extern uint SetThreadExecutionState(uint flags);
+        // keeps the PC from going to sleep while downloads run (for overnight downloads); the screen may still turn off
+        public string KeepAwake(string on)
+        {
+            try { SetThreadExecutionState(on == "1" ? 0x80000001u : 0x80000000u); return "ok"; }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
         Dictionary<string, DlJob> jobs2 = new Dictionary<string, DlJob>();
         public string DownloadEx(string id, string url, string name, string resume)
         {
@@ -407,12 +416,22 @@ namespace Xaly
                     {
                         byte[] buf = new byte[131072]; int n; long got = have; int last = 0;
                         f.Js("onDl", id, "p", got.ToString(), total.ToString());
-                        while ((n = inp.Read(buf, 0, buf.Length)) > 0)
+                        int winT = Environment.TickCount; long winB = 0; bool limited = id != "upd";   // the launcher's own update is never slowed down
+                        while ((n = inp.Read(buf, 0, limited && speedLimit > 0 ? (int)Math.Max(4096, Math.Min(buf.Length, speedLimit / 8)) : buf.Length)) > 0)
                         {
                             fs.Write(buf, 0, n); got += n;
                             if (job.stop != 0) break;
                             int t = Environment.TickCount;
                             if (t - last > 250) { last = t; f.Js("onDl", id, "p", got.ToString(), total.ToString()); }
+                            long lim = limited ? speedLimit : 0;
+                            if (lim > 0)
+                            {
+                                // speed limit: sleep until this window's bytes fit the cap; a new window every 2 s follows changes quickly
+                                winB += n;
+                                if (t - winT > 2000) { winT = t; winB = n; }
+                                long due = winB * 1000 / lim - (Environment.TickCount - winT);
+                                while (due > 0 && job.stop == 0) { int z = (int)Math.Min(due, 200); Thread.Sleep(z); due -= z; }
+                            }
                         }
                         f.Js("onDl", id, "p", got.ToString(), total.ToString());
                         if (job.stop == 0 && total > 0 && got < total) throw new IOException("The connection dropped before the download finished.");

@@ -776,6 +776,51 @@ html,body{overflow:hidden}
 .im:hover .imo{opacity:1}.imo:hover{background:#1e2433;color:#fff}
 .blr{display:flex;align-items:center;background:#141821;border-radius:12px;padding:10px 14px;margin:-4px 0 10px;max-width:720px;box-sizing:border-box}
 .blt{flex:1 1 0%;margin-left:12px;min-width:0}.blt b{display:block;font-size:14px}.blt span{display:block;color:#7d8299;font-size:12px}
+
+/* ===== 1.7.5 overlay ===== */
+#ovl:before{display:none}
+#ovbg{position:absolute;left:-30px;top:-30px;right:-30px;bottom:-30px;background-size:cover;background-position:center;filter:blur(14px) saturate(1.15) brightness(.42);transform:scale(1.04)}
+#ovl.on{animation:ovin .22s ease-out}@keyframes ovin{from{opacity:0}to{opacity:1}}
+#ovl.on .ovbody{animation:ovup .28s cubic-bezier(.2,.8,.2,1)}@keyframes ovup{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.ovtop{background:rgba(12,15,24,.55);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07);height:62px}
+.ovgame{display:flex;align-items:center;margin-left:22px;padding:5px 14px 5px 5px;background:rgba(255,255,255,.06);border-radius:999px;max-width:420px}
+.ovgame i{width:30px;height:30px;border-radius:50%;background-size:cover;background-position:center;margin-right:10px;flex:0 0 auto}
+.ovgame span{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovclk{margin-left:auto;margin-right:18px;font-size:20px;font-weight:800;color:#fff;letter-spacing:.5px}
+.ovhint{flex:0 0 auto;margin-right:14px;color:#8a90a8;font-size:12px}
+.ovhint kbd{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font:700 11px Segoe UI,sans-serif;color:#d6dae6;margin:0 2px}
+#ovx{border-radius:999px;padding:0 18px;height:36px;background:rgba(46,230,240,.14);color:#bff7fb;border:1px solid rgba(46,230,240,.35)}#ovx:hover{background:rgba(46,230,240,.24)}
+.ovbody{top:62px}
+.ovl{padding:26px 28px}
+.ovcols{display:flex;align-items:flex-start;max-width:1200px}
+.ovcol{flex:1 1 0%;min-width:0;margin-right:18px}.ovcol+.ovcol{flex:0 0 380px}
+.ovk2{background:rgba(18,21,32,.72);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;margin-bottom:16px}
+.ovkh{display:flex;align-items:center;margin-bottom:12px}.ovkh b{font-size:14px;flex:1 1 0%}
+.ovlink{background:transparent;color:#2ee6f0;font-weight:700;font-size:12.5px;padding:2px 4px}.ovlink:hover{text-decoration:underline}
+.ovmuted{color:#8a90a8;font-size:12.5px}
+.ovnow{display:flex;flex-wrap:wrap;padding:0;overflow:hidden}
+.ovcv{width:44%;min-width:220px;min-height:210px;background-size:cover;background-position:center;flex:0 0 auto}
+.ovni{flex:1 1 0%;padding:20px 22px;min-width:0}
+.ovkk{color:#2ee6f0;font-size:11px;font-weight:800;letter-spacing:2.6px}
+.ovni h2{margin:6px 0 12px;font-size:24px;line-height:1.2}
+.ovbig{font-size:42px;font-weight:800;letter-spacing:1px;line-height:1;font-variant-numeric:tabular-nums}
+.ovst{display:flex;margin-top:16px}.ovst div{margin-right:26px}.ovst b{display:block;font-size:17px;white-space:nowrap}.ovst small{color:#8a90a8;font-size:11.5px}
+.ovnx{width:100%;display:flex;align-items:center;padding:14px 22px;border-top:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025)}
+.ovnx .achi.sm{width:38px;height:38px;font-size:18px;border-radius:10px}
+.ovnxt{flex:1 1 0%;margin-left:14px;min-width:0}.ovnxt small{display:block;color:#8a90a8;font-size:10.5px;font-weight:800;letter-spacing:1.6px}
+.ovnxt b{display:block;font-size:14px;margin:2px 0 6px}.ovnxt span{display:block;color:#aab0c4;font-size:12px;margin-top:5px}.ovnxt.done{color:#ffd95a;font-weight:700;margin-left:0}
+.ovnxb{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}.ovnxb i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,#00b8d4,#2ee6f0)}
+.ovag{display:flex;flex-wrap:wrap}
+.ovab{width:44px;height:44px;line-height:44px;font-size:20px;border-radius:12px;margin:0 8px 8px 0;filter:grayscale(1) brightness(.45);cursor:default}.ovab.got{filter:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.ovpv{height:180px;border-radius:12px;background:#0d1018 center/cover;margin-bottom:12px;display:flex;align-items:center;justify-content:center;color:#5d6480;font-size:12.5px;border:1px solid rgba(255,255,255,.06)}
+.ovpv.flash{animation:ovfl .45s ease-out}@keyframes ovfl{0%{box-shadow:0 0 0 0 rgba(255,255,255,.9);filter:brightness(2)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0);filter:none}}
+.ovshot .pri{width:100%}
+.ovstrip{display:flex;flex-wrap:wrap;margin-top:12px}
+.ovth{width:54px;height:54px;border-radius:8px;background:#0d1018 center/cover;margin:0 6px 6px 0;cursor:pointer;border:1px solid rgba(255,255,255,.08)}.ovth:hover{border-color:#2ee6f0}
+.ovnote textarea{width:100%;height:120px;resize:vertical;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#e8ebf5;padding:10px 12px;font:13.5px/1.5 Segoe UI,sans-serif;box-sizing:border-box}
+.ovqa{padding:12px}.ovqr{display:flex}.ovqr .btn{flex:1 1 0%;margin-right:8px}.ovqr .btn:last-child{margin-right:0}
+.ovch .chr{padding:6px 0}
+.ovnone{max-width:520px}.ovnone h2{margin:0 0 6px}
 </style>
 <style id="theme"></style>
 </head>
@@ -826,11 +871,12 @@ html,body{overflow:hidden}
 <div id="achp"></div>
 <div id="wn"></div>
 <div id="tv"><div id="tvbg"></div><div id="tvsh"></div><div id="tvtop"></div><div id="tvhero"></div><div id="tvview"><div id="tvrows"></div></div><div id="tvsheet"></div><div id="tvhint"></div></div>
-<div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
+<div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.4";
+var VER="1.7.5";
 var NOTES=[
+ {v:"1.7.5",d:"6 Nov 2026",t:["New in-game overlay (Shift+Tab): your game blurred in the background, a live session timer, your next achievement with how far to go, all achievements for the game, screenshots with a gallery, per-game notes, challenges and friends"]},
  {v:"1.7.4",d:"6 Nov 2026",t:["Classic layout: the Downloads tab next to Library is gone. Use the Downloads button in the middle of the bottom bar instead"]},
  {v:"1.7.3",d:"6 Nov 2026",t:["Fixed: Install from itch.io sometimes needed several clicks. One click now always works and the button shows Preparing\u2026 right away","Classic layout: the Downloads button is back in the middle of the bottom bar"]},
  {v:"1.7.2",d:"6 Nov 2026",t:["Fixed: opening a game in the Store while offline could freeze the page","Behind the scenes: over 250 automatic checks now run on every change, and a version is only released when they all pass"]},
@@ -4466,8 +4512,8 @@ function fmtClock(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floo
 window.onOverlay=function(on,bg){if(on==="1")openOverlay(bg);else closeOverlay();};
 function openOverlay(bg){
   if(!S)return;ovOn=true;hideMenu();closeForm();
-  var o=$("ovl");o.style.backgroundImage=bg?'url("'+bg+'")':"none";o.className="on";
-  var br=$("ovbr");br.innerHTML="";var im=el("img");im.src=$("brand").getElementsByTagName("img")[0].src;br.appendChild(im);br.appendChild(el("b","","Xaly overlay"));
+  var o=$("ovl");ovBg=bg||"";$("ovbg").style.backgroundImage=bg?'url("'+bg+'")':"none";o.className="";void o.offsetWidth;o.className="on";
+  var br=$("ovbr");br.innerHTML="";var im=el("img");im.src=$("brand").getElementsByTagName("img")[0].src;br.appendChild(im);br.appendChild(el("b","","Xaly"));
   renderOverlay();
   var fp=$("fp");$("ovright").appendChild(fp);fp.className="open";renderFriends(true);
   clearInterval(ovT);ovT=setInterval(tickOverlay,1000);tickOverlay();
@@ -4475,31 +4521,86 @@ function openOverlay(bg){
 function closeOverlay(){
   if(!ovOn)return;ovOn=false;clearInterval(ovT);
   var fp=$("fp");$("main").appendChild(fp);setFP(false);
-  $("ovl").className="";$("ovl").style.backgroundImage="none";
+  $("ovl").className="";$("ovbg").style.backgroundImage="none";ovBg="";
 }
+var ovBg="",ovAchN=-1;
+// the achievement this game is closest to, with a plain-language "how far to go"
+function nextAch(g){
+  var s=gStats(g),best=null,br=-1;
+  achProg(g).forEach(function(x){if(x.got)return;var r=x.goal?Math.min(.999,x.v/x.goal):0;if(r>br){br=r;best=x;}});
+  if(!best)return null;
+  var id=best.a[0],left=best.goal-best.v,txt;
+  if(/^h\d/.test(id))txt=fmtT(Math.max(60,left*3600))+" of play to go";
+  else if(id==="mara")txt=s.maxS>0?"Longest session so far: "+fmtT(s.maxS*3600)+". Keep this one going!":"Play "+fmtT(best.goal*3600)+" in one go";
+  else if(/^l\d/.test(id)||id==="first")txt=left+" more launch"+(left===1?"":"es");
+  else if(/^d\d/.test(id))txt="Play "+left+" more day"+(left===1?"":"s")+" in a row";
+  else txt=best.a[2];
+  return {a:best.a,r:br,txt:txt};
+}
+function ovCard(cls,title,act){var c=el("div","ovk2 "+cls);if(title){var h=el("div","ovkh");h.appendChild(el("b","",title));if(act)h.appendChild(act);c.appendChild(h);}return c;}
 function renderOverlay(){
-  var L=$("ovleft"),g=ovGame();L.innerHTML="";
-  var c=el("div","ovc");
-  if(g){
-    var it=g.storeId?storeById(g.storeId):null,cv=el("div","ovcv");paint(cv,g.name,(it&&(it.image||it.hero))||g.image||"");c.appendChild(cv);
-    c.appendChild(el("div","ovk","NOW PLAYING"));c.appendChild(el("h2","",g.name));
-    var st=el("div","ovst");
-    [["This session","ovs1"],["Total play time","ovs2"],["Played","ovs3"]].forEach(function(x){var d=el("div");d.appendChild(el("small","",x[0]));var b=el("b","","");b.id=x[1];d.appendChild(b);st.appendChild(d);});
-    c.appendChild(st);
-    var r=el("div","ovbt");
-    r.appendChild(btn("📷  Save screenshot","pri",function(){var p=T(function(){return X.OverlayShot(g.name);});toast(p.indexOf("ERR")===0?"Couldn't save the screenshot: "+p.replace("ERR:",""):"Screenshot saved to Pictures › Xaly Screenshots");}));
-    r.appendChild(btn("Open screenshots","btn",function(){T(function(){return X.OverlayShots();});}));
-    r.appendChild(btn("Quit game","btn dng",function(){openForm("Quit "+g.name+"? Unsaved progress may be lost.",[],"Quit game",function(){T(function(){return X.Stop(g.id);});},null);}));
-    c.appendChild(r);
-  }else c.appendChild(el("h2","","No game running"));
-  L.appendChild(c);
-  var tip=el("div","ovtip");tip.appendChild(el("b","","Friends"));tip.appendChild(el("div","","Chat with friends on the right without leaving your game. Messages are end-to-end encrypted."));L.appendChild(tip);
+  var L=$("ovleft"),g=ovGame();L.innerHTML="";ovAchN=-1;
+  $("ovgame").innerHTML="";
+  if(!g){var e=ovCard("ovnone","");e.appendChild(el("h2","","No game running"));e.appendChild(el("div","ovmuted","Start a game from your library, then press Shift+Tab while playing."));L.appendChild(e);return;}
+  var it=g.storeId?storeById(g.storeId):null,art=(it&&(it.hero||it.image))||g.image||"";
+  var gt=$("ovgame");var gd=el("i");paint(gd,g.name,art);gt.appendChild(gd);gt.appendChild(el("span","",g.name));
+  var cols=el("div","ovcols"),c1=el("div","ovcol"),c2=el("div","ovcol");cols.appendChild(c1);cols.appendChild(c2);L.appendChild(cols);
+  // now playing
+  var np=ovCard("ovnow",""),cv=el("div","ovcv");paint(cv,g.name,art);np.appendChild(cv);
+  var info=el("div","ovni");info.appendChild(el("div","ovkk","NOW PLAYING"));info.appendChild(el("h2","",g.name));
+  var big=el("div","ovbig");big.id="ovs1";info.appendChild(big);info.appendChild(el("div","ovmuted","this session"));
+  var st=el("div","ovst");[["Total","ovs2"],["Launches","ovs3"],["Achievements","ovs4"]].forEach(function(x){var d=el("div");var b=el("b","");b.id=x[1];d.appendChild(b);d.appendChild(el("small","",x[0]));st.appendChild(d);});
+  info.appendChild(st);np.appendChild(info);
+  var nx=el("div","ovnx");nx.id="ovnx";np.appendChild(nx);c1.appendChild(np);
+  // achievements
+  var ac=ovCard("ovach","Achievements",btn("See all","ovlink",function(){T(function(){return X.OverlayClose();});P.cur=g.id;nav("game");T(function(){return X.ShowWindow();});}));
+  var grid=el("div","ovag");grid.id="ovag";ac.appendChild(grid);c1.appendChild(ac);
+  // challenges for this game
+  var cl=(S.chal||[]).filter(function(c){return c.st==="open"&&gMatch(c.sid,c.g,g);});
+  if(cl.length){var cc=ovCard("ovch","Challenges");cl.forEach(function(c){cc.appendChild(chalRow(c,true));});c1.appendChild(cc);}
+  // screenshot
+  var sc=ovCard("ovshot","Screenshot",btn("Open folder","ovlink",function(){T(function(){return X.OverlayShots();});}));
+  var pv=el("div","ovpv");if(ovBg)pv.style.backgroundImage='url("'+ovBg+'")';else pv.appendChild(el("span","","No picture of this moment"));sc.appendChild(pv);
+  var sb=btn("📷  Save this moment","pri",function(){
+    var p2=T(function(){return X.OverlayShot(g.name);});
+    if(p2.indexOf("ERR")===0){toast("Couldn’t save the screenshot: "+p2.replace("ERR:",""));return;}
+    sb.textContent="✓  Saved to Pictures › Xaly Screenshots";sb.disabled=true;pv.className="ovpv flash";ovShots(g);});
+  if(!ovBg)sb.disabled=true;sc.appendChild(sb);
+  var strip=el("div","ovstrip");strip.id="ovstrip";sc.appendChild(strip);c2.appendChild(sc);
+  // notes
+  var nt=ovCard("ovnote","Notes"),ta=el("textarea");ta.setAttribute("placeholder","Codes, strategies, where you left off… saved for "+g.name+".");ta.value=g.notes||"";
+  var nT=null;ta.onkeyup=ta.onchange=function(){clearTimeout(nT);nT=setTimeout(function(){g.notes=ta.value.substr(0,4000);save();},400);};
+  nt.appendChild(ta);c2.appendChild(nt);
+  // quick actions
+  var qa=ovCard("ovqa",""),row=el("div","ovqr");
+  if(g.path&&g.path.indexOf("://")<0)row.appendChild(btn("Game folder","btn",function(){var d=g.path.replace(/[\\\/][^\\\/]*$/,"");T(function(){return X.Open(d);});}));
+  row.appendChild(btn("Quit game","btn dng",function(){openForm("Quit "+g.name+"? Unsaved progress may be lost.",[],"Quit game",function(){T(function(){return X.Stop(g.id);});},null);}));
+  qa.appendChild(row);c2.appendChild(qa);
+  ovShots(g);tickOverlay();
+}
+function ovShots(g){
+  var s=$("ovstrip");if(!s)return;s.innerHTML="";
+  var l=T(function(){return X.ListShots(g.name);},"").split("\n").filter(function(x){return x&&x.indexOf("ERR")!==0;});
+  if(!l.length){s.appendChild(el("div","ovmuted","Your screenshots of this game show up here."));return;}
+  l.forEach(function(path){var t=el("div","ovth"),d=T(function(){return X.ImageData(path,"160","72");},"");if(d&&d.indexOf("data:")===0)t.style.backgroundImage='url("'+d+'")';
+    t.title="Open";t.onclick=function(){T(function(){return X.Open(path);});};s.appendChild(t);});
+}
+function ovAch(g){
+  var gr=$("ovag");if(!gr)return;var n=achCount(g);if(n===ovAchN)return;ovAchN=n;gr.innerHTML="";
+  achProg(g).forEach(function(x){var b=achBadge(x.a,"");b.className+=" ovab"+(x.got?" got":"");b.title=x.a[1]+" — "+x.a[2]+(x.got?" (unlocked)":"");gr.appendChild(b);});
 }
 function tickOverlay(){
   if(!ovOn)return;var d=new Date();$("ovclk").textContent=hhmm(d);
   var g=ovGame();if(!g)return;
-  var a=$("ovs1"),b=$("ovs2"),c=$("ovs3");
-  if(a)a.textContent=fmtClock(now()-(run[g.id]?run[g.id].t:now()));if(b)b.textContent=fmtT(total(g));if(c)c.textContent=(g.plays||0)+(g.plays===1?" time":" times");
+  var a=$("ovs1"),b=$("ovs2"),c=$("ovs3"),e=$("ovs4");
+  if(a)a.textContent=fmtClock(now()-(run[g.id]?run[g.id].t:now()));if(b)b.textContent=fmtT(total(g));if(c)c.textContent=String(g.plays||0);if(e)e.textContent=achCount(g)+" / "+ACH.length;
+  if(d.getSeconds()%5===0||!$("ovnx").firstChild){
+    var nx=$("ovnx"),n=nextAch(g);nx.innerHTML="";
+    if(n){nx.appendChild(achBadge(n.a,"sm"));var t=el("div","ovnxt");t.appendChild(el("small","","NEXT ACHIEVEMENT"));t.appendChild(el("b","",n.a[1]));
+      var bar=el("div","ovnxb"),fi=el("i");fi.style.width=Math.round(n.r*100)+"%";bar.appendChild(fi);t.appendChild(bar);t.appendChild(el("span","",n.txt));nx.appendChild(t);}
+    else{nx.appendChild(el("div","ovnxt done","★  Every achievement unlocked in this game!"));}
+    ovAch(g);
+  }
 }
 /* ---------- settings ---------- */
 function sw(on,cb){var d=el("div","sw"+(on?" on":""));d.onclick=function(){on=!on;d.className="sw"+(on?" on":"");cb(on);};return d;}
@@ -4777,6 +4878,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   r.checks.sharedcat="waiting";http(SHARED_CAT,function(ok9,t9){var d9=null;try{d9=JSON.parse(t9);}catch(e){}r.checks.sharedcat=d9&&d9.items?d9.items.length+" games, built "+new Date(d9.t).toISOString():"ERR "+String(t9).substr(0,60);});
   c("shortcut",function(){var a=X.MakeShortcut("desktop","Xaly Selftest Game","selftestid","");var h=X.HasShortcut("desktop","Xaly Selftest Game","selftestid");var r=X.RemoveShortcut("desktop","Xaly Selftest Game","selftestid");return (a.indexOf("ERR")===0?a:"made")+" has="+h+" "+r+" after="+X.HasShortcut("desktop","Xaly Selftest Game","selftestid");});
   c("register",function(){return X.RegisterApp(VER);});
+  c("listshots",function(){var r=X.ListShots("Xaly Selftest");return r===""?"empty ok":r.substr(0,40);});
   c("exists",function(){return X.Exists(X.Paths().split("|")[0]+"\nC:\\nope\\x.exe\nsteam://rungameid/1");});
   r.checks.scanpc="waiting";scanPCcb=function(pl){var l=String(pl||"").split("\n").filter(function(x){return x;});r.checks.scanpc=l.length+" found"+(l.length?": "+l.slice(0,3).map(function(x){return x.split("|").slice(0,2).join(" ");}).join(", "):"");};X.ScanPC("C:\\Program Files\\Git");
   c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});

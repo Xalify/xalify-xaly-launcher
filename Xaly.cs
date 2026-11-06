@@ -1637,6 +1637,22 @@ namespace Xaly
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
         static string ShotDir() { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Xaly Screenshots"); }
+        // the newest screenshots of a game (one path per line), for the overlay's gallery strip
+        public string ListShots(string game)
+        {
+            try
+            {
+                string d = ShotDir(); if (!Directory.Exists(d)) return "";
+                string pre = SafeName(string.IsNullOrEmpty(game) ? "Game" : game) + " ";
+                List<FileInfo> l = new List<FileInfo>();
+                foreach (string p in Directory.GetFiles(d, "*.jpg")) if (Path.GetFileName(p).StartsWith(pre, StringComparison.OrdinalIgnoreCase)) l.Add(new FileInfo(p));
+                l.Sort(delegate(FileInfo x, FileInfo y) { return y.LastWriteTimeUtc.CompareTo(x.LastWriteTimeUtc); });
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < l.Count && i < 6; i++) sb.Append(l[i].FullName).Append("\n");
+                return sb.ToString();
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
         public string OverlayShot(string game)
         {
             try

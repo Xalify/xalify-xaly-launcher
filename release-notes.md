@@ -1,1 +1,8 @@
-- **Classic layout:** the Downloads tab next to Library is gone. Use the **Downloads** button in the middle of the bottom bar instead (it also shows progress while a game downloads).
+- **New in-game overlay** (Shift+Tab while playing):
+  - Your game, frozen and blurred, behind everything, with the game's name, the clock and a **Back to game** button on top.
+  - **Now playing:** a big live session timer, total play time, launches and achievements.
+  - **Next achievement:** the one you're closest to, with a progress bar and how far to go ("18 min of play to go", "2 more launches").
+  - **Achievements:** all 12 for this game at a glance.
+  - **Screenshot:** save the moment you paused on, and see your recent screenshots of this game (click one to open it).
+  - **Notes:** a notepad for each game (codes, strategies, where you left off), saved automatically.
+  - **Challenges** for this game, **Friends** and chat on the right, plus **Game folder** and **Quit game**.

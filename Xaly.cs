@@ -958,7 +958,8 @@ namespace Xaly
                     {
                         if (sent >= 5) break;
                         string text; try { text = File.ReadAllText(file); } catch (Exception) { continue; }
-                        if (PostForm("Xaly crash report (" + ver + ")", text, ver, "")) { try { File.Delete(file); } catch (Exception) { } sent++; }
+                        string ce;
+                        if (MailDev("Xaly crash report (" + ver + ")", text, out ce) || PostForm("Xaly crash report (" + ver + ")", text, ver, "")) { try { File.Delete(file); } catch (Exception) { } sent++; }
                         else break;   // offline or the inbox isn't activated yet: try again next start
                     }
                     // never let old reports pile up
@@ -995,12 +996,47 @@ namespace Xaly
             catch (Exception) { return false; }
         }
 
+        // Emails a message to the developer through ntfy.sh's email forwarding: no account, no activation.
+        // "Cache: no" means ntfy doesn't keep the message after delivering it.
+        const string DevEmail = "xalify2004@gmail.com", FbTopic = "xaly-fb-7c3e9a51d2b84f60";
+        static bool MailDev(string title, string text, out string err)
+        {
+            err = "";
+            try
+            {
+                try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                byte[] data = Encoding.UTF8.GetBytes(text.Length > 3800 ? text.Substring(0, 3800) + "\n[cut short]" : text);
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create("https://ntfy.sh/" + FbTopic);
+                rq.Method = "POST"; rq.ContentType = "text/plain; charset=utf-8"; rq.UserAgent = "XalyLauncher";
+                rq.Headers["Title"] = System.Text.RegularExpressions.Regex.Replace(title, "[^\\x20-\\x7E]", "");
+                rq.Headers["Email"] = DevEmail; rq.Headers["Tags"] = "speech_balloon"; rq.Headers["Cache"] = "no";
+                rq.Timeout = 20000; rq.ReadWriteTimeout = 20000; rq.ContentLength = data.Length;
+                using (Stream os = rq.GetRequestStream()) os.Write(data, 0, data.Length);
+                using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse()) return (int)rs.StatusCode == 200;
+            }
+            catch (WebException we)
+            {
+                HttpWebResponse r = we.Response as HttpWebResponse;
+                err = r != null ? ((int)r.StatusCode == 429 ? "Too many messages were sent from this connection today. Try again tomorrow." : "HTTP " + (int)r.StatusCode) : we.Message;
+                return false;
+            }
+            catch (Exception ex) { err = ex.Message; return false; }
+        }
         public string Feedback(string id, string text, string ver, string email)
         {
             // everything happens on a background thread so the window never freezes
             ThreadPool.QueueUserWorkItem(delegate(object st)
             {
                 string okFlag = "0", msg = "";
+                // 1st choice: straight to the developer's inbox through ntfy.sh
+                string err1;
+                string mail = text + "\n\n----\nFrom: Xaly Launcher " + ver + (string.IsNullOrEmpty(email) ? "" : "\nReply to: " + email) + "\nWindows: " + Environment.OSVersion.VersionString;
+                if (MailDev("Xaly feedback (" + ver + ")", mail, out err1))
+                {
+                    try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onHttp", id, "1", "sent", "200"); })); } catch (Exception) { }
+                    return;
+                }
+                // 2nd choice: the old FormSubmit route
                 try
                 {
                     try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }

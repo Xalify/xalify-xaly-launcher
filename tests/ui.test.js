@@ -56,6 +56,7 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     nav("settings", "controller"); P.tab = "controller"; renderSettings(); await wait(150);
     out.live = (document.querySelector(".pdnm") || {}).textContent || "";
     out.rowsS = document.querySelectorAll("#sbody .pdbind").length;
+    const o = padLive; let n = 0; padLive = function () { n++; return o(); }; nav("store"); await wait(150); const n1 = n; await wait(250); out.stopped = n === n1; padLive = o;
     navigator.getGamepads = () => []; return out;
   });
   ok(pad.style === "ps" && pad.selGlyph === "\u2715" && pad.hint === "\u2715", "a PlayStation controller is detected and shows PlayStation buttons: " + JSON.stringify([pad.style, pad.selGlyph, pad.hint]));
@@ -63,6 +64,7 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   ok(pad.capturing && pad.capGone && pad.aOn === "n" && pad.yOn === "s", "TV mode: rebinding Select to a pressed button swaps it with the action that had it: " + JSON.stringify(pad));
   ok(pad.dzLow && !pad.dzHigh, "stick deadzone decides when a push counts");
   ok(pad.sw === "BA" && pad.xb === "A" && pad.reset === "sn" && pad.swapped, "Switch and Xbox styles, reset, and Nintendo-style confirm");
+  ok(pad.stopped, "the live controller test stops after leaving Settings");
   ok(/DualSense Wireless Controller connected/.test(pad.live) && pad.rowsS === 8, "Settings > Controller shows the live controller and every binding: " + pad.live);
   // quitting from the overlay asks inside the overlay, not in a launcher dialog hidden behind it
   const ovq = await p.evaluate(() => {

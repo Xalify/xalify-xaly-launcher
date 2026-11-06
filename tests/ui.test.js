@@ -20,7 +20,7 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     ["store game page", "openDetail(S.store.items[0])"],
     ["library game page", "S.games.push({id:'gt',name:'Test Game',path:'C:\\\\dl\\\\Games\\\\T\\\\t.exe',storeId:S.store.items[0].id,seconds:3600,plays:3,last:now(),added:1});P.cur='gt';nav('game')"],
     ["friends panel", "setFP(true);renderFriends(true)"], ["friends activity", "P.ftab='act';renderFriends()"], ["challenges", "P.ftab='ch';renderFriends()"],
-    ["logo menu", "setFP(false);brandMenu()"], ["what's new", "hideMenu();whatsNew(true)"],
+    ["feedback panel", "setFP(false);openFeedback()"], ["feedback panel closes", "closeFeedback()"], ["logo menu", "brandMenu()"], ["what's new", "hideMenu();whatsNew(true)"],
     ["in-game overlay", "run.gt={t:now()-60000};S.fr=S.fr||{inc:[],out:[],seen:{}};openOverlay('')"], ["overlay closes", "closeOverlay();delete run.gt"],
     ["TV mode", "enterTV()"], ["leave TV mode", "exitTV()"]
   ];

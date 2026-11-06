@@ -1,8 +1,2 @@
-- **New in-game overlay** (Shift+Tab while playing):
-  - Your game, frozen and blurred, behind everything, with the game's name, the clock and a **Back to game** button on top.
-  - **Now playing:** a big live session timer, total play time, launches and achievements.
-  - **Next achievement:** the one you're closest to, with a progress bar and how far to go ("18 min of play to go", "2 more launches").
-  - **Achievements:** all 12 for this game at a glance.
-  - **Screenshot:** save the moment you paused on, and see your recent screenshots of this game (click one to open it).
-  - **Notes:** a notepad for each game (codes, strategies, where you left off), saved automatically.
-  - **Challenges** for this game, **Friends** and chat on the right, plus **Game folder** and **Quit game**.
+- **Give feedback works now.** It opens a short form right inside the launcher: what's on your mind, what it's about, and your email if you'd like a reply. Your message goes straight to the developer. The launcher version and your Windows version are added automatically.
+- Press Esc or ✕ to close it, or **Open in browser** if you prefer.

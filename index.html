@@ -978,8 +978,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.3";
+var VER="1.8.4";
 var NOTES=[
+ {v:"1.8.4",d:"6 Nov 2026",t:["Games on Google Drive that Drive won\u2019t give to apps (like Super Smash Bros. Crusade) now open in your browser automatically, and Xaly installs them as soon as the download finishes","Accounts that stay on this PC no longer need an email or password: just pick a name"]},
  {v:"1.8.3",d:"6 Nov 2026",t:["Settings redesigned: a sidebar with icons, settings grouped into clear sections, and a search box that finds any setting","General is split into General, Appearance and Notifications, so things are easier to find","Switch account: jump to another account on this PC from Settings, the menu under your name, or the Xaly logo menu","Account settings open with your profile card, showing your username, email and online status"]},
  {v:"1.8.2",d:"6 Nov 2026",t:["New sign-in screen: sign in and create an account on one page, with a Xaly panel full of games","Usernames are checked as you type, passwords show how strong they are, and an eye button shows what you typed","Email codes go in six boxes that move on by themselves; paste the whole code at once if you like","Pick your account from a cleaner list, and every mistake is explained right under the field it\u2019s about"]},
  {v:"1.8.1",d:"6 Nov 2026",t:["Fixed: if the confirmation email was slow to send, creating an online account showed an error even though it worked. It now goes straight to the code screen"]},
@@ -2934,6 +2935,8 @@ function startJob(j){
   });
 }
 function goJob(j){
+  // Drive refused this game for apps in the last 12 hours: skip straight to the browser
+  if(!j.autoBr&&j.it.brQ&&now()-j.it.brQ<12*3600000&&driveId(String(j.url||""))){j.resolving=0;j.autoBr=1;browserDl(j,true);toast("Opening "+j.it.name+" in your browser. Xaly installs it as soon as it finishes.");return;}
   j.resolving=0;j.st="downloading";j.lt=now();j.lb=j.bytes;j.speed=0;
   var have=+T(function(){return X.PartSize(j.fn);},"0")||0;j.bytes=have;
   var r=T(function(){return X.DownloadEx(j.id,j.url,j.fn,have>0?"1":"0");});
@@ -2943,11 +2946,11 @@ function goJob(j){
 /* ---------- 1.5.11: let the browser download what Google Drive or MediaFire won't give the launcher ---------- */
 function needsBrowser(j,msg){var u=String(j.url||j.it.url||"");return (driveId(u)&&/too many people|blocking automatic|didn’t send the file|didn't send the file/i.test(msg||""))||(mfFile(u)||/mediafire/i.test(u))&&/MediaFire|HTTP 403|HTTP 429/i.test(msg||"");}
 function browserUrl(j){var u=String(j.url||j.it.url||""),id=driveId(u);return id?"https://drive.usercontent.google.com/download?id="+id+"&export=download&authuser=0":u.replace(/&amp;/g,"&");}
-function browserDl(j){
+function browserDl(j,quiet){
   T(function(){return X.Open(browserUrl(j));});
   if(dl===j)dl=null;
   j.st="browser";j.bsince=now()-5000;j.bseen=null;j.err="";saveDQ();paintDl();pumpQ();
-  toast("Download "+j.it.name+" in your browser. Xaly installs it as soon as it’s in your Downloads folder.");
+  if(!quiet)toast("Download "+j.it.name+" in your browser. Xaly installs it as soon as it\u2019s in your Downloads folder.");
 }
 function importDl(j,path){
   var i=DQ.indexOf(j);if(i>=0)DQ.splice(i,1);saveDQ();
@@ -2971,6 +2974,11 @@ function jobFail(j,msg,hard){
   // errors that won't fix themselves in a few seconds: show them right away instead of "Connection lost"
   if(/Google Drive|MediaFire|web page|folder|private|removed|can\u2019t download from|HTTP 40[0-4]|HTTP 410/i.test(msg||""))hard=true;
   if(needsBrowser(j,msg))j.browser=1;
+  // 1.8.4: Drive won't hand this file to apps, but it will to the player's own signed-in browser: do that right away
+  if(j.browser&&driveId(String(j.url||j.it.url||""))&&/too many people|blocking automatic|didn.t send the file/i.test(msg||"")&&!j.autoBr){
+    j.autoBr=1;j.it.brQ=now();try{save();saveCat();}catch(e){}browserDl(j,true);
+    notify("ok","Opened "+j.it.name+" in your browser","Google Drive only lets signed-in people download this game right now, so Xaly opened the download in your browser. When it finishes, Xaly installs it by itself.",null,j.it.image);
+    return;}
   j.tries=(j.tries||0)+1;j.err=msg;
   var waits=[5,10,20,40,60,120];
   if(!hard&&j.tries<=waits.length){j.st="retry";j.retryAt=now()+waits[j.tries-1]*1000;}

@@ -1,5 +1,2 @@
-- **Settings redesigned:** a new sidebar with icons, grouped into You, App and Games. Settings sit in clear cards with small headings instead of one long list.
-- **Search settings:** type in the box at the top of the sidebar to find any setting. Matching settings show right there and work as normal.
-- **More sections:** General is split into **General**, **Appearance** (layout, accent colour, display engine) and **Notifications** (pop-ups and sounds).
-- **Switch account:** jump to another account on this PC from the **Switch account** button in Settings › Account, the account card at the bottom of the settings sidebar, the menu under your name, or the Xaly logo menu. Accounts without a password open straight away, and ones with a password ask for it first. You can't switch while a game is running.
-- **Profile card:** Settings › Account opens with your avatar, name, @username, email and online status at the top.
+- **Google Drive games just work:** when Google Drive won't give a game to apps, which happens with popular files like Super Smash Bros. Crusade, Xaly now opens the download in your browser by itself, where you're signed in to Google. It installs the game as soon as the file lands in your Downloads folder. There's no more error to find and no button to press. Installing that game again within 12 hours goes straight to the browser.
+- **Accounts without an email:** when you turn off "Online account", email and password are now optional. Just pick a name. If you do type an email, it's still checked.

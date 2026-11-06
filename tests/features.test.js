@@ -118,20 +118,24 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
  ok(ctx.extUrl("https://www.mediafire.com/file/x1/G.zip/file")==="https://www.mediafire.com/file/x1/G.zip/file"&&ctx.extOk("https://www.mediafire.com/file/x1/G.zip/file")&&!ctx.extOk("https://www.mediafire.com/folder/x1"),"MediaFire file yes, folder no");
  // ---- 1.5.10 real error text
  ctx.DQ.length=0;ctx.dl=null;const jq={it:cr,st:"downloading",tries:0};ctx.DQ.push(jq);
- ctx.jobFail(jq,"Google Drive says too many people downloaded this file recently. Try again later.",false);ok(jq.st==="error","Drive limit stops at once instead of retrying");
+ ctx.jobFail(jq,"Google Drive says too many people downloaded this file recently. Try again later.",false);ok(jq.st!=="retry"&&jq.st!=="queued","Drive limit stops at once instead of retrying");delete cr.brQ;
  const jr={it:cr,st:"downloading",tries:0};ctx.DQ.push(jr);ctx.jobFail(jr,"The connection dropped before the download finished.",false);
  ok(jr.st==="retry"&&/^Connection lost\. Trying again in \d+ s \(try 1 of 6\)$/.test(ctx.retryTxt(jr)),"real drops still retry: "+ctx.retryTxt(jr));
  // ---- 1.5.11 browser fallback
  ctx.DQ.length=0;ctx.dl=null;const opened=[];X.Open=u=>{opened.push(u);return "ok";};
  const jb2=ctx.newJob(cr,{direct:1,url:ctx.extUrl(cr.url),fn:"xaly-ssb1.download",kind:"archive"});ctx.DQ.push(jb2);ctx.dl=jb2;
  ctx.jobFail(jb2,"Google Drive says too many people downloaded this file recently. Try again later.",false);
- ok(jb2.st==="error"&&jb2.browser===1,"Drive limit offers the browser");
- ctx.nav("downloads");ok(reg.pDl.textContent.indexOf("Download in browser")>-1,"button shown on Downloads page");
- ctx.browserDl(jb2);ok(opened[0]==="https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download&authuser=0"&&jb2.st==="browser","opens the signed-in Drive link in the browser");
+ ok(jb2.st==="browser"&&jb2.browser===1&&opened.length===1,"when Drive refuses, the download opens in the browser by itself (1.8.4)");
+ ok(opened[0]==="https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download&authuser=0","it opens the signed-in Drive link");
+ ok(cr.brQ>0,"Xaly remembers Drive refused this game");
+ ctx.nav("downloads");ok(reg.pDl.textContent.indexOf("Waiting for the download in your browser")>-1&&reg.pDl.textContent.indexOf("Open again")>-1,"Downloads explains it is waiting for the browser");
  let fd="0|C:\\Users\\me\\Downloads||0";X.FindDownload=()=>fd;const fins=[];X.Extract=(z,n)=>{fins.push(z);return "C:\\dl\\Games\\SSBC\\SSBC.exe|C:\\dl\\Games\\SSBC";};
  ctx.brT=0;ctx.browserTick();fd="1|C:\\Users\\me\\Downloads|C:\\Users\\me\\Downloads\\SSBC.zip|5000";ctx.brT=0;ctx.browserTick();ok(!jb2.bseen,"waits while the browser is still writing");
  fd="0|C:\\Users\\me\\Downloads|C:\\Users\\me\\Downloads\\SSBC.zip|1739587584";ctx.brT=0;ctx.browserTick();ok(jb2.bseen&&ctx.DQ.length===1,"sees the file, checks it once more");
  ctx.brT=0;ctx.browserTick();await sleep(100);ok(fins[0]==="C:\\Users\\me\\Downloads\\SSBC.zip"&&ctx.DQ.length===0&&ctx.inLib("ssb1"),"installs the finished file and adds the game");
+ {const j3=ctx.newJob(cr,{direct:1,url:ctx.extUrl(cr.url),fn:"xaly-ssb1.download",kind:"archive"});ctx.DQ.push(j3);let started=0;const oe=X.DownloadEx;X.DownloadEx=(...a)=>{started++;return oe(...a);};
+  ctx.goJob(j3);ok(j3.st==="browser"&&started===0&&opened.length===2,"installing it again within 12 hours goes straight to the browser");
+  X.DownloadEx=oe;ctx.DQ.length=0;ctx.dl=null;}
  // ---- 1.6.0 shared catalog
  ctx.loadCat();ctx.CAT.items.push({id:"xold1",name:"Old Game",url:"https://dev.itch.io/old-game",kind:"page",live:1,auto:1,image:"o.png"},{id:"xkeep",name:"Kept Game",url:"https://dev.itch.io/kept",kind:"page",live:1,auto:1,image:"k.png"},{id:"xlocal9",name:"Same Game",url:"https://dev.itch.io/same/",kind:"page",live:1,auto:1,image:"s.png",desc:"A long description from the game page that is longer than the tagline for sure."});
  ctx.S.games.push({id:"gk",name:"Kept Game",storeId:"xkeep",path:"C:\\dl\\Games\\K\\k.exe",seconds:0,added:1});

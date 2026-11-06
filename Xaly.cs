@@ -717,6 +717,8 @@ namespace Xaly
         // ---- TV mode
         public string SetFullscreen(string on) { f.SetFullscreen(on == "1"); return "ok"; }
         public string PadNative(string on) { f.PadNative(on == "1"); return "ok"; }
+        public string PadConfig(string stick, string trig) { f.PadConfig(stick, trig); return "ok"; }
+        public string PadRaw() { return f.PadRaw(); }
 
         // ---- move a game folder to another drive (<drive>:\Xaly Games\<game>), with progress and cancel
         public string FreeSpace(string path)
@@ -2385,22 +2387,57 @@ namespace Xaly
             }
             padTimer.Start();
         }
+        // deadzones are set from Settings > Controller (percent of the full push)
+        int padStick = 16000, padTrig = 77;
+        public void PadConfig(string stick, string trig)
+        {
+            int a, b;
+            if (int.TryParse(stick, out a)) padStick = Math.Max(5, Math.Min(95, a)) * 32767 / 100;
+            if (int.TryParse(trig, out b)) padTrig = Math.Max(5, Math.Min(95, b)) * 255 / 100;
+            padLast = -1;
+        }
+        // buttons by position, the XInput layout plus LT=0x400 and RT=0x800 (unused by XInput)
+        int PadBitsOf(XGamepad g)
+        {
+            int bits = g.wButtons & 0xF3FF;
+            if (g.sThumbLY > padStick) bits |= 1; if (g.sThumbLY < -padStick) bits |= 2;
+            if (g.sThumbLX < -padStick) bits |= 4; if (g.sThumbLX > padStick) bits |= 8;
+            if (g.bLeftTrigger > padTrig) bits |= 0x400; if (g.bRightTrigger > padTrig) bits |= 0x800;
+            return bits;
+        }
+        bool PadRead(int i, ref XState st)
+        {
+            if (padApi == 0) return false;
+            int r;
+            try { r = padApi == 14 ? XInputGetState14(i, ref st) : XInputGetState910(i, ref st); }
+            catch (Exception) { padApi = padApi == 14 ? 910 : 0; return false; }
+            return r == 0;
+        }
         void PadPoll()
         {
             if ((Form.ActiveForm != this && !overlayOn) || padApi == 0) return;
             int bits = 0;
             for (int i = 0; i < 4; i++)
             {
-                XState st = new XState(); int r;
-                try { r = padApi == 14 ? XInputGetState14(i, ref st) : XInputGetState910(i, ref st); }
-                catch (Exception) { padApi = padApi == 14 ? 910 : 0; return; }
-                if (r != 0) continue;
-                XGamepad g = st.Gamepad;
-                bits |= g.wButtons & 0xF33F;
-                if (g.sThumbLY > 16000) bits |= 1; if (g.sThumbLY < -16000) bits |= 2;
-                if (g.sThumbLX < -16000) bits |= 4; if (g.sThumbLX > 16000) bits |= 8;
+                XState st = new XState();
+                if (!PadRead(i, ref st)) { if (padApi == 0) return; continue; }
+                bits |= PadBitsOf(st.Gamepad);
             }
             if (bits != padLast) { padLast = bits; Js("onPad", bits.ToString()); }
+        }
+        // the first connected controller, for the live test in Settings: "lx,ly,rx,ry,lt,rt,bits" (sticks -1..1, triggers 0..1)
+        public string PadRaw()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                XState st = new XState();
+                if (!PadRead(i, ref st)) continue;
+                XGamepad g = st.Gamepad;
+                Func<double, string> n = delegate(double v) { return v.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture); };
+                return n(g.sThumbLX / 32767.0) + "," + n(g.sThumbLY / -32767.0) + "," + n(g.sThumbRX / 32767.0) + "," + n(g.sThumbRY / -32767.0) + ","
+                    + n(g.bLeftTrigger / 255.0) + "," + n(g.bRightTrigger / 255.0) + "," + PadBitsOf(g);
+            }
+            return "";
         }
 
         void OvKeys(bool on)

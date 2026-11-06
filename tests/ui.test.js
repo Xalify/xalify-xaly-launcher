@@ -24,7 +24,7 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     ["in-game overlay", "run.gt={t:now()-60000};S.fr=S.fr||{inc:[],out:[],seen:{}};openOverlay('')"], ["overlay closes", "closeOverlay();delete run.gt"],
     ["TV mode", "enterTV()"], ["leave TV mode", "exitTV()"]
   ];
-  ["account", "friends", "general", "appearance", "notifications", "downloads", "storage", "cache", "about"].forEach(t => visits.push(["settings: " + t, "nav('settings','" + t + "');P.tab='" + t + "';renderSettings()"]));
+  ["account", "friends", "general", "appearance", "notifications", "controller", "downloads", "storage", "cache", "about"].forEach(t => visits.push(["settings: " + t, "nav('settings','" + t + "');P.tab='" + t + "';renderSettings()"]));
   visits.push(["settings search", "P.sq2='sound';renderSettings()"], ["settings search cleared", "P.sq2='';renderSettings()"], ["switch account menu", "switchMenu($('chip'))"], ["find games dialog", "nav('lib');findGames('')"], ["backup dialog", "closeForm();backupAcc()"], ["uninstall dialog", "closeForm();openUninstall()"], ["challenge form", "closeForm();S.friends.push({code:'111222333',name:'Bob',color:1,msgs:[]});chalForm(S.friends[0],gameBy('gt'))"]);
   for (const [name, js] of visits) {
     const before = errs.length;
@@ -33,6 +33,37 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     ok(errs.length === before, name + (errs.length === before ? "" : " \u2014 " + errs.slice(before).join(" | ")));
   }
   ok(await p.evaluate(() => document.querySelectorAll("#pStore .gc").length >= 0), "store renders");
+  // 2.0.0 controller settings, driven by a fake PlayStation controller
+  const pad = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms)), out = {};
+    const B = () => { const l = []; for (let i = 0; i < 17; i++) l.push({ pressed: false, value: 0 }); return l; };
+    window.__gp = { id: "DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)", connected: true, buttons: B(), axes: [0, 0, 0, 0], mapping: "standard" };
+    navigator.getGamepads = () => [window.__gp];
+    const press = async i => { __gp.buttons[i] = { pressed: true, value: 1 }; await wait(90); __gp.buttons[i] = { pressed: false, value: 0 }; await wait(90); };
+    PAD.native = 0; padReset(); S.set.pad.style = "auto"; await wait(80);
+    out.style = padStyle(); out.selGlyph = padName("a");
+    enterTV(); await wait(50); out.hint = document.querySelector("#tvhint .tvbt").textContent;
+    await press(9); out.menu = !!TV.menu;                                   // Options opens the TV menu
+    await press(13); await press(13); await press(0); out.cfg = !!TV.cfg;      // down, down, select: Controller settings
+    out.rows = document.querySelectorAll("#tvsheet .tvcr").length;
+    TV.sf = tvCfgItems().map(x => x.t).indexOf("Select"); tvCfg(); await press(0); out.capturing = !!PAD.cap;
+    await press(3); out.aOn = padBtnOf("a"); out.yOn = padBtnOf("y");           // bind Select to triangle: Details moves to cross
+    out.capGone = !PAD.cap;
+    __gp.axes = [0.4, 0, 0, 0]; S.set.pad.dz = 30; out.dzLow = (padBits() & 8) > 0; S.set.pad.dz = 50; out.dzHigh = (padBits() & 8) > 0; __gp.axes = [0, 0, 0, 0];
+    S.set.pad.style = "sw"; out.sw = padLabel("s") + padLabel("e"); S.set.pad.style = "xbox"; out.xb = padLabel("s");
+    padReset(); out.reset = padBtnOf("a") + padBtnOf("y"); padBind("a", "e"); out.swapped = padSwapped() && padBtnOf("b") === "s"; padReset();
+    TV.cfg = 0; exitTV(); S.set.pad.style = "auto";
+    nav("settings", "controller"); P.tab = "controller"; renderSettings(); await wait(150);
+    out.live = (document.querySelector(".pdnm") || {}).textContent || "";
+    out.rowsS = document.querySelectorAll("#sbody .pdbind").length;
+    navigator.getGamepads = () => []; return out;
+  });
+  ok(pad.style === "ps" && pad.selGlyph === "\u2715" && pad.hint === "\u2715", "a PlayStation controller is detected and shows PlayStation buttons: " + JSON.stringify([pad.style, pad.selGlyph, pad.hint]));
+  ok(pad.menu && pad.cfg && pad.rows >= 13, "TV mode: Options opens the menu, and Controller settings opens from it with the controller (" + pad.rows + " rows)");
+  ok(pad.capturing && pad.capGone && pad.aOn === "n" && pad.yOn === "s", "TV mode: rebinding Select to a pressed button swaps it with the action that had it: " + JSON.stringify(pad));
+  ok(pad.dzLow && !pad.dzHigh, "stick deadzone decides when a push counts");
+  ok(pad.sw === "BA" && pad.xb === "A" && pad.reset === "sn" && pad.swapped, "Switch and Xbox styles, reset, and Nintendo-style confirm");
+  ok(/DualSense Wireless Controller connected/.test(pad.live) && pad.rowsS === 8, "Settings > Controller shows the live controller and every binding: " + pad.live);
   // quitting from the overlay asks inside the overlay, not in a launcher dialog hidden behind it
   const ovq = await p.evaluate(() => {
     run.gt = { t: now() - 60000 }; S.fr = S.fr || { inc: [], out: [], seen: {} }; openOverlay("");

@@ -4395,6 +4395,11 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("freespace",function(){var v=+X.FreeSpace(X.Paths().split("|")[0]);return v>0?"ok "+Math.round(v/1073741824)+" GB":"bad "+v;});
   c("placeguard",function(){return X.PlaceStandalone("C:\\Windows\\notepad.exe","x");});
   r.checks.sharedcat="waiting";http(SHARED_CAT,function(ok9,t9){var d9=null;try{d9=JSON.parse(t9);}catch(e){}r.checks.sharedcat=d9&&d9.items?d9.items.length+" games, built "+new Date(d9.t).toISOString():"ERR "+String(t9).substr(0,60);});
+  (function(){var big=new Array(30001).join("0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqr");
+    var t0=new Date().getTime();X.Save("perf-test.json",big);var t1=new Date().getTime();var back=X.Data("perf-test.json");var t2=new Date().getTime();X.Delete("perf-test.json");
+    r.checks.perfbridge="save "+Math.round(big.length/1e6*10)/10+" MB: "+(t1-t0)+" ms, read: "+(t2-t1)+" ms, ok="+(back.length===big.length);
+    var h0=new Date().getTime();http(SHARED_CAT,function(ok,t){var h1=new Date().getTime(),d=null;try{d=JSON.parse(t);}catch(e){}var h2=new Date().getTime();
+      r.checks.perfcat="download+hand-over "+(h1-h0)+" ms, parse "+(h2-h1)+" ms, "+(d&&d.items?d.items.length:0)+" games";});})();
   c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
   c("relaylive",function(){

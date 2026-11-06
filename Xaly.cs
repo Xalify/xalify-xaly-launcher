@@ -1017,7 +1017,9 @@ namespace Xaly
             catch (WebException we)
             {
                 HttpWebResponse r = we.Response as HttpWebResponse;
-                err = r != null ? ((int)r.StatusCode == 429 ? "Too many messages were sent from this connection today. Try again tomorrow." : "HTTP " + (int)r.StatusCode) : we.Message;
+                string why = "";
+                if (r != null) { try { using (StreamReader sr = new StreamReader(r.GetResponseStream(), Encoding.UTF8)) why = sr.ReadToEnd(); } catch (Exception) { } }
+                err = r != null ? ((int)r.StatusCode == 429 ? "Too many messages were sent from this connection today. Try again tomorrow." : "HTTP " + (int)r.StatusCode + " " + (why.Length > 160 ? why.Substring(0, 160) : why)) : we.Message;
                 return false;
             }
             catch (Exception ex) { err = ex.Message; return false; }
@@ -1057,15 +1059,16 @@ namespace Xaly
                     HttpWebResponse rs = null;
                     try { rs = (HttpWebResponse)rq.GetResponse(); }
                     catch (WebException we) { rs = we.Response as HttpWebResponse; if (rs == null) throw; }
-                    string resp;
+                    string resp; int code = (int)rs.StatusCode;
                     using (rs) using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8)) resp = sr.ReadToEnd();
                     bool good = resp.Replace(" ", "").IndexOf("\"success\":\"true\"") >= 0 || resp.Replace(" ", "").IndexOf("\"success\":true") >= 0;
                     okFlag = good ? "1" : "0";
                     int m = resp.IndexOf("\"message\"");
                     if (m >= 0) { int a = resp.IndexOf('"', resp.IndexOf(':', m) + 1); int b = a >= 0 ? resp.IndexOf('"', a + 1) : -1; if (a >= 0 && b > a) msg = resp.Substring(a + 1, b - a - 1); }
-                    if (msg.Length == 0) msg = good ? "sent" : "HTTP " + (int)rs.StatusCode;
+                    if (msg.Length == 0) msg = good ? "sent" : "HTTP " + code;
                 }
                 catch (Exception ex) { msg = ex.Message; }
+                if (okFlag != "1") msg = "ntfy: " + err1 + " / formsubmit: " + msg;
                 string o2 = okFlag, m2 = msg;
                 try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onHttp", id, o2, m2, "200"); })); } catch (Exception) { }
             });

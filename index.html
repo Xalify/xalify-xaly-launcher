@@ -4878,7 +4878,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   r.checks.sharedcat="waiting";http(SHARED_CAT,function(ok9,t9){var d9=null;try{d9=JSON.parse(t9);}catch(e){}r.checks.sharedcat=d9&&d9.items?d9.items.length+" games, built "+new Date(d9.t).toISOString():"ERR "+String(t9).substr(0,60);});
   c("shortcut",function(){var a=X.MakeShortcut("desktop","Xaly Selftest Game","selftestid","");var h=X.HasShortcut("desktop","Xaly Selftest Game","selftestid");var r=X.RemoveShortcut("desktop","Xaly Selftest Game","selftestid");return (a.indexOf("ERR")===0?a:"made")+" has="+h+" "+r+" after="+X.HasShortcut("desktop","Xaly Selftest Game","selftestid");});
   c("register",function(){return X.RegisterApp(VER);});
-  if(ENGINE==="webview2"&&navigator.userAgent.indexOf("Edg")>=0){var fid="selffb";r.checks.feedback="waiting";cbs[fid]=function(ok2,msg2){r.checks.feedback="ok="+ok2+" "+String(msg2).substr(0,120);};
+  if(ENGINE==="webview2"&&navigator.userAgent.indexOf("Edg")>=0){var fid="selffb";r.checks.feedback="waiting";cbs[fid]=function(ok2,msg2){r.checks.feedback="ok="+ok2+" "+String(msg2).substr(0,400);};
     X.Feedback(fid,"Hi! This is a one-time test from the Xaly Launcher build server, to check that the Give feedback button reaches your inbox. If you can read this, it works. Feedback from players will arrive just like this.",VER+" build test","");}
   c("listshots",function(){var r=X.ListShots("Xaly Selftest");return r===""?"empty ok":r.substr(0,40);});
   c("exists",function(){return X.Exists(X.Paths().split("|")[0]+"\nC:\\nope\\x.exe\nsteam://rungameid/1");});

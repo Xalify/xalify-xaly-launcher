@@ -16,7 +16,13 @@ const { chromium } = require("playwright"), fs = require("fs"), path = require("
   await fr.waitForSelector("textarea", { timeout: 30000 });
   console.log("form loaded inside the launcher panel");
   await fr.fill("textarea", "Test from the Xaly Launcher build server: the Give feedback button works end to end. You can delete this response.");
-  const click = async re => { const bt = fr.locator("button", { hasText: re }).first(); await bt.waitFor({ state: "visible", timeout: 15000 }); await bt.click(); await p.waitForTimeout(1200); };
+  console.log("FORM TEXT:", (await fr.innerText("body")).replace(/\s+/g, " ").slice(0, 300));
+  console.log("CLICKABLES:", JSON.stringify(await fr.evaluate(() => [].slice.call(document.querySelectorAll("button,[role=button],a,input[type=submit]")).map(e => e.tagName + ":" + (e.innerText || e.value || e.getAttribute("aria-label") || "").trim().slice(0, 30)).slice(0, 30))));
+  const click = async re => {
+    const bt = fr.locator("button, [role=button], a", { hasText: re }).first();
+    try { await bt.waitFor({ state: "visible", timeout: 6000 }); await bt.click(); }
+    catch (e) { console.log("no button matching " + re + ", pressing Ctrl+Enter"); await p.keyboard.press("Control+Enter"); }
+    await p.waitForTimeout(1500); };
   await click(/Next|OK/);
   console.log("after message:", (await fr.innerText("body")).replace(/\s+/g, " ").slice(0, 160));
   await click(/Next|Skip|OK/);

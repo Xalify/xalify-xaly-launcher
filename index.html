@@ -902,8 +902,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.9";
+var VER="1.7.10";
 var NOTES=[
+ {v:"1.7.10",d:"6 Nov 2026",t:["Switching between Store and Library is instant now. The Store keeps its page instead of rebuilding it each time, and remembers where you scrolled","The Store builds game rows as you scroll to them, so it opens faster and uses less memory","Xaly gives memory back while it\u2019s minimized or in the tray, like when you\u2019re in a game"]},
  {v:"1.7.9",d:"6 Nov 2026",t:["Fix \u201Cwon\u2019t start\u201D: Xaly checks each game for missing Microsoft runtimes (Visual C++ and DirectX) before it starts, and offers to install them with one click. If a game closes right away, it checks again. You can also run it from a game\u2019s More menu","Clean up leftovers: Settings \u203A Storage finds unfinished downloads, old archives and installers, empty or orphaned game folders and old update files, and frees the space in one click","Friends leaderboard: a new Ranks tab shows who played the most this week, who unlocked the most achievements, and all-time hours. It resets every Monday, and Xaly tells you who won last week"]},
  {v:"1.7.8",d:"6 Nov 2026",t:["Fixed: with the Friends panel open, the last game in each Store row was cut off at the panel. Rows now resize their cards so only whole games show, at any window size"]},
  {v:"1.7.7",d:"6 Nov 2026",t:["Fixed: the scrollbar lagged behind when the Friends panel opened or closed. Scrollbars now move smoothly with the page"]},
@@ -1352,14 +1353,15 @@ function backNav(){
 function render(){
   if(!S)return;
   var pg=P.page,ids={store:"pStore",detail:"pDet",lib:"pLib",game:"pGame",downloads:"pDl",settings:"pSet",profile:"pProf"},k;
-  for(k in ids){var d=$(ids[k]);if(k===pg){if(d.style.display!=="block"){d.style.display="block";d.className="page in";}}else d.style.display="none";}
+  var entering=false;
+  for(k in ids){var d=$(ids[k]);if(k===pg){if(d.style.display!=="block"){entering=true;d.style.display="block";d.className="page in";if(k==="store"&&P.stTop)d.scrollTop=P.stTop;}}else{if(k==="store"&&d.style.display==="block")P.stTop=d.scrollTop;d.style.display="none";}}
   $("tStore").className="tab"+((pg==="store"||pg==="detail")?" on":"");
   $("tLib").className="tab"+((pg==="lib"||pg==="game")?" on":"");
   $("tDl").className="tab"+(pg==="downloads"?" on":"");$("tProf").className="tab"+(pg==="profile"&&!P.prof?" on":"");$("tSet").className="tab"+(pg==="settings"?" on":"");
   stopAnim();
   $("back").style.display=(pg==="detail"||pg==="game"||(pg==="profile"&&P.prof))?"block":"none";
   if(pg!=="store")stopCar();
-  if(pg==="store")renderStore();else if(pg==="detail")renderDetail();else if(pg==="lib")renderLib();else if(pg==="game")renderGame();else if(pg==="downloads")renderDownloads();else if(pg==="profile")renderProfile();else renderSettings();
+  if(pg==="store"){if(entering&&P.storeSig&&$("pStore").firstChild&&P.storeSig===storeSig()){fitW=-1;try{fitShelves();}catch(e){}fillLazy();}else renderStore();}else if(pg==="detail")renderDetail();else if(pg==="lib")renderLib();else if(pg==="game")renderGame();else if(pg==="downloads")renderDownloads();else if(pg==="profile")renderProfile();else renderSettings();
   chip();bottom();paintBell();
   if(tvOn&&!TV.sheet&&!TV.menu)tvRender();
 }
@@ -1596,6 +1598,24 @@ function patchCards(it){   // update one game's cards on screen without rebuildi
   return n;
 }
 var lastStoreR=0;
+/* 1.7.10: what the Store page shows depends on these; if none changed, switching back to the Store reuses the page instead of rebuilding it */
+function storeSig(){
+  var w=wishMap(),wk=[],k;for(k in w)if(w[k])wk.push(k);
+  var ff=friendFeed(),f0=ff[0];
+  return [allStore().length,CAT.sh||"",S.games.map(function(g){return (g.storeId||"")+(g.missing?"m":"");}).join(","),wk.sort().join(","),JSON.stringify(P.f),P.sq,P.lim,covLeft(),
+    ff.length+":"+(f0?JSON.stringify(f0).length+":"+(f0.t||(f0.e&&f0.e.t)||""):""),DQ.length].join("|");
+}
+/* only the first few shelves get their cards straight away; the rest fill in just before they scroll into view */
+var SHN=0;
+function fillLazy(){
+  var pg=$("pStore");if(!pg||!pg.querySelectorAll||pg.style.display==="none")return;
+  var l=pg.querySelectorAll(".shv"),lim=(pg.getBoundingClientRect?pg.getBoundingClientRect().bottom:900)+900,i,n=0;
+  for(i=0;i<l.length;i++){var v=l[i];if(!v._lazy)continue;
+    if(v.getBoundingClientRect().top>lim)break;
+    var tr=v.firstChild,list=v._lazy;v._lazy=null;tr.style.minHeight="";list.forEach(function(it){tr.appendChild(gcard(it));});
+    if(v._sl)v.scrollLeft=v._sl;n++;}
+  if(n){fitW=-1;try{fitShelves();}catch(e){}}
+}
 function softRender(it){
   if(it&&P.page==="store"){patchCards(it);softRender.dirty=1;return;}   // the Store picks up the rest on its next quiet refresh
   if(softRender.t)return;
@@ -1921,8 +1941,9 @@ var FR={"Mario":["#ff4b4b","#ffb02e"],"Sonic":["#2f7bff","#27d3ff"],"FNAF":["#d1
 var FRO=["Recomp","Mario","Sonic","FNAF","Pok\u00e9mon","Smash","Indie"];
 function frOf(it){
   if(it.fr&&FR[it.fr])return it.fr;
-  var n=(it.name||"").toLowerCase();
-  return /mario/.test(n)?"Mario":/sonic/.test(n)?"Sonic":/fnaf|freddy|five nights/.test(n)?"FNAF":/pok[e\u00e9]mon/.test(n)?"Pok\u00e9mon":/smash bros/.test(n)?"Smash":"Indie";
+  if(it._frn===it.name)return it._frv;
+  var n=(it.name||"").toLowerCase();it._frn=it.name;
+  return it._frv=/mario/.test(n)?"Mario":/sonic/.test(n)?"Sonic":/fnaf|freddy|five nights/.test(n)?"FNAF":/pok[e\u00e9]mon/.test(n)?"Pok\u00e9mon":/smash bros/.test(n)?"Smash":"Indie";
 }
 function frGrad(fr){var c=FR[fr]||FR.Indie;return "linear-gradient(135deg,"+c[0]+","+c[1]+")";}
 function closeMenus(){if(SMENU){SMENU.className="sdd";SMENU=null;}}
@@ -1966,11 +1987,11 @@ function shelf(title,list,onAll,grad,total){
   h.appendChild(bar);h.appendChild(el("h3","",title));var n=total||list.length;h.appendChild(el("small","",n+(n===1?" game":" games")));
   var sp=el("div");sp.style.flex="1 1 0%";h.appendChild(sp);
   if(onAll)h.appendChild(btn("See all","seeall",onAll));
-  var vp=el("div","shv"),tr=el("div","sht");list.forEach(function(it){tr.appendChild(gcard(it));});vp.appendChild(tr);
+  var vp=el("div","shv"),tr=el("div","sht");if(SHN++<3)list.forEach(function(it){tr.appendChild(gcard(it));});else{vp._lazy=list;tr.style.minHeight="262px";}vp.appendChild(tr);
   function scr(d){var cw=vp._cw,to=vp.scrollLeft+d*(vp._step||(vp.clientWidth-80));if(cw)to=Math.round(to/cw)*cw;to=Math.max(0,Math.min(vp.scrollWidth-vp.clientWidth,to));animScroll(vp,to);}
   h.appendChild(btn("‹","sha",function(){scr(-1);}));h.appendChild(btn("›","sha",function(){scr(1);}));
   s.appendChild(h);s.appendChild(vp);
-  if(P.shs&&P.shs[title])setTimeout(function(){vp.scrollLeft=P.shs[title];},0);
+  if(P.shs&&P.shs[title]){vp._sl=P.shs[title];setTimeout(function(){vp.scrollLeft=P.shs[title];},0);}
   vp.onscroll=function(){P.shs=P.shs||{};P.shs[title]=vp.scrollLeft;};
   return s;
 }
@@ -2027,7 +2048,8 @@ function spotlight(list){
 spotlight.re=function(list){clearTimeout(spT);spT=setTimeout(function(){if(spEl&&spEl.parentNode&&P.page==="store")swapSpot(list);},8000);};
 function swapSpot(list){var o=spEl;if(!o||!o.parentNode)return;var n=spotlight(list);o.parentNode.replaceChild(n,o);}
 function renderStore(keep){
-  var pg=$("pStore"),top=pg.scrollTop,f=P.f;P.f.lf=P.f.lf||"";pg.innerHTML="";SMENU=null;
+  var pg=$("pStore"),top=pg.scrollTop,f=P.f;P.f.lf=P.f.lf||"";pg.innerHTML="";SMENU=null;SHN=0;
+  if(!pg._lz){pg._lz=1;pg.onscroll=function(){if(!fillLazy.t)fillLazy.t=setTimeout(function(){fillLazy.t=0;fillLazy();},60);};}
   lastStoreR=now();
   var every=allStore().filter(visIt),all=storeFilter(every),body=el("div","xs");
   // header + search
@@ -2100,7 +2122,7 @@ function renderStore(keep){
       else if(f.lf&&LFU[f.lf]){var lb=btn(liveMore[f.lf]?"Loading\u2026":"Load more from itch.io","btn",function(){lb.textContent="Loading\u2026";loadMoreLive(f.lf,function(c,n){P.lim=lim+60;renderStore(true);if(c<=0)toast("That\u2019s everything itch.io has in this list right now");});});mr.appendChild(lb);}
       body.appendChild(mr);}
   }
-  pg.appendChild(body);fitW=-1;try{fitShelves();}catch(e){}pg.scrollTop=top;
+  pg.appendChild(body);fitW=-1;try{fitShelves();}catch(e){}pg.scrollTop=top;fillLazy();try{P.storeSig=storeSig();}catch(e){P.storeSig="";}
 }
 function openDetail(it){it=directFor(it)||it;P.sel=it;P.si=0;P.dtab="ov";nav("detail");refreshItch(it);}
 function host(u){return (u||"").replace(/^[a-z]+:\/\//i,"").split("/")[0];}

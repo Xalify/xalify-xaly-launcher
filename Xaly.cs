@@ -2425,6 +2425,19 @@ namespace Xaly
         }
 
 #if WEBVIEW2
+        bool memLow = false;
+        void MemLevel()
+        {
+            try
+            {
+                if (wv == null || wv.CoreWebView2 == null) return;
+                bool idle = !Visible || WindowState == FormWindowState.Minimized;
+                if (idle == memLow) return;
+                memLow = idle;
+                wv.CoreWebView2.MemoryUsageTargetLevel = idle ? CoreWebView2MemoryUsageTargetLevel.Low : CoreWebView2MemoryUsageTargetLevel.Normal;
+            }
+            catch (Exception) { }
+        }
         async void StartModern(string idx)
         {
             try
@@ -2455,6 +2468,9 @@ namespace Xaly
                     { try { wv.Reload(); } catch (Exception) { } }
                 };
                 Modern = true;
+                // 1.7.10: while the window is minimized or in the tray (like during a game), ask WebView2 to give memory back
+                EventHandler mem = delegate(object s2, EventArgs e2) { MemLevel(); };
+                Resize += mem; VisibleChanged += mem;
                 if (File.Exists(idx)) c.Navigate("https://app.xaly/index.html");
                 else c.NavigateToString(Missing);
             }

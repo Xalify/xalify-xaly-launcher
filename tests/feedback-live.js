@@ -34,6 +34,9 @@ const { chromium } = require("playwright"), fs = require("fs"), path = require("
   const end = (await fr.innerText("body")).replace(/\s+/g, " ");
   console.log("end screen:", end.slice(0, 200));
   console.log(/on its way/i.test(end) ? "LIVE FEEDBACK OK" : "LIVE FEEDBACK DID NOT REACH THE THANK-YOU SCREEN");
+  await p.waitForTimeout(9000);
+  const fr2 = (await (await p.$("#fbw iframe")).contentFrame());
+  console.log("AFTER 9s url:", fr2.url().slice(0, 120), "| text:", (await fr2.innerText("body").catch(() => "?")).replace(/\s+/g, " ").slice(0, 160));
   await p.screenshot({ path: "fb-final.png" });
   await b.close();
 })().catch(e => { console.log("LIVE FEEDBACK ERROR", e.message); process.exit(1); });

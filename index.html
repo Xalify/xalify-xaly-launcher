@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.7";
+var VER="1.5.8";
 var NOTES=[
+ {v:"1.5.8",d:"5 Nov 2026",t:["Fixed: Super Smash Bros. Crusade couldn\u2019t be installed when you found it through search. Every copy now uses the working Google Drive download"]},
  {v:"1.5.7",d:"5 Nov 2026",t:["New in the Store: Super Smash Bros. Crusade, the fan-made Smash with a huge roster","Games hosted on Google Drive now download properly, including big files that show Google\u2019s virus-scan warning","Games packed as .7z or .rar can now be installed, not just .zip","If a link opens a web page instead of a game, the download now stops with a clear message instead of failing at install"]},
  {v:"1.5.6",d:"5 Nov 2026",t:["Fixed: the old Windows scrollbars showed up in the library, menus and pop-ups. Every list now uses the slim Xaly scrollbar","Fixed: the ticked option in the View and Sort menus was squashed and cut off","Fixed: games that are a single .exe couldn\u2019t be uninstalled or moved. They now get their own folder, including ones you already have","Fixed: updating a game after moving it to another drive"]},
  {v:"1.5.5",d:"5 Nov 2026",t:["Move games to another drive: open a game and press Move. Play time, achievements and updates stay with it","Messages now arrive within a second through a live connection, instead of waiting for the next check","Fixed: your message stayed in the box after you sent it","Friend activity: see what friends played, installed and unlocked, with Get it and Play buttons, in the Friends panel and on the Store page","Game pages show the download size and your free space, and Xaly warns you before installing if the drive is too full"]},
@@ -1255,7 +1256,17 @@ function itchGameId(it,cb){
   });
 }
 function isGh(it){return kindOf(it)==="page"&&!!it.gh;}
+/* games whose itch.io page has no file but that Xaly knows a direct download for (like Crusade on Google Drive):
+   any other copy of that page (search, live catalog, a friend's recommendation) points to the working entry */
+function pgKey(u){return String(u||"").toLowerCase().replace(/^https?:\/\//,"").split(/[?#]/)[0].replace(/\/+$/,"");}
+var dirMap=null,dirN=-1;
+function directFor(it){
+  if(!it||!S||it.page&&it.kind!=="page")return null;
+  if(dirN!==S.store.items.length){dirMap={};dirN=S.store.items.length;S.store.items.forEach(function(x){if(x.page&&x.kind&&x.kind!=="page"&&x.url)dirMap[pgKey(x.page)]=x;});}
+  var d=dirMap[pgKey(pageUrl(it)||it.url)];return d&&d!==it?d:null;
+}
 function visIt(it){
+  if(directFor(it))return false;
   if(it.steam||(S.gone&&S.gone[it.id]))return false;
   if(kindOf(it)==="page"&&!it.remote&&!isItch(it)&&!isGh(it))return false;   // no direct Windows download
   if(it.auto&&(it.paid||(!it.image&&!it.hero)))return false;                 // store games must be free and have art
@@ -1785,7 +1796,7 @@ function renderStore(keep){
   }
   pg.appendChild(body);pg.scrollTop=top;
 }
-function openDetail(it){P.sel=it;P.si=0;P.dtab="ov";nav("detail");refreshItch(it);}
+function openDetail(it){it=directFor(it)||it;P.sel=it;P.si=0;P.dtab="ov";nav("detail");refreshItch(it);}
 function host(u){return (u||"").replace(/^[a-z]+:\/\//i,"").split("/")[0];}
 function stat(l,v){var d=el("div","st");d.appendChild(el("small","",l));d.appendChild(el("b","",v));return d;}
 /* ---------- system requirements ---------- */
@@ -1886,10 +1897,11 @@ function renderDetail(){
     if(isGh(it))L.appendChild(el("div","note","This one installs the newest Windows build from its GitHub releases page. Recompiled and ported games contain no game data: you need your own legally owned copy of the original game, which the game asks for the first time you start it."));
     if(kindOf(it)==="page"&&!it.remote&&!isItch(it)&&!isGh(it)){
       L.appendChild(el("div","note","This one is listed from "+(it.source||host(it.url))+". Their pages don't hand out direct file links, so there is no one-click install yet. If you have the direct download link (ending in .zip, .exe or .msi), paste it here and the launcher will download and install it."));
-      var pr=el("div","paste"),inp=el("input");inp.setAttribute("type","text");inp.setAttribute("placeholder","Paste a direct .zip, .exe or .msi link");
+      var pr=el("div","paste"),inp=el("input");inp.setAttribute("type","text");inp.setAttribute("placeholder","Paste a direct .zip, .exe or .msi link, or a Google Drive link");
       pr.appendChild(inp);pr.appendChild(btn("Use link","btn",function(){
         var vv=trim(inp.value),m=vv.split("#")[0].split("?")[0].match(/\.(zip|exe|msi)$/i);
-        if(!/^https?:\/\//i.test(vv)||!m){toast("That link needs to end in .zip, .exe or .msi");return;}
+        if(driveId(vv)){it.page=pageUrl(it);it.url=vv;it.kind="archive";it.host="Google Drive";save();render();return;}
+        if(!/^https?:\/\//i.test(vv)||!m){toast("That link needs to end in .zip, .exe or .msi, or be a Google Drive link");return;}
         var e=m[1].toLowerCase();it.page=pageUrl(it);it.url=vv;it.kind=e==="zip"?"archive":e==="exe"?"standalone":"installer";save();render();
       }));L.appendChild(pr);
     }
@@ -2001,6 +2013,7 @@ function loadDQ(){
   });
 }
 function install(it,spaceOk){
+  var al=directFor(it);if(al){install(al,spaceOk);return;}
   var k=kindOf(it),ex=jobOf(it);
   if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else{toast(it.name+" is already in your downloads");}return;}
   if(isItch(it)||isGh(it)){if(!install.chk){install.chk=1;spaceCheck(it,function(){install.chk=0;if(!jobOf(it))addJob(newJob(it,{}));});setTimeout(function(){install.chk=0;},4000);}return;}

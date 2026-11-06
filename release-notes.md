@@ -1,4 +1,2 @@
-- **New in the Store: Super Smash Bros. Crusade** (ver. 0.9.6a), the fan-made Smash with a huge roster. It's a 1.66 GB download straight from the Crusade team's Google Drive.
-- **Google Drive downloads:** games hosted on Google Drive now download properly, including big files where Google shows its "can't scan for viruses" page.
-- **.7z and .rar games** can now be installed, not just .zip. Xaly uses 7-Zip if you have it, otherwise Windows' own unpacker.
-- If a download link opens a web page instead of a game, Xaly now stops with a clear message instead of failing when installing.
+- **Fixed: Super Smash Bros. Crusade wouldn't install** when you opened it from a search or from the big itch.io catalog. Those copies tried itch.io's own download, which this game doesn't have. Every copy now opens the working entry and downloads from Google Drive.
+- The "paste a direct link" box on store pages now also takes Google Drive links.

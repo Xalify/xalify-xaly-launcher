@@ -413,9 +413,11 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .sdg{display:flex;flex-wrap:wrap;margin:-4px 0 6px}
 .sdc{background:#181824;border-radius:12px;padding:14px 18px;margin:0 12px 12px 0;min-width:150px}
 .sdc small{display:block;color:#8d8da6;font-size:12px;margin-bottom:4px}.sdc b{font-size:15px}
-.sdlogo{height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px;margin-bottom:6px}
+.sdlogo{height:140px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px;margin-bottom:6px}
 .sdlimg{max-width:100%;max-height:140px;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
-.sdlogo.cov{height:auto;padding:0;margin-bottom:16px}.sdcov{width:100%;padding-top:42%;border-radius:14px;background-size:cover;background-position:center 30%;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
+.sdlogo.cov,.sdlogo.wait{padding:0}.sdcov{width:100%;height:140px;border-radius:14px;background-size:cover;background-position:center 30%;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
+.sdwait{width:100%;height:140px;border-radius:14px;background:linear-gradient(100deg,#16161f 30%,#1f2230 50%,#16161f 70%);background-size:300% 100%;animation:sdw 1.3s ease-in-out infinite}
+@keyframes sdw{0%{background-position:100% 0}100%{background-position:0 0}}
 .tlogo{max-width:100%;padding:6px 10px;border-radius:12px}.tlogo.box{padding:12px 16px}
 .tlm{font-weight:900;letter-spacing:2px;text-transform:uppercase;line-height:1.1;color:transparent;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 10px rgba(0,0,0,.55));word-wrap:break-word}
 .tls{margin-top:6px;color:#d6d8ea;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.85}
@@ -985,8 +987,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.6";
+var VER="1.8.7";
 var NOTES=[
+ {v:"1.8.7",d:"6 Nov 2026",t:["Fixed: the picture above the Install button no longer swaps from one image to another when you open a game. It waits for the game\u2019s page and shows the final art once","Pictures from a game\u2019s description are only used as its logo when they\u2019re the title image at the very top, so artwork and screenshots aren\u2019t mistaken for logos"]},
  {v:"1.8.6",d:"6 Nov 2026",t:["Every game page now shows real art above the Install button. Xaly uses the game\u2019s banner, or the title logo from the top of its description, or its cover art"]},
  {v:"1.8.5",d:"6 Nov 2026",t:["Every game page now shows logo art above the Install button: the game\u2019s own banner from itch.io when it has one, or a title logo in the game\u2019s colours","Game pages show the developer\u2019s real name, and clicking it opens more of their games on itch.io"]},
  {v:"1.8.4",d:"6 Nov 2026",t:["Games on Google Drive that Drive won\u2019t give to apps (like Super Smash Bros. Crusade) now open in your browser automatically, and Xaly installs them as soon as the download finishes","Accounts that stay on this PC no longer need an email or password: just pick a name"]},
@@ -2727,7 +2730,10 @@ function itchLogoDev(it,t){
   it.logo=lg;it.logoT=now();it.logoV=2;
   // no banner: the first images at the top of the description are usually the title logo
   var cands=[],ds=t.match(/class=["'][^"']*formatted_description[^"']*["'][^>]*>([\s\S]{0,20000})/i);
-  if(ds){var ri=/<img[^>]+src=["'](https:\/\/[^"']+)["']/gi,mi;while((mi=ri.exec(ds[1]))&&cands.length<3)cands.push(mi[1].replace(/&amp;/g,"&"));}
+  if(ds){var ri=/<img[^>]+src=["'](https:\/\/[^"']+)["']/gi,mi;
+    while((mi=ri.exec(ds[1]))&&cands.length<2){
+      if(htmlText(ds[1].substr(0,mi.index)).replace(/\s+/g,"").length>0)break;   // text came first: not a title logo
+      var u=mi[1].replace(/&amp;/g,"&");if(/\.(png|gif|webp)(\?|$)/i.test(u.split("#")[0]))cands.push(u);}}
   it.logoC=cands;
   var au=t.match(/<td[^>]*>\s*Authors?\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i),names=[];
   if(au){var ra=/<a[^>]*>([\s\S]*?)<\/a>/gi,mm;while((mm=ra.exec(au[1]))&&names.length<4){var n=htmlText(mm[1]);if(n)names.push(n);}if(!names.length&&htmlText(au[1]))names.push(htmlText(au[1]));}
@@ -2817,14 +2823,22 @@ function renderDetail(){
 function gameLogo(it,fr){
   var lg=el("div","sdlogo");
   function art(){   // the game's own cover art, framed
+    lg.innerHTML="";lg.className="sdlogo";
     var cv=it.image||it.hero;if(!cv){lg.appendChild(titleLogo(it,fr));return;}
     var c=el("div","sdcov");paint(c,it.name,cv);lg.className="sdlogo cov";lg.appendChild(c);
   }
-  function img(u,bad){var im=document.createElement("img");im.alt=it.name;im.className="sdlimg";
-    im.onerror=function(){if(im.parentNode)lg.removeChild(im);bad();};im.src=u;lg.appendChild(im);}
+  // the itch.io page hasn't been read yet: hold a steady placeholder instead of showing one picture and swapping it
+  if(isItch(it)&&it.logoV!==2&&!it.logo){
+    lg.className="sdlogo wait";lg.appendChild(el("div","sdwait"));
+    setTimeout(function(){if(lg.className==="sdlogo wait"&&lg.parentNode)art();},4000);
+    return lg;
+  }
+  function img(u,bad){lg.innerHTML="";lg.className="sdlogo";var im=document.createElement("img");im.alt=it.name;im.className="sdlimg";
+    im.onerror=function(){bad();};im.src=u;lg.appendChild(im);}
   if(it.logo){img(it.logo,function(){it.logo="";art();});return lg;}
   var cs=(it.logoC||[]).slice(),k=0;
   if(it.logoArt===0||!cs.length){art();return lg;}
+  lg.className="sdlogo wait";lg.appendChild(el("div","sdwait"));
   // try the description images: the first wide one is taken as the logo
   (function next(){
     if(k>=cs.length){it.logoArt=0;save();if(it.live)saveCat();art();return;}

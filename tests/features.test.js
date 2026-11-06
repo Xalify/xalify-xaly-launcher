@@ -249,5 +249,37 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   await sleep(1500);
   ok(ctx.DQ.filter(j=>j.it===g).length===1,"one click was enough, and extra clicks didn't queue it twice");
   X.Http=oldHttp;ctx.DQ.length=0;ctx.dl=null;}
+ // ---- 1.7.9 runtimes, leftovers, leaderboard
+ {ctx.closeForm();const t=Date.now(),ws=ctx.weekStart();const d=new Date(ws);
+  ok(d.getDay()===1&&d.getHours()===0&&d.getMinutes()===0&&ws<=t&&t-ws<7*86400000,"the week starts on Monday at midnight");
+  const g={id:"rtg",name:"Runtime Game",path:"C:\\dl\\Games\\R\\r.exe",args:"",seconds:0,plays:0,last:0,added:1,sess:[[ws+3600000,7200]],ach:{first:ws+3600000}};ctx.S.games.push(g);
+  let launched=0;X.Launch=()=>{launched++;return "ok";};X.Exists=()=>"1";X.NeedsRuntimes=()=>"vc14-x64,dx";
+  ctx.playGame(g);ok(launched===0&&/needs a Microsoft runtime/.test(reg.mbox.children[0].textContent),"a game missing Visual C++ asks to install it before starting");
+  ok(reg.mbox.find(c=>c.tag==="div"&&c.className==="rti").length===2,"it lists both missing runtimes");
+  let inst="";X.InstallRuntimes=(id,k)=>{inst=k;setTimeout(()=>{ctx.onRuntimes(id,"run","","","");ctx.onRuntimes(id,"done","vc14-x64=ok,dx=ok","","");},5);return "ok";};
+  X.NeedsRuntimes=()=>"";mbtn("Install and play").onclick({});await sleep(800);
+  ok(inst==="vc14-x64,dx","it installs exactly what was missing");
+  ok(launched===1&&g.rtOk===g.path,"after installing, the game starts and isn't checked again");
+  X.NeedsRuntimes=()=>"vc12-x86";delete g.rtOk;ctx.run[g.id]={t:Date.now()-2000};ctx.onExit(g.id,"-1073741515");await sleep(400);
+  ok(/closed right away/.test(reg.mbox.children[0].textContent),"a game that closes within seconds with an error gets the fix offered");
+  ctx.closeForm();ctx.run[g.id]={t:Date.now()-60000};let opened=0;const oo=ctx.rtDialog;ctx.rtDialog=()=>{opened++;};ctx.onExit(g.id,"1");await sleep(400);ctx.rtDialog=oo;
+  ok(opened===0,"a game played for a minute doesn't trigger it");
+  X.NeedsRuntimes=()=>"";
+  // leftovers
+  ok(ctx.loKeep().split("\n").indexOf(g.path)>=0,"leftover search is told to keep every library game");
+  ctx.LO={id:"L1",st:"scan",list:[],sel:{},t:Date.now()};
+  ctx.onLeftovers("L1","part|C:\\dl\\a.zip.part|100\nfolder|C:\\dl\\Games\\Old|500\ntemp|C:\\T\\XalyUpdate_1|20\n");
+  ok(ctx.LO.list.length===3&&ctx.LO.list[0].k==="folder","leftovers are listed biggest first");
+  ok(ctx.LO.sel["C:\\dl\\a.zip.part"]&&!ctx.LO.sel["C:\\dl\\Games\\Old"],"stray game folders aren't ticked by default, other leftovers are");
+  let cleaned="";X.CleanLeftovers=(id,ps)=>{cleaned=ps;setTimeout(()=>ctx.onCleaned(id,"120","2","0"),5);return "ok";};X.FindLeftovers=()=>"ok";
+  ctx.cleanLeftovers();await sleep(50);ok(cleaned.split("\n").length===2&&cleaned.indexOf("Old")<0,"Clean up deletes only the ticked items");
+  // leaderboard
+  const pf=ctx.cleanProf({hrs:50,wk:{s:ws,h:999,a:4,g:"Bob Game"}});ok(pf.wk&&pf.wk.h===168&&pf.wk.a===4,"a friend's weekly numbers are kept and capped");
+  ok(ctx.myWeek().h===2&&ctx.myWeek().a>=1&&ctx.myWeek().g==="Runtime Game","this week's hours, achievements and top game are counted for you");
+  const sv=ctx.S.friends;ctx.S.friends=[{code:"1",name:"Bob",color:1,msgs:[],prof:ctx.cleanProf({hrs:9,wk:{s:ws,h:5,a:0,g:"x"}})},{code:"2",name:"Amy",color:2,msgs:[],prof:ctx.cleanProf({hrs:3,wk:{s:ws-14*86400000,h:30,a:9}})},{code:"3",name:"Old",color:3,msgs:[],prof:ctx.cleanProf({hrs:2})}];
+  const rows=ctx.lbRows("h");ok(rows.map(r=>r.me?"me":r.name).join(",")==="Bob,me,Amy,Old","friends are ranked by hours this week, older weeks count as 0 and old versions go last");
+  ctx.S.lb={ws:ws-7*86400000,snap:{"1":{h:12,a:1}}};ctx.S.lbPrev=null;g.sess.push([ws-3*86400000,3600*4]);ctx.lbTick();
+  ok(ctx.S.lbPrev&&ctx.S.lbPrev.win==="Bob"&&ctx.S.lbPrev.rank===2&&ctx.S.lb.ws===ws,"on Monday last week's winner is worked out and the board resets");
+  ctx.S.friends=sv;ctx.S.games.splice(ctx.S.games.indexOf(g),1);}
  console.log(fails?"FAILED "+fails:"ALL PASSED");process.exit(fails?1:0);
 })().catch(e=>{console.log("EXC",e.stack);process.exit(1);});

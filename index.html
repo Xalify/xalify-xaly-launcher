@@ -112,6 +112,24 @@ button{border:0;font-family:inherit;color:inherit;cursor:pointer;outline:0}
 .fr .pri.sm{margin-right:6px}
 .fr .fn span.pl{color:#6fe38a}
 .unr{background:#e5484d;color:#fff;border-radius:10px;font-size:11.5px;font-weight:700;padding:2px 7px;margin-left:8px}
+#fph .ftabs button{flex:1 1 auto;font-size:12.5px;padding:7px 6px;white-space:nowrap}.tbn{display:inline-block;font-style:normal;background:#2ee6f0;color:#06222a;border-radius:8px;font-size:10.5px;line-height:15px;min-width:15px;padding:0 4px;margin-left:4px;vertical-align:1px}
+.lbhd{display:flex;align-items:baseline;justify-content:space-between;margin:14px 6px 8px}.lbhd b{color:#fff;font-size:15px}.lbhd span{color:#8d8da6;font-size:11.5px}
+.lbseg{display:flex;gap:6px;margin:0 6px 10px}.lbseg button{flex:1 1 0%;background:#161b27;color:#9aa1b8;border-radius:8px;padding:6px 0;font-size:12px;font-weight:700}.lbseg button.on{background:#2a2350;color:#fff;box-shadow:inset 0 0 0 1px #7a5cff}
+.lbprev{margin:0 6px 10px;padding:9px 11px;border-radius:10px;background:linear-gradient(90deg,rgba(245,185,66,.16),rgba(245,185,66,.04));color:#f5d48a;font-size:12.5px;line-height:1.4}
+.lbr{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:10px;cursor:pointer}.lbr:hover{background:#1a1a27}.lbr.me{background:rgba(46,230,240,.07);box-shadow:inset 0 0 0 1px rgba(46,230,240,.25)}.lbr.old{opacity:.5}
+.lbn{width:22px;text-align:center;font-weight:800;color:#8d8da6;font-size:14px;flex:0 0 auto}.lbn.m1{color:#f5b942}.lbn.m2{color:#c9d2e3}.lbn.m3{color:#d08a55}
+.lbt{flex:1 1 0%;min-width:0}.lbt b{display:block;color:#fff;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lbt span{display:block;color:#8d8da6;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:14px}
+.lbb{height:4px;border-radius:3px;background:#20202e;margin-top:5px;overflow:hidden}.lbb i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#7a5cff,#2ee6f0)}
+.lbv{color:#fff;font-weight:800;font-size:13.5px;flex:0 0 auto;min-width:44px;text-align:right}
+.locard{background:#171724;border-radius:14px;padding:14px 16px;margin:0 0 18px}.lohd{display:flex;align-items:center;gap:12px}.lohd .btn,.lohd .pri{flex:0 0 auto}
+.loico{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#2a2350,#1b3a4a);display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
+.lotx{flex:1 1 0%;min-width:0}.lotx b{display:block;color:#fff;font-size:15px}.lotx span{display:block;color:#9a9ab0;font-size:12.5px;margin-top:2px}
+.lols{margin-top:12px;border-top:1px solid #24243a;padding-top:6px;max-height:300px;overflow:auto}
+.lorow{display:flex;align-items:center;gap:12px;padding:8px 6px;border-radius:9px;cursor:pointer}.lorow:hover{background:#1e1e2e}.lorow .chk{flex:0 0 auto}
+.lot{flex:1 1 0%;min-width:0}.lot b{display:block;color:#e8e8f2;font-size:13px}.lot span{display:block;color:#8d8da6;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.losz{color:#cfd3e6;font-size:12.5px;font-weight:700}
+.rtp{color:#c9cbe0;font-size:13.5px;line-height:1.5;margin:6px 0 10px}.rtl{background:#141925;border-radius:10px;padding:6px 12px;margin-bottom:10px}
+.rti{display:flex;align-items:center;gap:10px;padding:6px 0;color:#e8e8f2;font-size:13.5px}.rti i{font-style:normal;width:16px;text-align:center;color:#2ee6f0}.rti.ok i{color:#3ddc84}.rti.bad i{color:#ef5350}
+.rtn{color:#8d8da6;font-size:12px;line-height:1.45;margin:0 0 8px}.rts{color:#2ee6f0;font-size:13px;min-height:18px;margin-bottom:6px}
 .fempty{text-align:center;padding:30px 14px;color:#9a9ab0;font-size:13px;line-height:1.55}
 .fempty b{display:block;color:#fff;font-size:16px;margin-bottom:6px}
 .fcode{display:flex;align-items:center;justify-content:center;margin-top:14px}
@@ -865,7 +883,7 @@ html,body{overflow:hidden}
     <div class="page" id="pProf"></div>
     <div class="page" id="pSet"><div class="sw0"><div class="smenu" id="smenu"></div><div class="sbody" id="sbody"></div></div></div>
     <div id="fp">
-      <div id="fph"><h3>Friends</h3><div class="me" id="fpme"></div><div class="ftabs"><button id="ftF" class="on">Friends</button><button id="ftA">Activity</button><button id="ftC">Challenges</button></div></div>
+      <div id="fph"><h3>Friends</h3><div class="me" id="fpme"></div><div class="ftabs"><button id="ftF" class="on">Friends</button><button id="ftA">Activity</button><button id="ftR">Ranks</button><button id="ftC">Challenges</button></div></div>
       <div id="fpa"><input type="text" id="fq" placeholder="Search friends"><button class="btn" id="fadd">+ Add</button></div>
       <div id="fpb"></div>
     </div>
@@ -884,8 +902,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.8";
+var VER="1.7.9";
 var NOTES=[
+ {v:"1.7.9",d:"6 Nov 2026",t:["Fix \u201Cwon\u2019t start\u201D: Xaly checks each game for missing Microsoft runtimes (Visual C++ and DirectX) before it starts, and offers to install them with one click. If a game closes right away, it checks again. You can also run it from a game\u2019s More menu","Clean up leftovers: Settings \u203A Storage finds unfinished downloads, old archives and installers, empty or orphaned game folders and old update files, and frees the space in one click","Friends leaderboard: a new Ranks tab shows who played the most this week, who unlocked the most achievements, and all-time hours. It resets every Monday, and Xaly tells you who won last week"]},
  {v:"1.7.8",d:"6 Nov 2026",t:["Fixed: with the Friends panel open, the last game in each Store row was cut off at the panel. Rows now resize their cards so only whole games show, at any window size"]},
  {v:"1.7.7",d:"6 Nov 2026",t:["Fixed: the scrollbar lagged behind when the Friends panel opened or closed. Scrollbars now move smoothly with the page"]},
  {v:"1.7.6",d:"6 Nov 2026",t:["Give feedback works now: it opens a short form right inside the launcher, and your message goes straight to the developer"]},
@@ -2699,8 +2718,10 @@ function renderStorageTab(b){
       it("Open drive",function(){T(function(){return X.Open(cur.root);});});
       if(isDef)it("Clear cache",function(){var fr=+T(function(){return X.ClearCache();},"0")||0;S.games.forEach(function(g){g.icon="";getIcon(g);});save();toast("Cleared "+fmtB(fr));SC=null;scanning=false;renderSettings();});
       if(!isDef)it("Make default install drive",function(){makeDefault(cur);});
+      if(isDef)it("Clean up leftovers",function(){LO=LO||{};LO.open=1;findLeftovers();LO.open=1;P.skipAnim=1;renderSettings();});
       it("Rescan",function(){SC=null;scanning=false;renderSettings();});});};
   info.appendChild(mn);card.appendChild(rg);card.appendChild(info);b.appendChild(card);
+  if(isDef)b.appendChild(leftoverCard());
   var pct=Math.round(used*100/cur.total),sev=pct>=90?"#ef5350":pct>=75?"#f5b942":null;
   var ringSegs=isDef&&SC?parts.map(function(x){return {v:x[1],c:x[2]};}):[{v:used,c:sev||OTH}];
   if(sev){var w=el("div","warn"+(pct>=95?" bad":""));w.appendChild(el("span","","This drive is "+pct+"% full with only "+fmtG(cur.free)+" free."+(isDef?" New games may not fit. Pick another drive above and tap its star to install there.":"")));b.insertBefore(w,wrap);}
@@ -2889,6 +2910,7 @@ function buildGameDetail(c,g){
     it.push({t:hd?"Remove desktop shortcut":"Create desktop shortcut",fn:function(){gameShortcut(g,"desktop");}});
     it.push({t:hs?"Remove from Start menu":"Add to Start menu",fn:function(){gameShortcut(g,"start");}});
     if(updatable(g))it.push({t:g.updAvail?"Update now":"Check for updates",fn:function(){if(g.updAvail)updateGame(g);else checkGameUpdates(true);}});
+    if(!isUrl&&/\.exe$/i.test(g.path||""))it.push({t:"Fix \u201Cwon\u2019t start\u201D\u2026",fn:function(){fixGame(g);}});
     it.push({sep:1});
     if(gameDir(g))it.push({t:"Move to another drive\u2026",fn:function(){moveGame(g);}});
     if(gameDir(g))it.push({t:"Uninstall (delete files)",cls:"dng",fn:function(){uninstallGame(g);}});
@@ -2937,17 +2959,24 @@ function tickGame(){
 function playToggle(){
   var g=game();if(!g)return;
   if(run[g.id]){T(function(){return X.Stop(g.id);});return;}
+  playGame(g);
+}
+function playGame(g){
+  if(run[g.id])return;
   if(g.moving){toast(g.name+" is being moved. Wait for it to finish.");return;}
   if(g.missing||(g.path&&g.path.indexOf("://")<0&&T(function(){return X.Exists(g.path);},"1")==="0")){g.missing=1;missingGame(g);return;}
+  if(!g._rtSkip&&g.rtOk!==g.path){var need=rtNeed(g);if(need.length){rtDialog(g,need,"before",true);return;}g.rtOk=g.path;}
+  delete g._rtSkip;
   var r=T(function(){return X.Launch(g.id,g.path,g.args||"");});
   if(r.indexOf("ERR")===0){toast("Couldn't start "+g.name+": "+r.replace("ERR:",""));return;}
   if(r==="ok")run[g.id]={t:now()};
   ovHotkey();
   g.plays=(g.plays||0)+1;g.last=now();logAct("play",g);checkAch(g);save();render();syncNow();
 }
-window.onExit=function(id){
-  if(!S)return;var g=gameBy(id);if(g&&run[id]){var dur=Math.round((now()-run[id].t)/1000);g.seconds=(g.seconds||0)+dur;g.last=now();g.sess=g.sess||[];g.sess.push([run[id].t,dur]);if(g.sess.length>120)g.sess.splice(0,g.sess.length-120);}
+window.onExit=function(id,code){
+  if(!S)return;var g=gameBy(id),qc=0;code=+code||0;if(g&&run[id]){var dur=Math.round((now()-run[id].t)/1000);if(dur<12&&code!==0)qc=1;g.seconds=(g.seconds||0)+dur;g.last=now();g.sess=g.sess||[];g.sess.push([run[id].t,dur]);if(g.sess.length>120)g.sess.splice(0,g.sess.length-120);}
   delete run[id];if(g)checkAch(g);save();render();syncNow();ovHotkey();sendGs(false);
+  if(qc)setTimeout(function(){quickCrash(g,code);},300);
 };
 
 /* ---------- friends: online, end-to-end encrypted, over the free ntfy.sh relay ---------- */
@@ -3260,8 +3289,9 @@ function renderFriends(toBottom){
   sel.value=S.user.status;sel.onchange=function(){S.user.status=sel.value;save();chip();renderFriends();syncNow();};
   mn.appendChild(sel);if(S.fr&&S.fr.pub)mn.appendChild(el("span","mcode","Code "+fmtCode(S.user.code)));me.appendChild(mn);
   var b=$("fpb"),cf=P.chat?findF(P.chat):null;
-  $("ftF").className=P.ftab?"":"on";$("ftA").className=P.ftab==="act"?"on":"";$("ftC").className=P.ftab==="ch"?"on":"";
-  var cn=chalOpenN();$("ftC").textContent="Challenges"+(cn?" ("+cn+")":"");
+  $("ftF").className=P.ftab?"":"on";$("ftA").className=P.ftab==="act"?"on":"";$("ftC").className=P.ftab==="ch"?"on":"";$("ftR").className=P.ftab==="rk"?"on":"";
+  var cn=chalOpenN();$("ftC").innerHTML="Challenges"+(cn?"<i class=\"tbn\">"+cn+"</i>":"");
+  if(!cf&&P.ftab==="rk"&&frOn()){chatL=null;chatI=null;$("fpa").style.display="none";b.className="";b.innerHTML="";renderRanks(b);updBadge();return;}
   if(!cf&&P.ftab==="ch"&&frOn()){chatL=null;chatI=null;$("fpa").style.display="none";b.className="";b.innerHTML="";renderChal(b);updBadge();return;}
   if(!cf&&P.ftab==="act"&&frOn()){chatL=null;chatI=null;$("fpa").style.display="none";b.className="";b.innerHTML="";
     var fl=friendFeed();if(!fl.length)b.appendChild(el("div","fempty",S.friends.length?"Nothing yet. When friends play, install or unlock something, it shows up here.":"Add friends to see what they\u2019re playing."));
@@ -3421,6 +3451,7 @@ function sbTick(){
   sbL=sbL.filter(function(c){if(document.body.contains(c))return true;if(c._sb&&c._sb.bar.parentNode)c._sb.bar.parentNode.removeChild(c._sb.bar);return false;});
 }
 setInterval(sbTick,300);
+setInterval(function(){try{lbTick();}catch(e){}},600000);setTimeout(function(){try{lbTick();}catch(e){}},90000);
 /* 1.7.7: while something slides or resizes, move the slim scrollbars every frame so they never trail behind */
 var sbUntil=0,sbRaf=0;
 function sbFollow(ms){
@@ -3584,7 +3615,7 @@ function profShare(){
   return {lv:m.lvi.lv,xp:m.xp,bd:m.bd,feat:m.feat,rn:cut(m.rn,40),cn:cut(m.cn,30),bio:cut(m.bio,180),since:m.since,gc:m.gc,hrs:Math.round(m.hrs),h2:Math.round(m.h2*10)/10,fc:m.fc,
     fav:m.fav?{n:cut(m.fav.n,60),i:cut(m.fav.i,300),h:Math.round(m.fav.h*10)/10,l:m.fav.l,sid:m.fav.sid}:null,
     rec:m.rec.slice(0,3).map(function(r){return {n:cut(r.n,60),i:cut(r.i,300),h:Math.round(r.h*10)/10,l:r.l,sid:r.sid};}),
-    ac:m.ac,ar:m.ar.slice(0,4).map(function(x){return {id:x.id,g:cut(x.g,60),t:x.t};}),
+    ac:m.ac,ar:m.ar.slice(0,4).map(function(x){return {id:x.id,g:cut(x.g,60),t:x.t};}),wk:myWeek(),
     ev:(S.act||[]).slice(0,6).map(function(e){return {k:e.k,g:cut(e.g,50),sid:cut(e.sid,24),a:e.a,t:e.t};})};
 }
 function cleanProf(o){
@@ -3593,7 +3624,8 @@ function cleanProf(o){
   return {lv:Math.min(999,Math.max(1,Math.floor(num(o.lv))||1)),xp:num(o.xp),bd:(o.bd&&o.bd.length?o.bd:[]).filter(function(b){return BADGE[b];}).slice(0,20),feat:BADGE[o.feat]?o.feat:"",
     rn:s(o.rn,40),cn:s(o.cn,30),bio:s(o.bio,180),since:num(o.since),gc:num(o.gc),hrs:num(o.hrs),h2:num(o.h2),fc:num(o.fc),fav:g(o.fav),rec:(o.rec&&o.rec.length?o.rec:[]).slice(0,3).map(g),
     ev:(o.ev&&o.ev.length?o.ev:[]).filter(function(e){return e&&/^(play|inst|ach)$/.test(e.k);}).slice(0,6).map(function(e){return {k:e.k,g:s(e.g,50),sid:s(e.sid,24),a:ACHM[e.a]?e.a:"",t:num(e.t)};}),
-    ac:num(o.ac),ar:(o.ar&&o.ar.length?o.ar:[]).filter(function(x){return x&&ACHM[x.id];}).slice(0,4).map(function(x){return {id:x.id,g:s(x.g,60),t:num(x.t)};})};
+    ac:num(o.ac),ar:(o.ar&&o.ar.length?o.ar:[]).filter(function(x){return x&&ACHM[x.id];}).slice(0,4).map(function(x){return {id:x.id,g:s(x.g,60),t:num(x.t)};}),
+    wk:o.wk&&typeof o.wk==="object"&&num(o.wk.s)>0?{s:num(o.wk.s),h:Math.min(168,num(o.wk.h)),a:Math.min(9999,Math.floor(num(o.wk.a))),g:s(o.wk.g,60),sid:s(o.wk.sid,40)}:null};
 }
 function profFriend(f){
   var p=f.prof||cleanProf({});
@@ -4374,7 +4406,185 @@ function toggleNotes(open){
 }
 window.onNotifyClick=function(tag){if(!S)return;if(tag&&gameBy(tag)){P.cur=tag;nav("game");return;}
   if(tag==="chal"){setFP(true);P.ftab="ch";P.chat=null;renderFriends();return;}
+  if(tag==="lb"){setFP(true);P.ftab="rk";P.chat=null;renderFriends();return;}
   if(/^friend:/.test(tag||"")){var f=findF(tag.substr(7));setFP(true);P.ftab="";if(f){P.chat=f.code;}renderFriends(true);}};
+/* ---------- 1.7.9: games that won't start because a Microsoft runtime is missing ---------- */
+var RTN={vc14:"Visual C++ 2015–2022",vc12:"Visual C++ 2013",vc11:"Visual C++ 2012",vc10:"Visual C++ 2010",dx:"DirectX 9 extras (d3dx9, XInput, XAudio)"};
+var RT_COMMON=["vc14-x64","vc14-x86","dx"],RTJ=null;
+function rtName(k){var p=String(k).split("-");return (RTN[p[0]]||k)+(p[1]?" · "+(p[1]==="x64"?"64-bit":"32-bit"):"");}
+function rtNeed(g){if(!g||!g.path||!/\.exe$/i.test(g.path))return [];var r=T(function(){return X.NeedsRuntimes(g.path);},"");return r?r.split(","):[];}
+function rtDialog(g,keys,why,play){
+  var b=$("mbox");b.innerHTML="";
+  b.appendChild(el("h3","",why==="crash"||why==="unknown"?g.name+" closed right away":why==="fix"||why==="none"?"Fix “"+g.name+"” won’t start":g.name+" needs a Microsoft runtime"));
+  var msg={before:g.name+" uses something from Microsoft that isn’t on this PC yet, so it wouldn’t start. Xaly can install it for you:",
+    crash:"It’s missing something from Microsoft that it needs to run. Xaly can install it for you:",
+    fix:"Xaly checked "+g.name+" and found what’s missing. It can install it for you:",
+    unknown:"Windows said a file the game needs is missing. That’s almost always one of these free Microsoft runtimes, which Xaly can install:",
+    none:"Xaly didn’t find anything missing for this game. Installing the common Microsoft runtimes still fixes most games that won’t start:"}[why];
+  b.appendChild(el("p","rtp",msg));
+  var ul=el("div","rtl");keys.forEach(function(k){var r=el("div","rti");r.id="rt_"+k;r.appendChild(el("i","","○"));r.appendChild(el("span","",rtName(k)));ul.appendChild(r);});b.appendChild(ul);
+  b.appendChild(el("p","rtn","Free and straight from Microsoft. Xaly checks each download is signed by Microsoft, and Windows asks for permission once."));
+  var st=el("div","rts");st.id="rtst";b.appendChild(st);
+  var row=el("div","mrow");row.id="rtrow";
+  row.appendChild(btn("Not now","btn",closeForm));
+  if(play)row.appendChild(btn("Play anyway","btn",function(){closeForm();g._rtSkip=1;playGame(g);}));
+  var go=btn(play?"Install and play":"Install","pri",function(){rtStart(g,keys,play);});row.appendChild(go);
+  b.appendChild(row);$("modal").className="open";
+}
+function rtStart(g,keys,play){
+  if(RTJ){toast("Xaly is already installing runtimes");return;}
+  var id="rt"+now(),r=T(function(){return X.InstallRuntimes(id,keys.join(","));},"ERR");
+  if(r.indexOf("ERR")===0){var s0=$("rtst");if(s0)s0.textContent="Couldn’t start: "+r.replace("ERR:","");return;}
+  RTJ={id:id,g:g,keys:keys,play:play};
+  var rw=$("rtrow");if(rw){rw.innerHTML="";rw.appendChild(btn("Hide","btn",closeForm));}
+  var st=$("rtst");if(st)st.textContent="Starting…";
+}
+window.onRuntimes=function(id,kind,a,b,c){
+  if(!RTJ||RTJ.id!==id)return;var st=$("rtst");
+  if(kind==="step"){if(st)st.textContent="Downloading "+rtName(a)+"…";var r=$("rt_"+a);if(r)r.firstChild.textContent="↓";return;}
+  if(kind==="run"){if(st)st.textContent="Installing… Click Yes when Windows asks for permission.";return;}
+  if(kind!=="done")return;
+  var j=RTJ;RTJ=null;var res={},bad=[],cancel=0,reboot=0;
+  (a||"").split(",").forEach(function(x){var i=x.indexOf("=");if(i<0)return;var k=x.substr(0,i),v=x.substr(i+1);res[k]=v;
+    var r=$("rt_"+k);if(r){r.firstChild.textContent=v==="ok"||v==="reboot"?"✓":v==="cancel"?"–":"✕";r.className="rti "+(v==="ok"||v==="reboot"?"ok":"bad");}
+    if(v==="cancel")cancel++;else if(v==="reboot")reboot++;else if(v!=="ok")bad.push(rtName(k)+": "+v.replace(/^err:/,""));});
+  var open=$("modal").className==="open"&&$("rtst");
+  if(cancel&&!bad.length){if(open){st.textContent="Windows permission was declined, so nothing was installed.";var rw=$("rtrow");rw.innerHTML="";rw.appendChild(btn("Not now","btn",closeForm));rw.appendChild(btn("Try again","pri",function(){rtStart(j.g,j.keys,j.play);}));}else toast("Runtime install was cancelled");return;}
+  if(bad.length){if(open){st.textContent="Some didn’t install. "+bad.join(". ");var rw2=$("rtrow");rw2.innerHTML="";rw2.appendChild(btn("Close","btn",closeForm));if(j.play)rw2.appendChild(btn("Play anyway","btn",function(){closeForm();j.g._rtSkip=1;playGame(j.g);}));rw2.appendChild(btn("Try again","pri",function(){rtStart(j.g,j.keys,j.play);}));}else toast("Some runtimes didn’t install");return;}
+  j.g.rtOk=j.g.path;save();
+  if(open){closeForm();}
+  toast(reboot?"Installed. If "+j.g.name+" still won’t start, restart your PC.":"Installed. "+(j.play?"Starting "+j.g.name+"…":j.g.name+" should start now."));
+  if(j.play)setTimeout(function(){j.g._rtSkip=1;playGame(j.g);},600);
+};
+function fixGame(g){var need=rtNeed(g);if(need.length)rtDialog(g,need,"fix",!run[g.id]);else rtDialog(g,RT_COMMON.slice(),"none",!run[g.id]);}
+/* called when a game closes within a few seconds with an error code */
+function quickCrash(g,code){
+  if(!g||RTJ)return;var need=rtNeed(g);
+  if(need.length){rtDialog(g,need,"crash",true);return;}
+  if(code===-1073741515||code===-1073741701){rtDialog(g,RT_COMMON.slice(),"unknown",true);return;}
+  if(!g._qcT||now()-g._qcT>600000){g._qcT=now();notify("err",g.name+" closed right away","It stopped with error "+(code>>>0).toString(16).toUpperCase().replace(/^/,"0x")+". Try More › Fix “won’t start” on its page.",g,coverOf(g));}
+}
+
+/* ---------- 1.7.9: leftover files (unfinished downloads, old archives, stray game folders, update temp files) ---------- */
+var LO=null;
+function loKeep(){
+  var k=[];S.games.forEach(function(g){if(g.path)k.push(g.path);var d=gameDir(g);if(d)k.push(d);});
+  DQ.forEach(function(j){if(j.fn)k.push(j.fn);});
+  if(UPD&&UPD.rel&&UPD.rel.v)k.push("XalyLauncher-update-"+UPD.rel.v+".zip");
+  return k.join("\n");
+}
+function findLeftovers(){
+  var id="lo"+now();LO={id:id,st:"scan",list:[],sel:{},t:now(),open:LO?LO.open:0};
+  var r=T(function(){return X.FindLeftovers(id,loKeep());},"ERR");if(r.indexOf("ERR")===0)LO.st="err";
+}
+window.onLeftovers=function(id,txt){
+  if(!LO||LO.id!==id)return;LO.st="ready";LO.list=[];LO.sel={};
+  (txt||"").split("\n").forEach(function(l){var p=l.split("|");if(p.length<3||p[0]==="err")return;var x={k:p[0],path:p[1],size:+p[2]||0};LO.list.push(x);if(x.k!=="folder")LO.sel[x.path]=1;});
+  LO.list.sort(function(a,b){return b.size-a.size;});
+  if(P.page==="settings"&&P.tab==="storage"){P.skipAnim=1;renderSettings();}
+};
+function loLabel(x){
+  var n=x.path.replace(/^.*[\\\/]/,"");
+  if(x.k==="part")return ["Unfinished download",n.replace(/\.part$/i,"")];
+  if(x.k==="file")return [/\.(zip|7z|rar)$/i.test(n)?"Leftover archive":/\.exe$/i.test(n)?"Leftover installer":"Leftover download",n];
+  if(x.k==="empty")return ["Empty game folder",n];
+  if(x.k==="folder")return ["Game folder not in your library",n+" · not ticked, it may hold saves"];
+  return ["Leftover update files",n];
+}
+function loSel(){return LO?LO.list.filter(function(x){return LO.sel[x.path];}):[];}
+function cleanLeftovers(){
+  var l=loSel();if(!l.length)return;
+  var id="lc"+now();LO.st="clean";LO.cid=id;
+  var r=T(function(){return X.CleanLeftovers(id,l.map(function(x){return x.path;}).join("\n"));},"ERR");
+  if(r.indexOf("ERR")===0){LO.st="ready";toast("Couldn’t clean up: "+r.replace("ERR:",""));}
+  P.skipAnim=1;renderSettings();
+}
+window.onCleaned=function(id,freed,done,failed){
+  if(!LO||LO.cid!==id)return;freed=+freed||0;failed=+failed||0;
+  toast((freed>0?"Freed "+fmtB(freed):"Cleaned up")+(failed?". "+failed+(failed===1?" item was":" items were")+" in use and stayed":""));
+  SC=null;scanning=false;findLeftovers();if(P.page==="settings"&&P.tab==="storage"){P.skipAnim=1;renderSettings();}
+};
+function leftoverCard(){
+  if(!LO||(LO.st!=="scan"&&LO.st!=="clean"&&now()-LO.t>300000))findLeftovers();
+  var c=el("div","locard"),hd=el("div","lohd"),ico=el("div","loico","✨"),tx=el("div","lotx");
+  var sel=loSel(),sz=0;sel.forEach(function(x){sz+=x.size;});var all=0;LO.list.forEach(function(x){all+=x.size;});
+  tx.appendChild(el("b","","Leftover files"));
+  tx.appendChild(el("span","",LO.st==="scan"?"Looking for files Xaly no longer needs…":LO.st==="clean"?"Cleaning up…":LO.st==="err"?"Couldn’t look for leftovers.":!LO.list.length?"Nothing to clean up. Xaly isn’t keeping any files it doesn’t need.":LO.list.length+(LO.list.length===1?" item":" items")+" · "+fmtB(all)+" · "+fmtB(sz)+" selected"));
+  hd.appendChild(ico);hd.appendChild(tx);
+  if(LO.st==="ready"&&LO.list.length){
+    hd.appendChild(btn(LO.open?"Hide":"Review","btn",function(){LO.open=!LO.open;P.skipAnim=1;renderSettings();}));
+    var cb=btn("Clean up"+(sz?" "+fmtB(sz):""),"pri",cleanLeftovers);if(!sel.length)cb.disabled=true;hd.appendChild(cb);
+  }else if(LO.st==="ready"||LO.st==="err")hd.appendChild(btn("Check again","btn",function(){findLeftovers();P.skipAnim=1;renderSettings();}));
+  c.appendChild(hd);
+  if(LO.open&&LO.st==="ready"&&LO.list.length){
+    var ls=el("div","lols");
+    LO.list.forEach(function(x){var lb=loLabel(x),r=el("div","lorow"),ck=el("div","chk"+(LO.sel[x.path]?" on":""),LO.sel[x.path]?"✓":"");
+      r.appendChild(ck);var t=el("div","lot");t.appendChild(el("b","",lb[0]));t.appendChild(el("span","",lb[1]));r.appendChild(t);r.appendChild(el("div","losz",fmtB(x.size)));
+      r.title=x.path;r.onclick=function(){if(LO.sel[x.path])delete LO.sel[x.path];else LO.sel[x.path]=1;P.skipAnim=1;renderSettings();};ls.appendChild(r);});
+    c.appendChild(ls);
+  }
+  return c;
+}
+
+/* ---------- 1.7.9: weekly friends leaderboard ---------- */
+function weekStart(t){var d=new Date(t||now());d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime();}
+function weekOf(ws,we){
+  var tot=0,a=0,per={},top=null,k;
+  S.games.forEach(function(g){var s=0;(g.sess||[]).forEach(function(x){if(x[0]>=ws&&x[0]<we)s+=x[1];});
+    if(run[g.id]&&now()>=ws&&now()<we+3600000)s+=Math.max(0,Math.round((now()-Math.max(ws,run[g.id].t))/1000));
+    for(k in (g.ach||{}))if(ACHM[k]&&g.ach[k]>=ws&&g.ach[k]<we)a++;
+    tot+=s;if(s>0&&(!top||s>per.s)){top=g;per.s=s;}});
+  return {s:ws,h:Math.round(tot/360)/10,a:a,g:top?String(top.name).substr(0,60):"",sid:top?String(top.storeId||"").substr(0,40):""};
+}
+function myWeek(){var ws=weekStart();return weekOf(ws,ws+7*86400000);}
+function frWeek(f,ws){var w=f.prof&&f.prof.wk;if(!w)return null;if(Math.abs(w.s-ws)<2*86400000)return w;return {s:ws,h:0,a:0,g:"",sid:""};}
+function lbRows(m){
+  var ws=weekStart(),me=myWeek(),rows=[],pm=profMine();
+  rows.push({me:1,old:false,name:S.user.name,color:S.user.color,av:myAv(),st:S.user.status==="invisible"?"offline":S.user.status,v:m==="a"?me.a:m==="all"?Math.round(pm.hrs*10)/10:me.h,g:m==="all"?"":me.g});
+  S.friends.forEach(function(f){var w=frWeek(f,ws),p=f.prof;
+    var v=m==="all"?(p?p.hrs:null):w?(m==="a"?w.a:w.h):null;
+    rows.push({f:f,name:fname2(f),color:f.color,av:f.av||"",st:pstate(f),v:v,g:m==="all"||!w?"":w.g,old:v===null});});
+  rows.sort(function(a,b){if(a.old!==b.old)return a.old?1:-1;return ((b.v||0)-(a.v||0))||(a.name.toLowerCase()<b.name.toLowerCase()?-1:1);});
+  return rows;
+}
+function lbTick(){
+  if(!S)return;var ws=weekStart();S.lb=S.lb||{ws:ws,snap:{}};
+  if(S.lb.ws<ws){
+    var pws=S.lb.ws,mine=weekOf(pws,pws+7*86400000),l=[{me:1,name:S.user.name,h:mine.h}];
+    S.friends.forEach(function(f){var x=S.lb.snap[f.code];if(x)l.push({name:fname2(f),h:x.h});});
+    l.sort(function(a,b){return b.h-a.h;});
+    var rk=0;l.forEach(function(x,i){if(x.me)rk=i+1;});
+    if(l.length>1&&l[0].h>0){S.lbPrev={ws:pws,win:l[0].me?"":l[0].name,h:l[0].h,rank:rk,n:l.length,seen:0};}
+    S.lb={ws:ws,snap:{}};save();
+  }
+  S.friends.forEach(function(f){var w=f.prof&&f.prof.wk;if(w&&Math.abs(w.s-ws)<2*86400000)S.lb.snap[f.code]={h:w.h,a:w.a};});
+  if(S.lbPrev&&!S.lbPrev.seen&&frOn()&&S.friends.length){S.lbPrev.seen=1;save();
+    var t=lbPrevText();if(!popup("Last week’s leaderboard",t,"lb","#f5b942"))notify("ok","Last week’s leaderboard",t,null,"");}
+}
+function ordn(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+function lbPrevText(){var p=S.lbPrev;if(!p)return "";return (p.win?"🏆 "+p.win+" won with "+hfmt(p.h)+" h. You came "+ordn(p.rank)+" of "+p.n+".":"🏆 You won with "+hfmt(p.h)+" h played!");}
+function renderRanks(b){
+  lbTick();P.lbm=P.lbm||"h";var m=P.lbm,ws=weekStart(),left=Math.ceil((ws+7*86400000-now())/86400000);
+  var hd=el("div","lbhd");hd.appendChild(el("b","",m==="all"?"All time":"This week"));
+  hd.appendChild(el("span","",m==="all"?"Hours played since you joined":"Resets Monday · "+(left<=1?"last day":left+" days left")));b.appendChild(hd);
+  var sg=el("div","lbseg");[["h","Hours"],["a","Achievements"],["all","All time"]].forEach(function(o){sg.appendChild(btn(o[1],m===o[0]?"on":"",function(){P.lbm=o[0];renderFriends();}));});b.appendChild(sg);
+  if(S.lbPrev&&m!=="all"&&now()-S.lbPrev.ws<14*86400000)b.appendChild(el("div","lbprev",lbPrevText()));
+  var rows=lbRows(m),max=0;rows.forEach(function(r){if(!r.old&&r.v>max)max=r.v;});
+  var rank=0,last=null;
+  rows.forEach(function(r,i){
+    if(!r.old&&r.v!==last){rank=i+1;last=r.v;}
+    var w=el("div","lbr"+(r.me?" me":"")+(r.old?" old":""));
+    w.appendChild(el("div","lbn"+(!r.old&&r.v>0&&rank<=3?" m"+rank:""),r.old?"–":String(rank)));
+    w.appendChild(avatar(r.name,r.color,36,r.st,r.av));
+    var t=el("div","lbt");t.appendChild(el("b","",r.me?r.name+" (you)":r.name));
+    t.appendChild(el("span","",r.old?"Not on Xaly 1.7.9 yet":r.g?"Mostly "+r.g:m==="all"?"":r.v>0?"":"Hasn’t played this week"));
+    var bar=el("div","lbb"),bi=el("i");bi.style.width=(max>0&&!r.old&&r.v>0?Math.max(3,Math.round(r.v*100/max)):0)+"%";bar.appendChild(bi);t.appendChild(bar);w.appendChild(t);
+    w.appendChild(el("div","lbv",r.old?"":m==="a"?String(r.v):hfmt(r.v)+" h"));
+    if(r.f)w.onclick=function(){openProfile(r.f.code);};else w.onclick=function(){openProfile("");};
+    b.appendChild(w);
+  });
+  if(!S.friends.length)b.appendChild(el("div","fempty","Add friends to see who plays the most each week."));
+}
 /* ---------- controller input (Gamepad API in the new engine, XInput through the app in the old one) ---------- */
 var PAD={prev:0,state:0,rep:{},native:0};
 var PADMAP=[[1,"up"],[2,"down"],[4,"left"],[8,"right"],[4096,"a"],[8192,"b"],[16384,"x"],[32768,"y"],[16,"start"],[32,"back"],[256,"lb"],[512,"rb"]];
@@ -4839,7 +5049,7 @@ $("brand").onclick=function(e){stp(e);brandMenu();};
 $("brand").title="Menu";
 $("fbtn").onclick=function(){if(ovOn)return;var o=$("fp").className==="open";setFP(!o);if(!o){renderFriends(true);if(now()-frPollT>5000)frPoll();}};
 $("fq").onkeyup=renderFriends;
-$("ftF").onclick=function(){P.ftab="";P.chat=null;renderFriends();};$("ftA").onclick=function(){P.ftab="act";P.chat=null;renderFriends();};$("ftC").onclick=function(){P.ftab="ch";P.chat=null;renderFriends();};
+$("ftF").onclick=function(){P.ftab="";P.chat=null;renderFriends();};$("ftA").onclick=function(){P.ftab="act";P.chat=null;renderFriends();};$("ftC").onclick=function(){P.ftab="ch";P.chat=null;renderFriends();};$("ftR").onclick=function(){P.ftab="rk";P.chat=null;renderFriends();};
 $("fadd").onclick=function(){if(!frOn()){toast(frErr||"Turn on online friends in Settings \u203A Friends first");return;}openForm("Add a friend",[{id:"code",label:"Their friend code (yours is "+fmtCode(S.user.code)+")",ph:"123 456 789"},{id:"nick",label:"Nickname (optional)"}],"Send request",function(v){return addFriend(v.code,v.nick);},null);};
 $("dlb").onclick=function(){nav("downloads");};
 $("tDl").onclick=function(){nav("downloads");};$("tTv").onclick=function(){enterTV();};$("tProf").onclick=function(){openProfile("");};$("tSet").onclick=function(){nav("settings",P.page==="settings"?P.tab:"account");};
@@ -4945,6 +5155,11 @@ function selfTest(){   // run by the build server: proves both directions of the
   r.checks.scanpc="waiting";scanPCcb=function(pl){var l=String(pl||"").split("\n").filter(function(x){return x;});r.checks.scanpc=l.length+" found"+(l.length?": "+l.slice(0,3).map(function(x){return x.split("|").slice(0,2).join(" ");}).join(", "):"");};X.ScanPC("C:\\Program Files\\Git");
   c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
+  c("runtimes",function(){return "notepad=["+X.NeedsRuntimes("C:\\Windows\\System32\\notepad.exe")+"] cmd=["+X.NeedsRuntimes("C:\\Windows\\SysWOW64\\cmd.exe")+"] missing=["+X.NeedsRuntimes("C:\\nope\\x.exe")+"]";});
+  r.checks.leftovers="waiting";var olo=window.onLeftovers,ocl=window.onCleaned;
+  window.onLeftovers=function(id,t){if(id!=="selflo"){if(olo)olo(id,t);return;}var l=String(t||"").split("\n").filter(function(x){return x;});r.checks.leftovers=l.length+" found"+(l.length?": "+l.slice(0,3).map(function(x){return x.split("|")[0];}).join(","):"");};
+  window.onCleaned=function(id,fr,dn,fl){if(id!=="selfcl"){if(ocl)ocl(id,fr,dn,fl);return;}r.checks.cleanguard="freed="+fr+" deleted="+dn+" refused="+fl;};
+  X.FindLeftovers("selflo","");X.CleanLeftovers("selfcl","C:\\Windows\\System32\\notepad.exe\nC:\\Windows\\win.ini");
   c("relaylive",function(){
     var tp="xaly-selftest-"+X.RandHex("6"),orm=window.onRelayMsg,ors=window.onRelayState,t0=new Date().getTime();
     window.onRelayState=function(on){if(on==="1"&&!r.relayPub){r.relayPub=1;cbs.selfpub=function(){};X.Relay("selfpub",tp,"","ping");}};

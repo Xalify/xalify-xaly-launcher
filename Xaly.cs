@@ -223,7 +223,8 @@ namespace Xaly
                 p.EnableRaisingEvents = true;
                 p.Exited += delegate(object s, EventArgs e)
                 {
-                    f.BeginInvoke(new MethodInvoker(delegate { procs.Remove(id); f.Js("onExit", id); }));
+                    int code = 0; try { code = p.ExitCode; } catch (Exception) { }
+                    f.BeginInvoke(new MethodInvoker(delegate { procs.Remove(id); f.Js("onExit", id, code.ToString()); }));
                 };
                 return "ok";
             }
@@ -710,6 +711,310 @@ namespace Xaly
         {
             try { return new DriveInfo(Path.GetPathRoot(Path.GetFullPath(path))).AvailableFreeSpace.ToString(); }
             catch (Exception) { return "-1"; }
+        }
+        // ---- 1.7.9: leftover files Xaly made and no longer needs
+        static bool UnderDir(string path, string dir)
+        {
+            try { string a = Path.GetFullPath(path).TrimEnd('\\') + "\\", b = Path.GetFullPath(dir).TrimEnd('\\') + "\\"; return a.Length > b.Length && a.StartsWith(b, StringComparison.OrdinalIgnoreCase); }
+            catch (Exception) { return false; }
+        }
+        static long ItemBytes(string p) { try { return Directory.Exists(p) ? DirSize(p) : (File.Exists(p) ? new FileInfo(p).Length : 0); } catch (Exception) { return 0; } }
+        List<string> GameRoots()
+        {
+            List<string> r = new List<string>();
+            r.Add(Path.Combine(f.DownloadsDir, "Games"));
+            try { foreach (DriveInfo d in DriveInfo.GetDrives()) if (d.DriveType == DriveType.Fixed && d.IsReady) r.Add(Path.Combine(d.RootDirectory.FullName, "Xaly Games")); } catch (Exception) { }
+            return r;
+        }
+        static bool OurTemp(string name)
+        {
+            string n = name.ToLowerInvariant();
+            return n.StartsWith("xalygameupdate_") || n.StartsWith("xalyupdate_") || n.StartsWith("xalyruntimes") || (n.StartsWith("xaly_uninstall_") && n.EndsWith(".cmd"));
+        }
+        // keep = library game paths/folders and queued download file names, one per line.
+        // Answers onLeftovers(id, lines) with kind|path|bytes per line. Kinds: part, file, folder, empty, temp
+        public string FindLeftovers(string id, string keep)
+        {
+            string[] ks = (keep ?? "").Split('\n');
+            Thread t = new Thread(delegate()
+            {
+                StringBuilder sb = new StringBuilder();
+                try
+                {
+                    Dictionary<string, bool> keepNames = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                    List<string> keepPaths = new List<string>();
+                    foreach (string k0 in ks)
+                    {
+                        string k = k0.Trim(); if (k == "") continue;
+                        if (k.IndexOf('\\') >= 0 || k.IndexOf('/') >= 0) { try { keepPaths.Add(Path.GetFullPath(k).TrimEnd('\\')); } catch (Exception) { } }
+                        else { keepNames[SafeName(k)] = true; keepNames[SafeName(k) + ".part"] = true; }
+                    }
+                    string dl = f.DownloadsDir;
+                    if (Directory.Exists(dl))
+                        foreach (string p in Directory.GetFiles(dl))
+                        {
+                            string n = Path.GetFileName(p), full = Path.GetFullPath(p);
+                            if (keepNames.ContainsKey(n)) continue;
+                            bool used = false; foreach (string kp in keepPaths) if (string.Equals(kp, full, StringComparison.OrdinalIgnoreCase)) used = true;
+                            if (used) continue;
+                            if (n.ToLowerInvariant().StartsWith("selftest-")) continue;
+                            if (DateTime.Now - File.GetLastWriteTime(p) < TimeSpan.FromMinutes(2)) continue;   // something may still be writing it
+                            sb.Append(n.EndsWith(".part", StringComparison.OrdinalIgnoreCase) ? "part" : "file").Append('|').Append(full).Append('|').Append(ItemBytes(p)).Append('\n');
+                        }
+                    foreach (string root in GameRoots())
+                    {
+                        if (!Directory.Exists(root)) continue;
+                        foreach (string d in Directory.GetDirectories(root))
+                        {
+                            string full = Path.GetFullPath(d).TrimEnd('\\');
+                            bool used = false;
+                            foreach (string kp in keepPaths) if (string.Equals(kp, full, StringComparison.OrdinalIgnoreCase) || UnderDir(kp, full)) { used = true; break; }
+                            if (used || !UnderGameRoot(f, full + "\\")) continue;
+                            if (DateTime.Now - Directory.GetLastWriteTime(d) < TimeSpan.FromMinutes(2)) continue;
+                            bool empty = Directory.GetFileSystemEntries(d).Length == 0;
+                            sb.Append(empty ? "empty" : "folder").Append('|').Append(full).Append('|').Append(empty ? 0 : ItemBytes(d)).Append('\n');
+                        }
+                    }
+                    string tmp = Path.GetTempPath();
+                    foreach (string p in Directory.GetFileSystemEntries(tmp))
+                    {
+                        if (!OurTemp(Path.GetFileName(p))) continue;
+                        DateTime w = Directory.Exists(p) ? Directory.GetLastWriteTime(p) : File.GetLastWriteTime(p);
+                        if (DateTime.Now - w < TimeSpan.FromMinutes(10)) continue;
+                        sb.Append("temp|").Append(Path.GetFullPath(p).TrimEnd('\\')).Append('|').Append(ItemBytes(p)).Append('\n');
+                    }
+                }
+                catch (Exception ex) { sb.Append("err|").Append(ex.Message.Replace("|", " ").Replace("\n", " ")).Append("|0\n"); }
+                f.Js("onLeftovers", id, sb.ToString());
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+        // deletes only things FindLeftovers can report: files directly in the downloads folder, folders in a Xaly games folder, Xaly's temp files
+        public string CleanLeftovers(string id, string paths)
+        {
+            string[] ps = (paths ?? "").Split('\n');
+            Thread t = new Thread(delegate()
+            {
+                long freed = 0; int failed = 0, done = 0;
+                string tmp = Path.GetFullPath(Path.GetTempPath()).TrimEnd('\\');
+                foreach (string p0 in ps)
+                {
+                    string p = p0.Trim(); if (p == "") continue;
+                    try
+                    {
+                        string full = Path.GetFullPath(p).TrimEnd('\\'), parent = (Path.GetDirectoryName(full) ?? "").TrimEnd('\\');
+                        bool inDl = File.Exists(full) && string.Equals(parent, Path.GetFullPath(f.DownloadsDir).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase);
+                        bool gameDir = Directory.Exists(full) && UnderGameRoot(f, full + "\\") && GameRoots().Exists(delegate(string r) { return string.Equals(Path.GetFullPath(r).TrimEnd('\\'), parent, StringComparison.OrdinalIgnoreCase); });
+                        bool inTmp = string.Equals(parent, tmp, StringComparison.OrdinalIgnoreCase) && OurTemp(Path.GetFileName(full));
+                        if (!inDl && !gameDir && !inTmp) { failed++; continue; }
+                        long sz = ItemBytes(full);
+                        if (Directory.Exists(full))
+                        {
+                            foreach (string x in Directory.GetFiles(full, "*", SearchOption.AllDirectories)) { try { File.SetAttributes(x, FileAttributes.Normal); } catch (Exception) { } }
+                            Directory.Delete(full, true);
+                        }
+                        else { File.SetAttributes(full, FileAttributes.Normal); File.Delete(full); }
+                        freed += sz; done++;
+                    }
+                    catch (Exception) { failed++; }
+                }
+                f.Js("onCleaned", id, freed.ToString(), done.ToString(), failed.ToString());
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+
+        // ---- 1.7.9: Microsoft runtimes a game needs (Visual C++ and old DirectX), read from the .exe's import table
+        static readonly string[][] RTDLL = new string[][] {
+            new string[] { "vc14", "msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll", "msvcp140_1.dll", "msvcp140_2.dll", "concrt140.dll", "vccorlib140.dll", "msvcp140_atomic_wait.dll", "msvcp140_codecvt_ids.dll", "vcomp140.dll" },
+            new string[] { "vc12", "msvcr120.dll", "msvcp120.dll", "vcomp120.dll" },
+            new string[] { "vc11", "msvcr110.dll", "msvcp110.dll", "vcomp110.dll" },
+            new string[] { "vc10", "msvcr100.dll", "msvcp100.dll", "vcomp100.dll" },
+        };
+        static string RtFor(string dll)
+        {
+            string d = dll.ToLowerInvariant();
+            foreach (string[] r in RTDLL) for (int i = 1; i < r.Length; i++) if (r[i] == d) return r[0];
+            if (System.Text.RegularExpressions.Regex.IsMatch(d, @"^(d3dx9_\d+|d3dx10(_\d+)?|d3dx11_\d+|xinput1_[123]|xinput9_1_0|xaudio2_[0-7]|x3daudio1_[0-7]|xapofx1_[0-5]|xactengine[23]_\d+|d3dcompiler_(3\d|4[0-3]))\.dll$")) return "dx";
+            return null;
+        }
+        static List<string> PeImports(string path, out string arch)
+        {
+            arch = "";
+            List<string> res = new List<string>();
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (BinaryReader br = new BinaryReader(fs))
+            {
+                if (fs.Length < 0x100 || br.ReadUInt16() != 0x5A4D) return res;
+                fs.Position = 0x3C; int pe = br.ReadInt32();
+                if (pe <= 0 || pe > fs.Length - 0x200) return res;
+                fs.Position = pe; if (br.ReadUInt32() != 0x4550) return res;
+                ushort machine = br.ReadUInt16(), nsec = br.ReadUInt16();
+                fs.Position = pe + 20; ushort optSize = br.ReadUInt16();
+                arch = machine == 0x8664 ? "x64" : machine == 0x14c ? "x86" : machine == 0xAA64 ? "arm64" : "";
+                long opt = pe + 24; fs.Position = opt; ushort magic = br.ReadUInt16();
+                long dd = opt + (magic == 0x20b ? 112 : 96);
+                fs.Position = dd + 8; uint impRva = br.ReadUInt32();
+                if (impRva == 0) return res;
+                long sec = opt + optSize;
+                uint[] va = new uint[nsec], vs = new uint[nsec], raw = new uint[nsec], ptr = new uint[nsec];
+                for (int i = 0; i < nsec && i < 96; i++)
+                {
+                    fs.Position = sec + i * 40 + 8; vs[i] = br.ReadUInt32(); va[i] = br.ReadUInt32(); raw[i] = br.ReadUInt32(); ptr[i] = br.ReadUInt32();
+                }
+                Func<uint, long> off = delegate(uint rva)
+                {
+                    for (int i = 0; i < nsec && i < 96; i++) { uint span = Math.Max(vs[i], raw[i]); if (rva >= va[i] && rva < va[i] + span) return (long)rva - va[i] + ptr[i]; }
+                    return -1;
+                };
+                long d0 = off(impRva); if (d0 < 0) return res;
+                for (int k = 0; k < 512; k++)
+                {
+                    long e = d0 + k * 20; if (e + 20 > fs.Length) break;
+                    fs.Position = e + 12; uint nameRva = br.ReadUInt32(), first = br.ReadUInt32();
+                    if (nameRva == 0 && first == 0) break;
+                    long no = off(nameRva); if (no < 0 || no >= fs.Length) continue;
+                    fs.Position = no; StringBuilder nm = new StringBuilder();
+                    for (int c = 0; c < 128; c++) { int b = fs.ReadByte(); if (b <= 0) break; nm.Append((char)b); }
+                    if (nm.Length > 0) res.Add(nm.ToString());
+                }
+            }
+            return res;
+        }
+        static string SysDirFor(string arch)
+        {
+            string win = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            if (!Environment.Is64BitOperatingSystem) return Path.Combine(win, "System32");
+            if (arch == "x86") return Path.Combine(win, "SysWOW64");
+            return Path.Combine(win, Environment.Is64BitProcess ? "System32" : "Sysnative");
+        }
+        // returns the runtimes the game is missing, like "vc14-x64,dx", or "" when nothing known is missing
+        public string NeedsRuntimes(string exe)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(exe) || !File.Exists(exe) || !exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return "";
+                string dir = Path.GetDirectoryName(exe), arch;
+                List<string> files = new List<string>(); files.Add(exe);
+                try { string[] dl = Directory.GetFiles(dir, "*.dll"); for (int i = 0; i < dl.Length && i < 80; i++) files.Add(dl[i]); } catch (Exception) { }
+                PeImports(exe, out arch);
+                if (arch != "x86" && arch != "x64") return "";
+                string sys = SysDirFor(arch);
+                List<string> need = new List<string>();
+                foreach (string file in files)
+                {
+                    string a2; List<string> imps;
+                    try { imps = PeImports(file, out a2); } catch (Exception) { continue; }
+                    if (a2 != arch) continue;
+                    foreach (string imp in imps)
+                    {
+                        string rt = RtFor(imp); if (rt == null) continue;
+                        if (File.Exists(Path.Combine(dir, imp)) || File.Exists(Path.Combine(sys, imp))) continue;
+                        string key = rt == "dx" ? "dx" : rt + "-" + arch;
+                        if (!need.Contains(key)) need.Add(key);
+                    }
+                }
+                return string.Join(",", need.ToArray());
+            }
+            catch (Exception) { return ""; }
+        }
+        static string RtUrl(string key)
+        {
+            switch (key)
+            {
+                case "vc14-x64": return "https://aka.ms/vc14/vc_redist.x64.exe";
+                case "vc14-x86": return "https://aka.ms/vc14/vc_redist.x86.exe";
+                case "vc12-x64": return "https://aka.ms/highdpimfc2013x64enu";
+                case "vc12-x86": return "https://aka.ms/highdpimfc2013x86enu";
+                case "vc11-x64": return "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe";
+                case "vc11-x86": return "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe";
+                case "vc10-x64": return "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe";
+                case "vc10-x86": return "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x86.exe";
+                case "dx": return "https://download.microsoft.com/download/1/7/1/1718ccc4-6315-4d8e-9543-8e28a4e18c4c/dxwebsetup.exe";
+            }
+            return null;
+        }
+        static string RtArgs(string key)
+        {
+            if (key == "dx") return "/Q";
+            if (key.StartsWith("vc10")) return "/passive /norestart";
+            return "/install /passive /norestart";
+        }
+        static bool SignedByMicrosoft(string file)
+        {
+            try
+            {
+                System.Security.Cryptography.X509Certificates.X509Certificate c = System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(file);
+                return c != null && c.Subject.IndexOf("O=Microsoft Corporation", StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            catch (Exception) { return false; }
+        }
+        // downloads each runtime from Microsoft, checks Microsoft signed it, then runs them all behind one Windows permission prompt.
+        // Reports onRuntimes(id, "step", key, n, total) and onRuntimes(id, "done", "key=result,...") where result is ok, reboot, cancel or err:...
+        public string InstallRuntimes(string id, string keys)
+        {
+            string[] ks = (keys ?? "").Split(',');
+            Thread t = new Thread(delegate()
+            {
+                List<string> results = new List<string>();
+                try
+                {
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    string dir = Path.Combine(Path.GetTempPath(), "XalyRuntimes");
+                    Directory.CreateDirectory(dir);
+                    List<string[]> ready = new List<string[]>();
+                    int n = 0;
+                    foreach (string k0 in ks)
+                    {
+                        string k = k0.Trim(), url = RtUrl(k); if (url == null) continue;
+                        n++; f.Js("onRuntimes", id, "step", k, n.ToString(), ks.Length.ToString());
+                        string file = Path.Combine(dir, k + ".exe");
+                        try
+                        {
+                            if (File.Exists(file)) File.Delete(file);
+                            using (WebClient wc = new WebClient()) { wc.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 XalyLauncher"; wc.DownloadFile(url, file); }
+                            if (!SignedByMicrosoft(file)) { try { File.Delete(file); } catch (Exception) { } results.Add(k + "=err:the download wasn't signed by Microsoft, so it wasn't run"); continue; }
+                            ready.Add(new string[] { k, file });
+                        }
+                        catch (Exception ex) { results.Add(k + "=err:couldn't download it (" + ex.Message + ")"); }
+                    }
+                    if (ready.Count > 0)
+                    {
+                        f.Js("onRuntimes", id, "run", "", "", "");
+                        string res = Path.Combine(dir, "results.txt"), cmd = Path.Combine(dir, "install.cmd");
+                        try { File.Delete(res); } catch (Exception) { }
+                        StringBuilder sb = new StringBuilder("@echo off\r\n");
+                        foreach (string[] r in ready)
+                            sb.Append("start \"\" /wait \"").Append(r[1]).Append("\" ").Append(RtArgs(r[0])).Append("\r\necho ").Append(r[0]).Append("=%errorlevel%>>\"").Append(res).Append("\"\r\n");
+                        File.WriteAllText(cmd, sb.ToString(), Encoding.Default);
+                        ProcessStartInfo psi = new ProcessStartInfo("cmd.exe", "/c \"\"" + cmd + "\"\"");
+                        psi.UseShellExecute = true; psi.Verb = "runas"; psi.WindowStyle = ProcessWindowStyle.Hidden;
+                        bool started = false;
+                        try { using (Process p = Process.Start(psi)) { started = true; p.WaitForExit(60 * 60 * 1000); } }
+                        catch (System.ComponentModel.Win32Exception wex) { if (wex.NativeErrorCode != 1223) throw; }
+                        if (!started) foreach (string[] r in ready) results.Add(r[0] + "=cancel");
+                        else
+                        {
+                            Dictionary<string, string> codes = new Dictionary<string, string>();
+                            try { foreach (string line in File.ReadAllLines(res)) { int i = line.IndexOf('='); if (i > 0) codes[line.Substring(0, i).Trim()] = line.Substring(i + 1).Trim(); } } catch (Exception) { }
+                            foreach (string[] r in ready)
+                            {
+                                string c; codes.TryGetValue(r[0], out c);
+                                if (c == "0" || c == "1638" || c == "5100") results.Add(r[0] + "=ok");
+                                else if (c == "3010" || c == "1641") results.Add(r[0] + "=reboot");
+                                else if (c == "1602" || c == "1223") results.Add(r[0] + "=cancel");
+                                else results.Add(r[0] + "=err:the installer stopped with code " + (c ?? "?"));
+                            }
+                        }
+                        try { foreach (string[] r in ready) File.Delete(r[1]); File.Delete(cmd); File.Delete(res); } catch (Exception) { }
+                    }
+                }
+                catch (Exception ex) { results.Add("all=err:" + ex.Message); }
+                f.Js("onRuntimes", id, "done", string.Join(",", results.ToArray()), "", "");
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
         }
         public string DirBytes(string path) { try { return Directory.Exists(path) ? DirSize(path).ToString() : "0"; } catch (Exception) { return "0"; } }
         public string MoveGame(string id, string src, string drive)

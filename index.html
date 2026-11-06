@@ -987,8 +987,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.7";
+var VER="1.8.8";
 var NOTES=[
+ {v:"1.8.8",d:"6 Nov 2026",t:["Games opened on 1.8.6 that picked artwork as their logo are checked again right away and get the right art"]},
  {v:"1.8.7",d:"6 Nov 2026",t:["Fixed: the picture above the Install button no longer swaps from one image to another when you open a game. It waits for the game\u2019s page and shows the final art once","Pictures from a game\u2019s description are only used as its logo when they\u2019re the title image at the very top, so artwork and screenshots aren\u2019t mistaken for logos"]},
  {v:"1.8.6",d:"6 Nov 2026",t:["Every game page now shows real art above the Install button. Xaly uses the game\u2019s banner, or the title logo from the top of its description, or its cover art"]},
  {v:"1.8.5",d:"6 Nov 2026",t:["Every game page now shows logo art above the Install button: the game\u2019s own banner from itch.io when it has one, or a title logo in the game\u2019s colours","Game pages show the developer\u2019s real name, and clicking it opens more of their games on itch.io"]},
@@ -2215,7 +2216,7 @@ function nextCover(){
   });
 }
 function refreshItch(it){
-  if(!isItch(it)||refreshItch.b[it.id]||(it.cmT&&now()-it.cmT<6*3600000&&it.logoV===2))return;
+  if(!isItch(it)||refreshItch.b[it.id]||(it.cmT&&now()-it.cmT<6*3600000&&it.logoV===3))return;
   refreshItch.b[it.id]=1;var mine=S;
   http(pageUrl(it),function(ok,t){delete refreshItch.b[it.id];if(S!==mine||!ok||!t)return;itchExtras(it,t);save();if(it.live)saveCat();if(P.page==="detail"&&P.sel===it)renderDetail();});
 }
@@ -2727,7 +2728,7 @@ function itchLogoDev(it,t){
   var hd=t.match(/<div[^>]+id=["']header["'][^>]*>([\s\S]*?)<\/div>/i),lg="";
   if(hd){var im=hd[1].match(/<img[^>]+src=["']([^"']+)["']/i);if(im)lg=im[1].replace(/&amp;/g,"&");}
   if(lg&&!/^https:\/\//i.test(lg))lg="";
-  it.logo=lg;it.logoT=now();it.logoV=2;
+  it.logo=lg;it.logoT=now();it.logoV=3;delete it.logoArt;
   // no banner: the first images at the top of the description are usually the title logo
   var cands=[],ds=t.match(/class=["'][^"']*formatted_description[^"']*["'][^>]*>([\s\S]{0,20000})/i);
   if(ds){var ri=/<img[^>]+src=["'](https:\/\/[^"']+)["']/gi,mi;
@@ -2828,7 +2829,7 @@ function gameLogo(it,fr){
     var c=el("div","sdcov");paint(c,it.name,cv);lg.className="sdlogo cov";lg.appendChild(c);
   }
   // the itch.io page hasn't been read yet: hold a steady placeholder instead of showing one picture and swapping it
-  if(isItch(it)&&it.logoV!==2&&!it.logo){
+  if(isItch(it)&&it.logoV!==3){
     lg.className="sdlogo wait";lg.appendChild(el("div","sdwait"));
     setTimeout(function(){if(lg.className==="sdlogo wait"&&lg.parentNode)art();},4000);
     return lg;

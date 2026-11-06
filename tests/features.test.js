@@ -306,7 +306,7 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   const it2={id:"lg2",name:"No Banner",url:"https://x.itch.io/nb"};ctx.itchLogoDev(it2,'<div id="header" class="header"><h1 class="game_title">No Banner</h1></div><tr><td>Author</td><td><a href="https://x.itch.io">Xavier</a></td></tr>');
   ok(it2.logo===""&&it2.devName==="Xavier"&&it2.logoT>0,"a page without a banner gets the drawn title logo");
   const it3={id:"lg3",name:"Desc Logo",url:"https://y.itch.io/d"};ctx.itchLogoDev(it3,'<div id="header" class="header"><h1>Desc Logo</h1></div><div class="formatted_description user_formatted"><p><img src="https://img.itch.zone/a/title.png" loading="lazy"></p><p>Hi</p><img src="https://img.itch.zone/b/shot1.png"><img src="https://img.itch.zone/c/shot2.png"><img src="https://img.itch.zone/d/shot3.png"></div>');
-  ok(it3.logo===""&&it3.logoC.length===1&&it3.logoC[0]==="https://img.itch.zone/a/title.png"&&it3.logoV===2,"without a banner, title images at the top of the description are logo candidates");
+  ok(it3.logo===""&&it3.logoC.length===1&&it3.logoC[0]==="https://img.itch.zone/a/title.png"&&it3.logoV===3,"without a banner, title images at the top of the description are logo candidates");
   const it4={id:"lg4",name:"Art First",url:"https://y.itch.io/a"};ctx.itchLogoDev(it4,'<div class="formatted_description user_formatted"><p>An action game!</p><img src="https://img.itch.zone/a/art.png"></div>');
   const it5={id:"lg5",name:"Jpg Art",url:"https://y.itch.io/j"};ctx.itchLogoDev(it5,'<div class="formatted_description user_formatted"><img src="https://img.itch.zone/a/fight.jpg"></div>');
   ok(!it4.logoC.length&&!it5.logoC.length,"pictures after text, or JPG artwork, are not taken as logos");

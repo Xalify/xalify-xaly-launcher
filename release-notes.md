@@ -1,2 +1,1 @@
-- **Fixed: Install from itch.io sometimes needed several clicks.** When you opened a game, Xaly started looking up its download size; clicking Install while that was still running was ignored. Now one click always works: the button shows **Preparing…** right away, waits for the lookup (at most 5 seconds), and extra clicks never queue the game twice.
-- **Classic layout:** the **Downloads** button is back in the middle of the bottom bar, with the number of queued games. It turns into the progress bar while something downloads.
+- **Classic layout:** the Downloads tab next to Library is gone. Use the **Downloads** button in the middle of the bottom bar instead (it also shows progress while a game downloads).

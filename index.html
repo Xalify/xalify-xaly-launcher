@@ -495,7 +495,7 @@ select::-ms-expand{display:none}
 .classic .snav .tab,.classic #fbtn{width:auto;height:38px;padding:0 18px;margin:0 4px 0 0;border-radius:19px}
 .classic .snav .tab svg{display:none}
 .classic .snav .tab.on,.classic #fbtn.on{background:#1b2232}.classic .snav .tab.on:before,.classic #fbtn.on:before{display:none}
-.classic #tSet{display:none}.classic #tDlp{margin-left:8px}
+.classic #tSet{display:none}.classic #tDl{display:none}.classic #tDlp{margin-left:8px}
 .classic #fbtn{margin-left:auto;background:#121722}.classic #fbtn svg{width:18px;height:18px;margin-right:8px}.classic #badge{margin-left:10px}
 .classic .sfoot{position:absolute;right:20px;top:9px;margin:0;width:200px}
 .classic #chip{height:44px}
@@ -829,8 +829,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.3";
+var VER="1.7.4";
 var NOTES=[
+ {v:"1.7.4",d:"6 Nov 2026",t:["Classic layout: the Downloads tab next to Library is gone. Use the Downloads button in the middle of the bottom bar instead"]},
  {v:"1.7.3",d:"6 Nov 2026",t:["Fixed: Install from itch.io sometimes needed several clicks. One click now always works and the button shows Preparing\u2026 right away","Classic layout: the Downloads button is back in the middle of the bottom bar"]},
  {v:"1.7.2",d:"6 Nov 2026",t:["Fixed: opening a game in the Store while offline could freeze the page","Behind the scenes: over 250 automatic checks now run on every change, and a version is only released when they all pass"]},
  {v:"1.7.0",d:"6 Nov 2026",t:["Block people: from their chat, by right-clicking them in your friends list, or from a friend request. They can\u2019t message you, see you online, challenge you or send requests, and they aren\u2019t told","Delete messages: right-click a message or use its \u22EF button. Delete any message for yourself, or your own messages for everyone","Blocked people are listed in Settings \u203A Friends, where you can unblock them"]},

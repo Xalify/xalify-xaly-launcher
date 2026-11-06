@@ -719,6 +719,7 @@ select::-ms-expand{display:none}
 .fath{width:54px;height:40px;border-radius:7px;background-size:cover;background-position:center;flex:0 0 auto;margin-right:8px;cursor:pointer}
 .fa .sm{flex:0 0 auto}
 .sdi .ir.low span:last-child{color:#ff8a95}
+#ncard .av.nav{flex:0 0 auto;margin-right:14px}
 
 /* ===== 1.5.6: no native scrollbars anywhere ===== */
 *{scrollbar-width:none!important;-ms-overflow-style:none!important}
@@ -801,8 +802,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.3";
+var VER="1.6.4";
 var NOTES=[
+ {v:"1.6.4",d:"5 Nov 2026",t:["Messages now have their own pop-up and chime, also while you\u2019re in a game. Click the pop-up to open the chat","Turn them off in Settings \u203A General"]},
  {v:"1.6.3",d:"5 Nov 2026",t:["Compare with friends: a game\u2019s page shows your play time and achievements next to a friend\u2019s, like \u201cBob beat Night Shift, you haven\u2019t yet\u201d","Friend challenges: send \u201cGet Marathon in Sonic Time Twisted by Sunday\u201d or your own goal like \u201cBeat night 5\u201d. Achievement goals complete by themselves, and you both get a notification","A pop-up and a sound when a friend comes online or starts playing a game, also while you\u2019re in a game","Achievement pop-ups now also show on top of games"]},
  {v:"1.6.2",d:"5 Nov 2026",t:["Every launcher now switches to a new Store list at the same moment, so two PCs never show a different number of games, not even right after the list is refreshed"]},
  {v:"1.6.1",d:"5 Nov 2026",t:["Fixed: the shared Store list only loaded once your old list was 6 hours old, so two PCs could still show different games. It now loads straight away and refreshes every 2 hours","Games found through the search box only show up while you search, so they no longer change the number of games in the Store"]},
@@ -2948,7 +2950,9 @@ function frPair(f,o,ts,id){
     if(e.mid)f.lastIn=e.mid;
     if(o.t==="game")e.g={sid:String(o.sid||""),name:String(o.gname||"a game").substr(0,80)};
     f.msgs.push(e);if(f.msgs.length>300)f.msgs.splice(0,f.msgs.length-300);
-    if(!(chatOpen()&&P.chat===f.code)){f.unread=(f.unread||0)+1;toast(fname2(f)+": "+(e.g?"recommended "+e.g.name:e.x).substr(0,90));}
+    var looking=chatOpen()&&P.chat===f.code&&(document.hasFocus?document.hasFocus():true)&&!ovOn;
+    if(!(chatOpen()&&P.chat===f.code))f.unread=(f.unread||0)+1;
+    if(!looking)msgAlert(f,e);
     return true;
   }
   if(o.t==="rc"){
@@ -3833,6 +3837,15 @@ function renderChal(b){
   if(old.length){b.appendChild(el("div","fsec","Finished"));old.forEach(function(c){b.appendChild(chalRow(c));});}
 }
 
+/* new messages: a chime and a pop-up, also while you're in a game */
+var msgSndT=0;
+function msgAlert(f,e){
+  if(!S||now()-(e.ts||now())>120000)return;   // old messages loaded at start-up stay quiet
+  var txt=(e.g?"Recommended "+e.g.name+(e.x?": "+e.x:""):e.x).substr(0,140);
+  if(S.set.nMsg===0){toast(fname2(f)+": "+txt.substr(0,90));return;}
+  if(S.set.sounds!==0&&S.set.nMsgSnd!==0&&now()-msgSndT>2500){msgSndT=now();playSnd("message");}
+  if(!popup(fname2(f),txt,"friend:"+f.code,"#5b8cff"))showCard({id:rid(),k:"msg",title:fname2(f),msg:txt,gid:"",img:"",t:now(),fc:f.code});
+}
 /* "is online" / "started playing" alerts, also while you're in a game */
 var frReadyT=0;
 function popup(title,msg,tag,accent){
@@ -3873,12 +3886,15 @@ var ncT=null;
 function showCard(n){
   var c=$("ncard");c.innerHTML="";c.className="";void c.offsetWidth;
   var th=el("div","nth");if(n.img)paint(th,n.title,n.img);else th.innerHTML=n.k==="err"?"!":"✓";
-  th.className="nth"+(n.k==="err"?" err":"")+(n.img?" img":"");c.appendChild(th);
+  th.className="nth"+(n.k==="err"?" err":"")+(n.img?" img":"");
+  var mf=n.fc?findF(n.fc):null;if(mf){th=avatar(fname2(mf),mf.color,44,"",mf.av);th.className+=" nav";}
+  c.appendChild(th);
   var tx=el("div","ntx");tx.appendChild(el("b","",n.title));tx.appendChild(el("div","",n.msg));
   var g=n.gid?gameBy(n.gid):null;
   if(g){var r=el("div","nrow");
     r.appendChild(btn("▶  Play now","pri",function(){hideCard();n.read=1;save();paintBell();P.cur=g.id;nav("game");if(!run[g.id])playToggle();}));
     r.appendChild(btn("View in library","btn",function(){hideCard();n.read=1;save();paintBell();P.cur=g.id;nav("game");}));tx.appendChild(r);}
+  if(mf){var r2=el("div","nrow");r2.appendChild(btn("Reply","pri",function(){hideCard();setFP(true);P.ftab="";P.chat=mf.code;mf.unread=0;renderFriends(true);if(chatI)chatI.focus();}));tx.appendChild(r2);}
   c.appendChild(tx);c.appendChild(btn("✕","ncx",hideCard));
   c.onmouseover=function(){clearTimeout(ncT);};c.onmouseout=function(){clearTimeout(ncT);ncT=setTimeout(hideCard,4000);};
   c.className="show"+(n.k==="err"?" err":"");clearTimeout(ncT);ncT=setTimeout(hideCard,9000);
@@ -4192,6 +4208,8 @@ function renderSettings(){
     snd.appendChild(btn("\u25B6 Download","btn",function(){T(function(){return X.PlaySound("download");});}));
     snd.appendChild(btn("\u25B6 Achievement","btn",function(){T(function(){return X.PlaySound("achievement");});}));snd.lastChild.style.marginLeft="8px";
     snd.appendChild(sw(S.set.sounds!==0,function(v){S.set.sounds=v?1:0;save();}));snd.lastChild.style.marginLeft="14px";
+    b.appendChild(srow("When a friend messages you","A pop-up with the message, also while you\u2019re in a game. Click it to open the chat.",sw(S.set.nMsg!==0,function(v){S.set.nMsg=v?1:0;save();})));
+    b.appendChild(srow("Message sound","A short pop when a message arrives.",sw(S.set.nMsgSnd!==0,function(v){S.set.nMsgSnd=v?1:0;save();if(v)playSnd("message");})));
     b.appendChild(srow("When a friend comes online","Show a pop-up in the bottom-right corner, also while you\u2019re in a game.",sw(S.set.nOnline!==0,function(v){S.set.nOnline=v?1:0;save();})));
     b.appendChild(srow("When a friend starts playing a game","Show a pop-up with the game they started.",sw(S.set.nPlay!==0,function(v){S.set.nPlay=v?1:0;save();})));
     b.appendChild(srow("Friend sound","A short chime with those pop-ups and with challenges.",sw(S.set.nSound!==0,function(v){S.set.nSound=v?1:0;save();if(v)playSnd("friend");})));
@@ -4313,7 +4331,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("fullscreen",function(){return X.SetFullscreen("1")+" "+X.SetFullscreen("0");});
   c("pad",function(){return X.PadNative("1")+" "+X.PadNative("0");});
   c("tv",function(){enterTV();var n=document.getElementById("tvrows").childNodes.length;exitTV();return n+" rows";});
-  c("sound",function(){return X.PlaySound("download")+" "+X.PlaySound("achievement")+" "+X.PlaySound("friend");});
+  c("sound",function(){return X.PlaySound("download")+" "+X.PlaySound("achievement")+" "+X.PlaySound("friend")+" "+X.PlaySound("message");});
   c("popup",function(){return X.Popup("Bob is online","Self-test pop-up","","#2ee6f0")+" "+X.Popup("Achievement unlocked: Marathon","Self-test","","#ffd95a");});
   c("crashlog",function(){return X.CrashLog("page","self-test entry (not a real crash)");});
   c("ach",function(){var g={id:"t",name:"T",plays:12,seconds:3*3600+60,sess:[[new Date(2026,0,3,1,0).getTime(),11000],[new Date(2026,0,4,20,0).getTime(),600],[new Date(2026,0,5,20,0).getTime(),600]]};checkAch(g,true);var k,l=[];for(k in g.ach)l.push(k);return l.sort().join(",");});

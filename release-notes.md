@@ -1,4 +1,3 @@
-- **Compare with friends:** every game page now shows your play time and achievements next to a friend's, with lines like "Bob beat Night Shift, you haven't yet". If several friends play the game, switch between them. It only needs both of you to use Xaly, nothing online in the game itself.
-- **Friend challenges:** send "Get Marathon in Sonic Time Twisted by Sunday" from a game page or the new **Challenges** tab in the Friends panel. Achievement goals complete by themselves when your friend unlocks them, and you both get a notification. You can also write your own goal like "Beat night 5"; your friend presses **I did it** when they've done it.
-- **Friend alerts:** a pop-up and a short chime when a friend comes online or starts playing a game. The pop-up shows in the bottom-right corner even while you're in a game. Turn each one off in Settings › General.
-- Achievement pop-ups now also show on top of your game.
+- **Message pop-ups and chime:** when a friend messages you, you hear a short pop and see the message in a pop-up, also on top of your game in the bottom-right corner. Click it to open the chat, or press **Reply** when the launcher is open.
+- No pop-up or sound when you're already looking at that chat.
+- Turn message pop-ups or the message sound off in Settings › General.

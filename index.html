@@ -821,6 +821,16 @@ html,body{overflow:hidden}
 .ovqa{padding:12px}.ovqr{display:flex}.ovqr .btn{flex:1 1 0%;margin-right:8px}.ovqr .btn:last-child{margin-right:0}
 .ovch .chr{padding:6px 0}
 .ovnone{max-width:520px}.ovnone h2{margin:0 0 6px}
+
+/* ===== 1.7.6 feedback form ===== */
+#fbw{display:none;position:fixed;left:0;top:0;right:0;bottom:0;z-index:180;background:rgba(4,6,10,.72);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#fbw.on{display:flex;animation:ovin .18s ease-out}
+.fbbox{position:relative;width:min(760px,calc(100vw - 60px));height:min(640px,calc(100vh - 80px));background:#0b0e15;border:1px solid #232a3a;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,.6)}
+.fbhd{display:flex;align-items:center;padding:14px 16px 14px 22px;border-bottom:1px solid #1b2130;flex:0 0 auto}
+.fbhd b{font-size:16px}.fbhd span{flex:1 1 0%;margin-left:12px;color:#7d8299;font-size:12.5px}.fbhd .btn{margin-right:8px}
+.fbx{background:transparent;color:#8a90a8;font-size:16px;width:34px;height:34px;border-radius:10px}.fbx:hover{background:#1b2130;color:#fff}
+.fbbox iframe{flex:1 1 0%;width:100%;border:0;background:#0b0e15}
+.fbld{position:absolute;left:0;right:0;top:120px;text-align:center;color:#8a90a8;font-size:13.5px;pointer-events:none}
 </style>
 <style id="theme"></style>
 </head>
@@ -874,8 +884,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.5";
+var VER="1.7.6";
 var NOTES=[
+ {v:"1.7.6",d:"6 Nov 2026",t:["Give feedback works now: it opens a short form right inside the launcher, and your message goes straight to the developer"]},
  {v:"1.7.5",d:"6 Nov 2026",t:["New in-game overlay (Shift+Tab): your game blurred in the background, a live session timer, your next achievement with how far to go, all achievements for the game, screenshots with a gallery, per-game notes, challenges and friends"]},
  {v:"1.7.4",d:"6 Nov 2026",t:["Classic layout: the Downloads tab next to Library is gone. Use the Downloads button in the middle of the bottom bar instead"]},
  {v:"1.7.3",d:"6 Nov 2026",t:["Fixed: Install from itch.io sometimes needed several clicks. One click now always works and the button shows Preparing\u2026 right away","Classic layout: the Downloads button is back in the middle of the bottom bar"]},
@@ -4769,7 +4780,7 @@ function brandMenu(){
     {t:"Find games on this PC",fn:function(){nav("lib");findGames("");}},
     {t:UPD.st==="avail"?"Install update "+UPD.rel.v:"Check for updates",fn:function(){if(UPD.st==="avail")showUpdate();else checkUpdate(true);}},
     {t:"What\u2019s new in "+VER,fn:function(){whatsNew(true);}},
-    {t:"Give feedback",fn:function(){$("fb").onclick();}},
+    {t:"Give feedback",fn:function(){openFeedback();}},
     {t:"About Xaly",fn:function(){nav("settings","about");P.tab="about";renderSettings();}},
     {sep:1},
     {t:"Hide to tray",fn:function(){T(function(){return X.HideNow();});}},
@@ -4809,7 +4820,30 @@ $("dlx").onclick=function(e){stp(e);cancelDl();};
 $("rec").onclick=function(e){stp(e);toggleRec();};
 document.onclick=function(){toggleRec(false);toggleNotes(false);closeMenus();hideMenu();};
 $("ver").onclick=function(){nav("settings","about");};
-$("fb").onclick=function(){
+/* 1.7.6: feedback goes to the developer's Youform form, shown inside the launcher */
+var FB_FORM="https://app.youform.com/forms/cbgzkc93";
+function feedbackUrl(){
+  var ua=navigator.userAgent,w=/Windows NT 10\.0/.test(ua)?"Windows 10/11":(ua.match(/Windows NT [\d.]+/)||["Windows"])[0];
+  return FB_FORM+"?version="+encodeURIComponent(VER)+"&windows="+encodeURIComponent(w)+"&engine="+encodeURIComponent(ENGINE)+"&player="+encodeURIComponent(S&&S.user?S.user.name:"");
+}
+function openFeedback(){
+  hideMenu();
+  if(ENGINE!=="webview2"){T(function(){return X.Open(feedbackUrl());});toast("The feedback form opened in your browser");return;}
+  var w=$("fbw");if(!w){w=el("div","");w.id="fbw";document.body.appendChild(w);}
+  w.innerHTML="";w.className="on";
+  var box=el("div","fbbox"),hd=el("div","fbhd");hd.appendChild(el("b","","Send feedback"));hd.appendChild(el("span","","Goes straight to the developer"));
+  var ob=btn("Open in browser","btn sm",function(){T(function(){return X.Open(feedbackUrl());});});hd.appendChild(ob);
+  hd.appendChild(btn("\u2715","fbx",closeFeedback));box.appendChild(hd);
+  var fr=document.createElement("iframe");fr.src=feedbackUrl();fr.setAttribute("title","Feedback form");fr.setAttribute("allow","clipboard-write");
+  var ld=el("div","fbld","Loading the feedback form\u2026");box.appendChild(ld);
+  fr.onload=function(){ld.style.display="none";};
+  setTimeout(function(){if(ld.style.display!=="none")ld.innerHTML="Still loading\u2026 If nothing shows up, press <b>Open in browser</b>.";},8000);
+  box.appendChild(fr);w.appendChild(box);
+  w.onclick=function(e){if(e.target===w)closeFeedback();};
+}
+function closeFeedback(){var w=$("fbw");if(w){w.className="";w.innerHTML="";}}
+$("fb").onclick=function(){openFeedback();};
+$("fb").oldClick=function(){
   var em=(curAcc&&curAcc.email)||"";
   openForm("Give feedback",[{id:"t",label:"What's working, what's broken, what should change?",area:1},{id:"e",label:"Your email, so the developer can reply (optional)",value:em,ph:"you@gmail.com"}],"Send",function(v){
     if(!v.t){toast("Write something first");return false;}
@@ -4831,7 +4865,7 @@ function fbFail(v,msg){
   var bx=$("mbox"),p0=el("div","fbm",act?"The first message to a new inbox triggers a one-time check. An email titled “FormSubmit activation” (or similar) was sent to xalify2004@gmail.com. Click its Activate button once, and from then on every message from the launcher arrives there.":"The feedback service said: "+(msg||"no answer")+". Your message was saved to feedback.txt, and you can also send it with your own email app.");
   bx.insertBefore(p0,bx.childNodes[1]);
 }
-document.onkeydown=function(e){e=e||window.event;if(tvOn&&!ovOn&&$("modal").className!=="open"){var km={37:"left",38:"up",39:"right",40:"down",13:"a",32:"a",27:"b",8:"b",77:"start",112:"start",9:"rb"},kk=km[e.keyCode];if(kk){tvInput(kk);if(e.preventDefault)e.preventDefault();return false;}}if(ovOn&&e.keyCode===27&&$("modal").className!=="open"){T(function(){return X.OverlayClose();});return false;}if(e.keyCode===27){if($("modal").className==="open")closeForm();else if(P.page==="detail"||P.page==="game"||P.page==="downloads")backNav();}};
+document.onkeydown=function(e){e=e||window.event;if(tvOn&&!ovOn&&$("modal").className!=="open"){var km={37:"left",38:"up",39:"right",40:"down",13:"a",32:"a",27:"b",8:"b",77:"start",112:"start",9:"rb"},kk=km[e.keyCode];if(kk){tvInput(kk);if(e.preventDefault)e.preventDefault();return false;}}if(ovOn&&e.keyCode===27&&$("modal").className!=="open"){T(function(){return X.OverlayClose();});return false;}if(e.keyCode===27&&$("fbw")&&$("fbw").className==="on"){closeFeedback();return false;}if(e.keyCode===27){if($("modal").className==="open")closeForm();else if(P.page==="detail"||P.page==="game"||P.page==="downloads")backNav();}};
 window.onShown=function(){if(!S)return;var a=$("app");a.className="";void a.offsetWidth;a.className="pop";syncNow();};
 window.onQuit=function(){if(!S)return;var k;for(k in run){var g=gameBy(k);if(g)g.seconds=(g.seconds||0)+Math.round((now()-run[k].t)/1000);}
   saveNow();};

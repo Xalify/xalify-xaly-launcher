@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.9";
+var VER="1.5.10";
 var NOTES=[
+ {v:"1.5.10",d:"5 Nov 2026",t:["Fixed: downloads showed \u201cConnection lost\u201d for every kind of problem. They now say what actually went wrong, like Google Drive\u2019s daily download limit","Problems that won\u2019t fix themselves (a removed file, a download limit, a private link) no longer retry over and over: the download stops with a Retry button"]},
  {v:"1.5.9",d:"5 Nov 2026",t:["itch.io games whose download is a Google Drive or MediaFire link now install straight from Xaly, and show up in the Store like any other game","Xaly also finds Google Drive and MediaFire links in a game\u2019s description when there\u2019s no download button","MediaFire downloads are now supported, also in Add game and the paste-a-link box"]},
  {v:"1.5.8",d:"5 Nov 2026",t:["Fixed: Super Smash Bros. Crusade couldn\u2019t be installed when you found it through search. Every copy now uses the working Google Drive download"]},
  {v:"1.5.7",d:"5 Nov 2026",t:["New in the Store: Super Smash Bros. Crusade, the fan-made Smash with a huge roster","Games hosted on Google Drive now download properly, including big files that show Google\u2019s virus-scan warning","Games packed as .7z or .rar can now be installed, not just .zip","If a link opens a web page instead of a game, the download now stops with a clear message instead of failing at install"]},
@@ -2108,7 +2109,11 @@ function goJob(j){
   if(r!=="ok"){dl=null;jobFail(j,r.replace("ERR:",""),false);return;}
   saveDQ();paintDl();
 }
+function retryTxt(j){var s=Math.max(1,Math.round((j.retryAt-now())/1000)),e=String(j.err||"");
+  return (/connection|timed out|dropped|unable to connect|remote name|closed|reset/i.test(e)||!e?"Connection lost":e.replace(/\.$/,""))+". Trying again in "+s+" s (try "+j.tries+" of 6)";}
 function jobFail(j,msg,hard){
+  // errors that won't fix themselves in a few seconds: show them right away instead of "Connection lost"
+  if(/Google Drive|MediaFire|web page|folder|private|removed|can\u2019t download from|HTTP 40[0-4]|HTTP 410/i.test(msg||""))hard=true;
   j.tries=(j.tries||0)+1;j.err=msg;
   var waits=[5,10,20,40,60,120];
   if(!hard&&j.tries<=waits.length){j.st="retry";j.retryAt=now()+waits[j.tries-1]*1000;}
@@ -2201,7 +2206,7 @@ function paintDl(){
   if(show!==dl){
     b.className="act";$("dlt").textContent=(show.upd?show.upd.name:show.it.name);$("dlk").textContent=show.st==="retry"?"RECONNECTING":"PAUSED";
     $("tDlp").textContent=DQ.length>1?DQ.length+"":"\u2016";$("dlfill").style.width=(show.pct>=0?show.pct:0)+"%";
-    $("dls").textContent=show.st==="retry"?"Connection lost. Trying again in "+Math.max(1,Math.round((show.retryAt-now())/1000))+" s":(fmtB(show.bytes)+(show.total?" of "+fmtB(show.total):"")+"  \u00B7  click to manage");
+    $("dls").textContent=show.st==="retry"?retryTxt(show):(fmtB(show.bytes)+(show.total?" of "+fmtB(show.total):"")+"  \u00B7  click to manage");
     setDetailBtn();if(P.page==="downloads")renderDownloads();return;
   }
   b.className="act";$("dlt").textContent=(dl.upd?dl.upd.name:dl.it.name)+(wait?"  +"+wait:"");$("dlk").textContent=dl.resolving?"PREPARING":"DOWNLOADING"+(dl.pct>=0?"  \u00B7  "+dl.pct+"%":"");
@@ -2244,7 +2249,7 @@ function renderDownloads(){
       var c=el("div","dq "+j.st+(j===dl?" act":"")),th=el("div","dqt");paint(th,j.it.name,j.it.image||"");c.appendChild(th);
       var m=el("div","dqm");m.appendChild(el("b","",(j.upd?"Update: "+j.upd.name:j.it.name)));
       var st=j===dl?(j.st==="resolving"?"Preparing the download…":j.st==="pausing"?"Pausing…":j.st==="cancelling"?"Cancelling…":(j.speed>0?fmtB(j.speed)+"/s":"Starting…")+(j.eta>=0?"  ·  "+fmtEta(j.eta)+" left":""))
-        :j.st==="paused"?"Paused":j.st==="retry"?"Connection lost, trying again in "+Math.max(1,Math.round((j.retryAt-now())/1000))+" s":j.st==="error"?"Failed: "+j.err:"Queued #"+(qPos(j)+1);
+        :j.st==="paused"?"Paused":j.st==="retry"?retryTxt(j):j.st==="error"?"Failed: "+j.err:"Queued #"+(qPos(j)+1);
       m.appendChild(el("span","dqs",st));
       m.appendChild(el("span","dqz",fmtB(j.bytes||0)+(j.total?" of "+fmtB(j.total):"")+(j.pct>=0?"  ·  "+j.pct+"%":"")));
       var pb=el("div","pb"),pf=el("div","pf");pf.style.width=(j.pct>=0?j.pct:(j===dl?100:0))+"%";if(j.pct<0&&j===dl)pf.style.opacity=".35";pb.appendChild(pf);m.appendChild(pb);c.appendChild(m);
@@ -4020,6 +4025,7 @@ function selfTest(){   // run by the build server: proves both directions of the
       if(gdo)gdo(i3,k3,a3,b3);
     };
     resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
+    X.DownloadEx("selfgd",driveUrl("https://drive.google.com/file/d/1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A/view"),"selftest-gd.bin","0");
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
     r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
   };

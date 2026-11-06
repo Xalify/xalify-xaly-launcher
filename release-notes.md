@@ -1,5 +1,2 @@
-- **Google Drive and MediaFire games from itch.io:** when a game's itch.io download is a link to Google Drive or MediaFire, Xaly now follows it and installs the game like any other. These games show up in the Store automatically.
-- If a game has no download button, Xaly also looks for a Google Drive or MediaFire link in its description, preferring the one marked for Windows / PC.
-- Games that were hidden earlier for "no Windows download" get checked again, so more games appear in the Store.
-- MediaFire links also work in **Add game** and in the paste-a-link box on store pages. Folders on Drive or MediaFire aren't supported, only single files.
-- Updates for these games: Xaly notices when the developer swaps in a new link.
+- **Fixed: downloads said "Connection lost" for every kind of problem.** They now show what actually went wrong, for example Google Drive's daily download limit.
+- Problems that won't fix themselves in a few seconds (a removed file, a download limit, a private link) no longer retry six times. The download stops right away and shows the reason with a Retry button.

@@ -1,5 +1,1 @@
-- **Block people:** block someone from their chat (⋯ menu), by right-clicking them in your friends list, or with the ⊘ button on a friend request. They're removed from your friends and can't message you, see when you're online, challenge you or send you friend requests again. They aren't told they were blocked.
-- **Blocked people** are listed in Settings › Friends, where you can unblock them.
-- **Delete messages:** right-click a message or hover it and press ⋯. **Delete for me** removes any message from your chat. **Delete for everyone** also removes your own message from your friend's chat as soon as their launcher is online (within about 12 hours; they need Xaly 1.7.0 or newer).
-- **Delete conversation (just for me)** in the chat's ⋯ menu clears the whole chat on your side.
-- Friends can be right-clicked for quick actions: Message, View profile, Challenge, Remove, Block.
+- Update README.md

@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.0";
+var VER="1.6.1";
 var NOTES=[
+ {v:"1.6.1",d:"5 Nov 2026",t:["Fixed: the shared Store list only loaded once your old list was 6 hours old, so two PCs could still show different games. It now loads straight away and refreshes every 2 hours","Games found through the search box only show up while you search, so they no longer change the number of games in the Store"]},
  {v:"1.6.0",d:"5 Nov 2026",t:["Everyone now sees the same Store: one shared list of thousands of free itch.io games, refreshed every 6 hours, instead of each PC building its own","Games in your library or wishlist always stay in your Store"]},
  {v:"1.5.11",d:"5 Nov 2026",t:["When Google Drive or MediaFire won\u2019t give a game to Xaly (for example Drive\u2019s download limit), press Download in browser: your browser gets the file and Xaly installs it as soon as it lands in your Downloads folder","You can also pick a game file you already downloaded","Fixed: Drive\u2019s download limit was sometimes reported when Google said something else. Xaly now shows Google\u2019s own message"]},
  {v:"1.5.10",d:"5 Nov 2026",t:["Fixed: downloads showed \u201cConnection lost\u201d for every kind of problem. They now say what actually went wrong, like Google Drive\u2019s daily download limit","Problems that won\u2019t fix themselves (a removed file, a download limit, a private link) no longer retry over and over: the download stops with a Retry button"]},
@@ -1272,6 +1273,7 @@ function directFor(it){
 }
 function visIt(it){
   if(directFor(it))return false;
+  if(it.srch&&!it.shared&&!P.sq&&!(S.wish&&S.wish[it.id])&&!inLib(it.id))return false;
   if(it.steam||(S.gone&&S.gone[it.id]))return false;
   if(kindOf(it)==="page"&&!it.remote&&!isItch(it)&&!isGh(it))return false;   // no direct Windows download
   if(it.auto&&(it.paid||(!it.image&&!it.hero)))return false;                 // store games must be free and have art
@@ -1591,7 +1593,7 @@ function parseRss(x){
   }
   return out;
 }
-function liveAdd(cells,key,rank0){
+function liveAdd(cells,key,rank0,fromSearch){
   var idx=liveIndex(),n=0;
   cells.forEach(function(c,i){
     if(c.paid||!c.img||!c.name)return;
@@ -1599,6 +1601,7 @@ function liveAdd(cells,key,rank0){
     if(!it){
       var fr=frGuess(c.name+" "+c.text+" "+(key||""));
       it={id:"x"+(c.gid||hash(k).toString(36)),fr:fr,genre:c.genre||LGEN[key]||"",name:c.name.substr(0,90),source:"itch.io",tagline:c.text.substr(0,160),desc:c.text+(fr!=="Indie"?FAN:""),url:c.url,price:"Free",kind:"page",image:c.img,launch:"",auto:1,live:1,devs:c.author,seen:now(),lf:{}};
+      if(fromSearch)it.srch=1;
       CAT.items.push(it);idx[k]=it;n++;
     }
     if(it.live){it.seen=now();if(c.img&&!it.image)it.image=c.img;if(c.genre&&!it.genre)it.genre=c.genre;if(!it.genre&&LGEN[key])it.genre=LGEN[key];}
@@ -1664,7 +1667,9 @@ function mergeShared(d){
 }
 function refreshLive(force,report){
   if(!S||liveBusy)return;loadCat();
-  if(!force&&CAT.t&&now()-CAT.t<LIVE_TTL){if(!CAT.shared)crawl();return;}
+  if(!force&&CAT.shared&&CAT.t&&now()-CAT.t<2*3600000)return;
+  if(!force&&!CAT.shared&&now()-(CAT.shTry||0)<15*60000){crawl();return;}   // the shared list failed a moment ago
+  CAT.shTry=now();
   var mine=S;liveBusy=1;if(P.page==="settings")renderSettings();
   loadShared(function(ok,added){
     liveBusy=0;if(S!==mine)return;
@@ -1723,7 +1728,7 @@ function searchItch(q){
     var mine=S;srchBusy=q;if(P.page==="store")renderStore(true);
     http("https://itch.io/search?q="+encodeURIComponent(q)+"&classification=game",function(ok,t){
       srchBusy="";if(S!==mine)return;srchDone[q.toLowerCase()]=1;
-      if(ok&&t){liveAdd(parseCells(t),"",0);}
+      if(ok&&t){liveAdd(parseCells(t),"",0,1);}
       if(P.page==="store"&&P.sq)renderStore(true);
     });
   },700);

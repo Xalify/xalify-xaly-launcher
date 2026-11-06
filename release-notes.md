@@ -1,3 +1,2 @@
-- **Everyone sees the same Store.** Before, every PC slowly built its own list of itch.io games, so two people could see different games and different totals. Now a shared list of thousands of free Windows games is built in one place every 6 hours, and every launcher loads that same list.
-- Games in your library, wishlist or download queue always stay in your Store, even if they leave the shared list.
-- Settings › General shows how many games are in the shared list and when it was last refreshed.
+- **Fixed: two PCs could still show a different number of games.** 1.6.0 only switched to the shared Store list once your old list was 6 hours old. Now every launcher loads the shared list as soon as it starts, and refreshes it every 2 hours.
+- Games you find by typing in the search box only show while you search, so they no longer change the number of games in the Store.

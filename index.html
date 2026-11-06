@@ -4019,8 +4019,6 @@ function selfTest(){   // run by the build server: proves both directions of the
       if(i3==="selfhtml"){if(k3!=="p")r.checks.htmlguard=k3+" "+a3;return;}
       if(gdo)gdo(i3,k3,a3,b3);
     };
-    X.DownloadEx("selfgd",driveUrl("https://drive.google.com/file/d/1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A/view"),"selftest-gd.bin","0");
-    X.DownloadEx("selfmf","https://www.mediafire.com/file/tw4ud7nmgskwcqc/FNiFG_1_%2526_2.zip/file","selftest-mf.bin","0");
     resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
     r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");

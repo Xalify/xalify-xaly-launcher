@@ -1,2 +1,5 @@
-- **Fixed: Super Smash Bros. Crusade wouldn't install** when you opened it from a search or from the big itch.io catalog. Those copies tried itch.io's own download, which this game doesn't have. Every copy now opens the working entry and downloads from Google Drive.
-- The "paste a direct link" box on store pages now also takes Google Drive links.
+- **Google Drive and MediaFire games from itch.io:** when a game's itch.io download is a link to Google Drive or MediaFire, Xaly now follows it and installs the game like any other. These games show up in the Store automatically.
+- If a game has no download button, Xaly also looks for a Google Drive or MediaFire link in its description, preferring the one marked for Windows / PC.
+- Games that were hidden earlier for "no Windows download" get checked again, so more games appear in the Store.
+- MediaFire links also work in **Add game** and in the paste-a-link box on store pages. Folders on Drive or MediaFire aren't supported, only single files.
+- Updates for these games: Xaly notices when the developer swaps in a new link.

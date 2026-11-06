@@ -21,7 +21,7 @@ const TARGET = +(process.env.TARGET || 8000), MAX_PAGES = 80, UA = "XalyLauncher
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function get(url) {
   for (let t = 0; t < 3; t++) {
-    try { const r = await fetch(url, { headers: { "User-Agent": UA } }); if (r.ok) return await r.text(); if (r.status === 404) return ""; }
+    try { const r = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(20000) }); if (r.ok) return await r.text(); if (r.status === 404) return ""; console.log("HTTP " + r.status + " " + url); }
     catch (e) { }
     await sleep(2000 * (t + 1));
   }
@@ -35,15 +35,18 @@ async function page(url, n) {
   let h = t; try { const j = JSON.parse(t); if (j && j.content !== undefined) h = j.content; } catch (e) { }
   return parseCells(h);
 }
+const T0 = Date.now(), BUDGET = +(process.env.BUDGET_MIN || 28) * 60000;   // always publish within the time budget
 (async () => {
   const items = [], idx = {}, pg = {}, done = {};
   let round = 0;
-  while (items.length < TARGET && LIVEF.some(f => !done[f[0]])) {
+  while (items.length < TARGET && LIVEF.some(f => !done[f[0]]) && Date.now() - T0 < BUDGET) {
     round++;
-    for (const f of LIVEF) {
-      if (done[f[0]] || items.length >= TARGET) continue;
-      const n = (pg[f[0]] || 0) + 1; pg[f[0]] = n;
-      const cells = await page(f[2], n);
+    const lists = LIVEF.filter(f => !done[f[0]]);
+    for (let b = 0; b < lists.length; b += 4) {   // four lists at a time
+      if (items.length >= TARGET || Date.now() - T0 >= BUDGET) break;
+      const batch = lists.slice(b, b + 4);
+      const results = await Promise.all(batch.map(f => { const n = (pg[f[0]] || 0) + 1; pg[f[0]] = n; return page(f[2], n).then(cells => [f, n, cells]); }));
+      for (const [f, n, cells] of results) {
       if (!cells.length || n >= MAX_PAGES) done[f[0]] = 1;
       let added = 0;
       cells.forEach((c, i) => {
@@ -58,8 +61,9 @@ async function page(url, n) {
         const rank = (n - 1) * 1000 + i;
         if (it.lf[f[0]] === undefined || rank < it.lf[f[0]]) it.lf[f[0]] = rank;
       });
-      console.log(`round ${round} ${f[0]} page ${n}: ${cells.length} games, ${added} new, total ${items.length}`);
-      await sleep(350);
+      console.log(`round ${round} ${f[0]} page ${n}: ${cells.length} games, ${added} new, total ${items.length}, ${Math.round((Date.now() - T0) / 1000)}s`);
+      }
+      await sleep(300);
     }
   }
   if (items.length < 500) { console.error("Too few games (" + items.length + "), keeping the old catalog."); process.exit(1); }

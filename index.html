@@ -3944,23 +3944,10 @@ function selfTest(){   // run by the build server: proves both directions of the
     return X.RelayStream(tp,String(Math.floor(t0/1000)))+" waiting";
   });
   var id="h_self",done=false;
-  var PRB=["https://securitydoll.itch.io/fnifg-12-reupload","https://clayarmunion.itch.io/noelle-vs-jean","https://eric9982.itch.io/doom-reborn","https://fusion-fangaming.itch.io/mushroom-kingdom-fusion","https://manthegamestudios.itch.io/man-the-game"],prbN=0;
-  PRB.forEach(function(P,pi){
-    var K="probe"+pi+"_";
-    http(P+"/data.json",function(ok,t){
-      var gid=0;try{gid=JSON.parse(t).id;}catch(e){}
-      itchApi("v2/games/"+gid+"/uploads",function(o2,t2){
-        var ups=[];try{ups=JSON.parse(t2).uploads||[];}catch(e){}
-        r.checks[K+"ups"]=gid+" "+ups.map(function(u){return u.id+":"+u.storage+":"+(u.host||"")+":"+u.filename+":"+(u.traits||[]).join("+");}).join(" | ");
-        var ex=ups.filter(function(u){return u.storage==="external";});
-        if(!ex.length){prbN++;return;}
-        itchApi("v2/uploads/"+ex[0].id+"/download",function(o3,t3){var u3="";try{u3=JSON.parse(t3).url;}catch(e){}r.checks[K+"ext"]=u3;
-          if(!/mediafire/i.test(u3)){prbN++;return;}
-          http(u3,function(o5,t5){t5=String(t5||"");var mm=t5.match(/.{0,250}(downloadButton|scrambled|download\d+\.mediafire).{0,350}/gi)||[];r.checks[K+"mfpage"]=(o5+" len="+t5.length+" "+mm.slice(0,4).join(" ### ")).substr(0,3000);prbN++;});
-        });
-      });
-    });
-  });
+  var prbN=0;
+  http("https://www.mediafire.com/file/tw4ud7nmgskwcqc/FNiFG_1_%2526_2.zip/file",function(o5,t5,st5){t5=String(t5||"");
+    var mm=t5.match(/.{0,300}(downloadButton|scrambled|download\d+\.mediafire).{0,400}/gi)||[];
+    r.checks.probe_mf=(o5+" st="+st5+" len="+t5.length+" "+mm.slice(0,5).join(" ### ")).substr(0,4000);prbN=5;});
   var fin0=function(){if(done)return;done=true;r.ok=r.checks.seal==="h\u00e9llo\n\"x\""&&/^done/.test(r.checks.download||"");r.checks.dlsize=T(function(){return X.FileSizeOf("selftest-dl.bin");},"?");T(function(){return X.SelfTestDone(JSON.stringify(r));});}
   var fw=0;function fin(){if(prbN>=5||fw>25){fin0();return;}fw++;setTimeout(fin,2000);}
   cbs[id]=function(ok,text,st){

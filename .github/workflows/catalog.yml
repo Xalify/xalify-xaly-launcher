@@ -25,6 +25,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Get the list published last time
+        run: |
+          mkdir -p out
+          git fetch -q --depth 1 origin catalog && git show origin/catalog:catalog.json > out/catalog.json || echo "no earlier list"
       - name: Crawl itch.io
         run: node tools/build-catalog.js
       - name: Publish to the catalog branch
@@ -33,6 +37,6 @@ jobs:
           git init -q -b catalog
           git config user.name "xaly-catalog"
           git config user.email "actions@users.noreply.github.com"
-          git add catalog.json
+          git add catalog.json catalog-version.json $(ls catalog-prev.json 2>/dev/null)
           git commit -q -m "Catalog $(date -u +%Y-%m-%dT%H:%MZ)"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" catalog

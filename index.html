@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.1";
+var VER="1.6.2";
 var NOTES=[
+ {v:"1.6.2",d:"5 Nov 2026",t:["Every launcher now switches to a new Store list at the same moment, so two PCs never show a different number of games, not even right after the list is refreshed"]},
  {v:"1.6.1",d:"5 Nov 2026",t:["Fixed: the shared Store list only loaded once your old list was 6 hours old, so two PCs could still show different games. It now loads straight away and refreshes every 2 hours","Games found through the search box only show up while you search, so they no longer change the number of games in the Store"]},
  {v:"1.6.0",d:"5 Nov 2026",t:["Everyone now sees the same Store: one shared list of thousands of free itch.io games, refreshed every 6 hours, instead of each PC building its own","Games in your library or wishlist always stay in your Store"]},
  {v:"1.5.11",d:"5 Nov 2026",t:["When Google Drive or MediaFire won\u2019t give a game to Xaly (for example Drive\u2019s download limit), press Download in browser: your browser gets the file and Xaly installs it as soon as it lands in your Downloads folder","You can also pick a game file you already downloaded","Fixed: Drive\u2019s download limit was sometimes reported when Google said something else. Xaly now shows Google\u2019s own message"]},
@@ -1635,12 +1636,28 @@ function pruneLive(){
 /* ---------- 1.6.0: one shared catalog for everyone ----------
    A GitHub job crawls itch.io every 6 hours and publishes catalog.json. Every launcher loads that same list,
    so all players see the same games. Games in your library or wishlist always stay. */
-var SHARED_CAT="https://raw.githubusercontent.com/Xalify/xalify-xaly-launcher/catalog/catalog.json";
+var SHARED_BASE="https://raw.githubusercontent.com/Xalify/xalify-xaly-launcher/catalog/",SHARED_CAT=SHARED_BASE+"catalog.json",shSwT=null;
+/* A new list goes live at a set time (30 minutes after it's built). Until then every launcher shows the previous one,
+   and at that moment they all switch together, so two PCs never show different games. */
+function sharedWant(cb){
+  http(SHARED_BASE+"catalog-version.json?t="+Math.floor(now()/60000),function(ok,t){
+    var v=null;if(ok){try{v=JSON.parse(t);}catch(e){}}
+    if(!v||!v.cur){cb(null);return;}
+    if(now()>=v.cur.liveAt||!v.prev)cb({f:"catalog.json",t:v.cur.t});
+    else cb({f:"catalog-prev.json",t:v.prev.t,next:v.cur.liveAt});
+  });
+}
 function loadShared(cb){
-  http(SHARED_CAT+"?t="+Math.floor(now()/600000),function(ok,t){
-    var d=null;if(ok){try{d=JSON.parse(t);}catch(e){}}
-    if(!d||!d.items||d.items.length<500){cb(false,0);return;}
-    cb(true,mergeShared(d));
+  sharedWant(function(w){
+    clearTimeout(shSwT);
+    if(w&&w.next)shSwT=setTimeout(function(){CAT.vT=0;liveBusy=0;refreshLive(true,false);},Math.max(1000,w.next-now()+1500));
+    CAT.vT=now();
+    if(w&&CAT.shared&&CAT.sh===w.t){cb(true,0);return;}   // already showing the right list
+    http(SHARED_BASE+(w?w.f:"catalog.json")+"?t="+Math.floor(now()/60000),function(ok,t){
+      var d=null;if(ok){try{d=JSON.parse(t);}catch(e){}}
+      if(!d||!d.items||d.items.length<500){cb(false,0);return;}
+      cb(true,mergeShared(d));
+    });
   });
 }
 function mergeShared(d){
@@ -1667,7 +1684,7 @@ function mergeShared(d){
 }
 function refreshLive(force,report){
   if(!S||liveBusy)return;loadCat();
-  if(!force&&CAT.shared&&CAT.t&&now()-CAT.t<2*3600000)return;
+  if(!force&&CAT.shared&&now()-(CAT.vT||0)<10*60000)return;   // checks a tiny version file every 10 minutes
   if(!force&&!CAT.shared&&now()-(CAT.shTry||0)<15*60000){crawl();return;}   // the shared list failed a moment ago
   CAT.shTry=now();
   var mine=S;liveBusy=1;if(P.page==="settings")renderSettings();
@@ -3942,7 +3959,7 @@ function renderSettings(){
     b.appendChild(srow("Layout","Sidebar is the new look. Classic brings back the top bar with Store and Library tabs and the bar along the bottom.",lay));
     var lu=el("div");lu.style.cssText="display:flex;align-items:center";
     lu.appendChild(btn(liveBusy?"Updating…":"Update now","btn",function(){if(!liveBusy){CAT.err="";refreshLive(true,true);toast("Checking itch.io for new games…");}}));
-    var cs=fmtN(CAT.items.length)+" games from itch.io. "+(CAT.shared?"Everyone with Xaly sees this same list, refreshed every 6 hours. ":"")+(CAT.t?"Last updated "+ago(CAT.sh||CAT.t)+". ":"")+(CAT.err?"Last problem: "+CAT.err+". ":(CAT.items.length<CAT_TARGET?"Still adding more in the background. ":""))+"New free Windows games are added automatically every 6 hours.";
+    var cs=fmtN(CAT.items.length)+" games from itch.io. "+(CAT.shared?"Everyone with Xaly sees this same list. New lists go live for everyone at the same moment, every 6 hours. ":"")+(CAT.t?"Last updated "+ago(CAT.sh||CAT.t)+". ":"")+(CAT.err?"Last problem: "+CAT.err+". ":(CAT.items.length<CAT_TARGET?"Still adding more in the background. ":""))+"New free Windows games are added automatically every 6 hours.";
     b.appendChild(srow("Store catalog",cs,lu));
     var gu=el("div");gu.style.cssText="display:flex;align-items:center";gu.appendChild(btn(guBusy?"Checking\u2026":"Check now","btn",function(){checkGameUpdates(true);}));gu.appendChild(sw(S.set.gameUpd!==0,function(v){S.set.gameUpd=v?1:0;save();}));gu.lastChild.style.marginLeft="14px";
     b.appendChild(srow("Game updates","Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. "+(updCount()?updCount()+" update"+(updCount()===1?"":"s")+" waiting. ":"")+(S.guT?"Last checked "+ago(S.guT)+".":""),gu));
@@ -4055,7 +4072,7 @@ function init(){
   setTimeout(function(){if(AC&&AC.crashRep!==0&&!SELFTEST)T(function(){return X.SendCrashes(VER);});},15000);setInterval(function(){checkUpdate(false);},6*3600000);
   setInterval(dqTick,1000);
   setInterval(function(){if(!S)return;var k;for(k in run)checkAch(gameBy(k));},60000);setTimeout(whatsNew,1600);
-  setInterval(function(){refreshLive(false);},30*60000);
+  setInterval(function(){refreshLive(false);},10*60000+5000);
   setInterval(function(){if(S&&(!S.guT||now()-S.guT>6*3600000))checkGameUpdates(false);},15*60000);
   setInterval(padTick,33);if(ENGINE==="ie")T(function(){return X.PadNative("1");});
   setInterval(function(){if(chatOpen()&&!frLive&&now()-frPollT>6000)frPoll();},2000);

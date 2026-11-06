@@ -1,2 +1,2 @@
-- **Fixed: two PCs could still show a different number of games.** 1.6.0 only switched to the shared Store list once your old list was 6 hours old. Now every launcher loads the shared list as soon as it starts, and refreshes it every 2 hours.
-- Games you find by typing in the search box only show while you search, so they no longer change the number of games in the Store.
+- **Every launcher switches to a new Store list at the same moment.** A new list is built every 6 hours and goes live 30 minutes later. Until then every launcher, including ones started in the meantime, shows the previous list. At that time they all switch together, so two PCs never show a different number of games, not even right after a refresh.
+- Launchers now check a tiny version file every 10 minutes instead of downloading the whole list, and only download the list when it actually changes.

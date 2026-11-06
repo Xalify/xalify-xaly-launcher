@@ -67,8 +67,18 @@ const T0 = Date.now(), BUDGET = +(process.env.BUDGET_MIN || 28) * 60000;   // al
     }
   }
   if (items.length < 500) { console.error("Too few games (" + items.length + "), keeping the old catalog."); process.exit(1); }
-  const out = { v: 2, t: Date.now(), n: items.length, items };
+  // Every launcher switches to a new list at the same moment: it goes live 30 minutes after it's built.
+  // Until then launchers keep showing the previous list, which stays published as catalog-prev.json.
+  const t = Date.now(), out = { v: 2, t, liveAt: t + 30 * 60000, n: items.length, items };
   fs.mkdirSync("out", { recursive: true });
+  let prev = null;
+  try { prev = JSON.parse(fs.readFileSync("out/catalog.json", "utf8")); } catch (e) { }   // the list published last time
+  if (prev && prev.items) {
+    if (!prev.liveAt) prev.liveAt = prev.t;
+    fs.writeFileSync("out/catalog-prev.json", JSON.stringify(prev));
+  }
   fs.writeFileSync("out/catalog.json", JSON.stringify(out));
-  console.log("wrote " + items.length + " games, " + Math.round(fs.statSync("out/catalog.json").size / 1024) + " KB");
+  const ver = { cur: { t, liveAt: out.liveAt, n: items.length }, prev: prev && prev.items ? { t: prev.t, liveAt: prev.liveAt, n: prev.items.length } : null };
+  fs.writeFileSync("out/catalog-version.json", JSON.stringify(ver));
+  console.log("wrote " + items.length + " games, " + Math.round(fs.statSync("out/catalog.json").size / 1024) + " KB, live at " + new Date(out.liveAt).toISOString());
 })();

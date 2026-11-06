@@ -1,6 +1,6 @@
 # Xaly Launcher
 
-A vibe-coded game launcher for Windows: a store full of free games from itch.io, a library with play-time tracking, friends with encrypted chat, profiles, an in-game overlay (Shift+Tab) and automatic updates.
+A game launcher for Windows: a store full of free games from itch.io, a library with play-time tracking, friends with encrypted chat, profiles, an in-game overlay (Shift+Tab) and automatic updates.
 
 ## Download
 

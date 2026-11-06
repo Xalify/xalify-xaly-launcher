@@ -117,6 +117,16 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   await p.evaluate(()=>{run.zz={t:Date.now()};S.games.push({id:"zz",name:"Busy Game",path:"C:\\z.exe",seconds:0,plays:0,last:0,added:1});switchTo(AC.list.filter(function(x){return x.name==="Friend";})[0]);});await w(200);
   ok(await p.evaluate(()=>!!S&&curAcc.email==="bredy@gmail.com"),"you can't switch while a game is running");
   await p.evaluate(()=>{delete run.zz;S.games.pop();});
+  // 9e. an account that stays on this PC needs no email or password
+  await p.evaluate(()=>{signOut();authGo("register");});await w(100);
+  await p.evaluate(()=>document.querySelector(".aswr").click());
+  ok(/optional/i.test(await p.evaluate(()=>document.getElementById("au_email").parentNode.parentNode.firstChild.textContent)),"with Online account off, email and password say optional");
+  await af({name:"No Email Kid"});await go();await w(300);
+  ok(await p.evaluate(()=>!!S&&curAcc.name==="No Email Kid"&&!curAcc.email&&!curAcc.pw),"an account can be made with just a name");
+  await p.evaluate(()=>{signOut();authGo("register");});await w(100);await p.evaluate(()=>document.querySelector(".aswr").click());
+  await af({name:"Typo Kid",email:"not-an-email"});await go();await w(200);
+  ok(await view()==="register"&&/valid email/.test(await hint("email")),"a mistyped optional email is still caught");
+  await p.evaluate(()=>{AUTH.v="";});
   // 10. the switch
   await p.evaluate(()=>{signOut();ONLINE_ACCOUNTS=0;renderLogin();});
   ok(await p.evaluate(()=>!document.querySelector(".auc")&&!sbOn()),"with the switch off, the old PC-only screen is back");

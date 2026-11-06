@@ -1345,15 +1345,15 @@ function createAcc(){
   if(sbOn()){authGo("register");return;}
   openForm(first?"Create your account":"Add an account",[
     {id:"name",label:"Display name",value:nm0},
-    {id:"email",label:"Gmail address",ph:"you@gmail.com"},
-    {id:"pw",label:"Password (at least 6 characters)",pass:1},{id:"pw2",label:"Repeat password",pass:1}],"Create account",function(v){
+    {id:"email",label:"Email (optional)",ph:"you@gmail.com"},
+    {id:"pw",label:"Password (optional, at least 6 characters)",pass:1},{id:"pw2",label:"Repeat password",pass:1}],"Create account",function(v){
     if(!v.name){toast("Please enter a name");return false;}
     if(v.name.length>24){toast("Names can be up to 24 characters");return false;}
     v.email=(v.email||"").toLowerCase();
-    if(!okEmail(v.email)){toast("Please enter a valid email address");return false;}
-    if(accByEmail(v.email)){toast("There\u2019s already an account with that email. Use Sign in with email.");return false;}
+    if(v.email&&!okEmail(v.email)){toast("Please enter a valid email address, or leave it empty");return false;}
+    if(v.email&&accByEmail(v.email)){toast("There\u2019s already an account with that email. Use Sign in with email.");return false;}
     if(AC.list.some(function(a){return a.name.toLowerCase()===v.name.toLowerCase();})){toast("There’s already an account with that name");return false;}
-    if((v.pw||"").length<6){toast("Pick a password with at least 6 characters");return false;}
+    if((v.pw||v.pw2)&&(v.pw||"").length<6){toast("Pick a password with at least 6 characters, or leave it empty");return false;}
     if(v.pw!==v.pw2){toast("The two passwords don’t match");return false;}
     var a={id:"a"+now(),name:v.name,email:v.email,color:AC.list.length%AV.length,pw:"",file:"",created:now()};
     a.file="data_"+a.id+".json";if(v.pw)a.pw=hashPw(a,v.pw);
@@ -1699,7 +1699,10 @@ function renderAuth(){
     c.appendChild(aField("pw2","Repeat password","password"));
     var on=el("div","aswr"),sw0=el("div","asw on");sw0.id="au_on";sw0.appendChild(el("i"));
     var st=el("div");st.appendChild(el("b","","Online account"));st.appendChild(el("span","","Sign in on any PC and reset a forgotten password. Turn off to keep this account only on this PC."));
-    on.appendChild(sw0);on.appendChild(st);on.onclick=function(){var o=sw0.className.indexOf("on")<0;sw0.className="asw"+(o?" on":"");var uf=$("au_user");if(uf)uf.parentNode.parentNode.style.display=o?"":"none";};c.appendChild(on);
+    on.appendChild(sw0);on.appendChild(st);on.onclick=function(){var o=sw0.className.indexOf("on")<0;sw0.className="asw"+(o?" on":"");var uf=$("au_user");if(uf)uf.parentNode.parentNode.style.display=o?"":"none";
+      var lab=function(id,t){var i=$("au_"+id);if(i)i.parentNode.parentNode.firstChild.textContent=t;};
+      lab("email",o?"Email":"Email (optional)");lab("pw",o?"Password":"Password (optional)");lab("pw2",o?"Repeat password":"Repeat password (optional)");
+      aHint("email",o?"We\u2019ll send a code to confirm it.":"Lets you sign in with it on this PC. You can add it later.");aHint("pw",o?"At least 6 characters":"Leave empty to sign in without a password");};c.appendChild(on);
     c.appendChild(aBtn("Create account",authRegister));c.onsubmit=authRegister;
     if(!first){var bk2=el("div","alinks");bk2.appendChild(aLink("‹ Accounts on this PC",function(){authGo("pick");}));c.appendChild(bk2);}
     setTimeout(userCheck,50);
@@ -1742,11 +1745,11 @@ function authRegister(){
   if(!nm){aHint("name","Enter a name","bad");bad=1;}
   else if(AC.list.some(function(a){return a.name.toLowerCase()===nm.toLowerCase();})){aHint("name","There’s already an account with that name on this PC","bad");bad=1;}
   if(online&&!okUser(u)){aHint("user","3–20 letters, numbers or _","bad");bad=1;}
-  if(!okEmail(e)){aHint("email","Enter a valid email address","bad");bad=1;}else if(accByEmail(e)){aHint("email","This PC already has an account with that email. Sign in instead.","bad");bad=1;}
-  if(p.length<6){aHint("pw","At least 6 characters","bad");bad=1;}
-  if(p!==p2){aHint("pw2","The passwords don’t match","bad");bad=1;}
+  if(online||e){if(!okEmail(e)){aHint("email",online?"Enter a valid email address":"Enter a valid email address, or leave it empty","bad");bad=1;}else if(accByEmail(e)){aHint("email","This PC already has an account with that email. Sign in instead.","bad");bad=1;}}
+  if(online||p||p2){if(p.length<6){aHint("pw",online?"At least 6 characters":"At least 6 characters, or leave it empty","bad");bad=1;}
+    if(p!==p2){aHint("pw2","The passwords don’t match","bad");bad=1;}}
   if(bad)return;
-  var a={id:"a"+now(),name:nm,email:e,color:AC.list.length%AV.length,pw:"",file:"",created:now()};a.file="data_"+a.id+".json";a.pw=hashPw(a,p);
+  var a={id:"a"+now(),name:nm,email:e,color:AC.list.length%AV.length,pw:"",file:"",created:now()};a.file="data_"+a.id+".json";if(p)a.pw=hashPw(a,p);
   if(!online){AC.list.push(a);saveAcc();startSession(a);return;}
   aBusy(true,"Creating your account…");
   sb("POST","/rest/v1/rpc/username_available",{name:u},"",function(st,free){
@@ -5809,6 +5812,7 @@ function selfTest(){   // run by the build server: proves both directions of the
     };
     resolveAny({id:"selfext",name:"Crusade",url:"https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a",kind:"page"},function(e5,r5){r.checks.itchext=e5?"ERR "+e5:String(r5.host)+" "+String(r5.url).substr(0,70);});
     X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
+    r.checks.gdrive="waiting";X.DownloadEx("selfgd","https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download&authuser=0","selftest-gd.bin","0");
     // speed limit: 512 KB/s for 4 seconds, then the normal download test runs unlimited
     var limB=0,limT0=0,lo=window.onDl;X.SetSpeedLimit("524288");X.KeepAwake("1");
     window.onDl=function(i4,k4,a4,b4){if(i4==="selflim"){if(k4==="p"){if(!limT0&&+a4>0)limT0=new Date().getTime();limB=+a4;}return;}if(lo)lo(i4,k4,a4,b4);};

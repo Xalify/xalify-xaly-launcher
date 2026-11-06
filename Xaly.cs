@@ -361,13 +361,7 @@ namespace Xaly
             {
                 try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
                 long have = File.Exists(part) ? new FileInfo(part).Length : 0;
-                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
-                rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) XalyLauncher";
-                rq.Timeout = 30000; rq.ReadWriteTimeout = 30000; rq.AllowAutoRedirect = true;
-                if (have > 0) rq.AddRange(have);
-                job.rq = rq;
-                if (job.stop != 0) throw new OperationCanceledException();
-                using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                using (HttpWebResponse rs = OpenDl(url, have, job))
                 {
                     long total;
                     if (have > 0 && rs.StatusCode == HttpStatusCode.PartialContent) total = rs.ContentLength >= 0 ? have + rs.ContentLength : -1;
@@ -407,6 +401,49 @@ namespace Xaly
             lock (jobs2) { jobs2.Remove(id); }
             f.Js("onDl", id, result, detail, "");
         }
+        // opens a download; a web page instead of a file is an error, except Google Drive's
+        // "can't scan this file for viruses" page, whose form is followed to the real file
+        static HttpWebResponse OpenDl(string url, long have, DlJob job)
+        {
+            CookieContainer jar = new CookieContainer();
+            for (int attempt = 0; ; attempt++)
+            {
+                HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
+                rq.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) XalyLauncher";
+                rq.Timeout = 30000; rq.ReadWriteTimeout = 30000; rq.AllowAutoRedirect = true; rq.CookieContainer = jar;
+                if (have > 0) rq.AddRange(have);
+                job.rq = rq;
+                if (job.stop != 0) throw new OperationCanceledException();
+                HttpWebResponse rs = (HttpWebResponse)rq.GetResponse();
+                string ct = rs.ContentType ?? "";
+                if (ct.IndexOf("text/html", StringComparison.OrdinalIgnoreCase) < 0) return rs;
+                string host = rs.ResponseUri.Host.ToLowerInvariant(), page;
+                using (rs)
+                using (StreamReader sr = new StreamReader(rs.GetResponseStream()))
+                { char[] b = new char[400000]; int n = sr.ReadBlock(b, 0, b.Length); page = new string(b, 0, n); }
+                bool google = host.EndsWith("google.com") || host.EndsWith("googleusercontent.com");
+                if (!google) throw new IOException("The link opened a web page instead of a game file.");
+                System.Text.RegularExpressions.Match fm = System.Text.RegularExpressions.Regex.Match(page, "<form[^>]*download-form[^>]*>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (fm.Success && attempt < 2)
+                {
+                    System.Text.RegularExpressions.Match am = System.Text.RegularExpressions.Regex.Match(fm.Value, "action=\"([^\"]+)\"");
+                    string act = am.Success ? WebUtility.HtmlDecode(am.Groups[1].Value) : "https://drive.usercontent.google.com/download";
+                    StringBuilder q = new StringBuilder();
+                    foreach (System.Text.RegularExpressions.Match im in System.Text.RegularExpressions.Regex.Matches(page, "<input[^>]*>", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                    {
+                        if (im.Value.IndexOf("hidden", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                        System.Text.RegularExpressions.Match nm = System.Text.RegularExpressions.Regex.Match(im.Value, "name=\"([^\"]*)\""), vm = System.Text.RegularExpressions.Regex.Match(im.Value, "value=\"([^\"]*)\"");
+                        if (!nm.Success) continue;
+                        q.Append(q.Length == 0 ? "?" : "&").Append(Uri.EscapeDataString(WebUtility.HtmlDecode(nm.Groups[1].Value))).Append("=").Append(Uri.EscapeDataString(vm.Success ? WebUtility.HtmlDecode(vm.Groups[1].Value) : ""));
+                    }
+                    url = act + q.ToString();
+                    continue;
+                }
+                if (page.IndexOf("quota", StringComparison.OrdinalIgnoreCase) >= 0 || page.IndexOf("Too many users", StringComparison.OrdinalIgnoreCase) >= 0)
+                    throw new IOException("Google Drive says too many people downloaded this file recently. Try again later.");
+                throw new IOException("Google Drive didn't send the file. It may be private or removed.");
+            }
+        }
         public string DownloadPause(string id)
         {
             DlJob j; lock (jobs2) { if (!jobs2.TryGetValue(id, out j)) return "ok"; j.stop = 1; }
@@ -445,7 +482,7 @@ namespace Xaly
                 string dir = Path.Combine(Path.Combine(f.DownloadsDir, "Games"), SafeName(name));
                 if (Directory.Exists(dir)) Directory.Delete(dir, true);
                 Directory.CreateDirectory(dir);
-                ZipFile.ExtractToDirectory(zip, dir);
+                Unpack(zip, dir);
                 string best = null; long size = -1;
                 foreach (string p in Directory.GetFiles(dir, "*.exe", SearchOption.AllDirectories))
                 {
@@ -466,7 +503,8 @@ namespace Xaly
             {
                 if (!UnderGameRoot(f, dir)) return "ERR:Only games installed by Xaly can be updated.";
                 string tmp = Path.Combine(Path.GetTempPath(), "XalyGameUpdate_" + DateTime.Now.Ticks);
-                ZipFile.ExtractToDirectory(zip, tmp);
+                Directory.CreateDirectory(tmp);
+                Unpack(zip, tmp);
                 CopyTree(tmp, dir);
                 try { Directory.Delete(tmp, true); } catch (Exception) { }
                 try { File.Delete(zip); } catch (Exception) { }
@@ -506,6 +544,53 @@ namespace Xaly
                 return to;
             }
             catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static string Sniff(string p)
+        {
+            byte[] b = new byte[8]; int n;
+            using (FileStream fs = new FileStream(p, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) n = fs.Read(b, 0, 8);
+            if (n >= 2 && b[0] == 0x50 && b[1] == 0x4B) return "zip";
+            if (n >= 4 && b[0] == 0x37 && b[1] == 0x7A && b[2] == 0xBC && b[3] == 0xAF) return "7z";
+            if (n >= 4 && b[0] == 0x52 && b[1] == 0x61 && b[2] == 0x72 && b[3] == 0x21) return "rar";
+            if (n >= 2 && b[0] == 0x4D && b[1] == 0x5A) return "exe";
+            if (n >= 1 && (b[0] == 0x3C || (n >= 4 && b[0] == 0xEF && b[3] == 0x3C))) return "html";
+            return "unknown";
+        }
+        public string SniffFile(string name)
+        {
+            try
+            {
+                string p = Path.Combine(f.DownloadsDir, SafeName(name));
+                if (!File.Exists(p)) p += ".part";
+                return File.Exists(p) ? Sniff(p) : "missing";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static int RunTool(string exe, string args)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo(exe, args);
+            psi.UseShellExecute = false; psi.CreateNoWindow = true;
+            using (Process p = Process.Start(psi))
+            {
+                if (!p.WaitForExit(45 * 60 * 1000)) { try { p.Kill(); } catch (Exception) { } return -1; }
+                return p.ExitCode;
+            }
+        }
+        // zip with .NET; 7z and rar with 7-Zip if it is installed, otherwise Windows' own tar; a lone .exe is copied in
+        static void Unpack(string arc, string dir)
+        {
+            string k = Sniff(arc);
+            if (k == "zip") { ZipFile.ExtractToDirectory(arc, dir); return; }
+            if (k == "html") throw new IOException("The download was a web page, not a game. The link may be broken or private.");
+            if (k == "exe") { File.Copy(arc, Path.Combine(dir, Path.GetFileName(dir.TrimEnd('\\')) + ".exe"), true); return; }
+            List<string> sevens = new List<string>();
+            foreach (string pf in new string[] { Environment.GetEnvironmentVariable("ProgramW6432"), Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), Environment.GetEnvironmentVariable("ProgramFiles(x86)") })
+                if (!string.IsNullOrEmpty(pf)) sevens.Add(Path.Combine(Path.Combine(pf, "7-Zip"), "7z.exe"));
+            foreach (string z in sevens)
+                if (File.Exists(z) && RunTool(z, "x -y \"-o" + dir + "\" \"" + arc + "\"") == 0) return;
+            string tar = Path.Combine(Environment.SystemDirectory, "tar.exe");
+            if (File.Exists(tar) && RunTool(tar, "-xf \"" + arc + "\" -C \"" + dir + "\"") == 0 && Directory.GetFileSystemEntries(dir).Length > 0) return;
+            throw new IOException("This game is packed as ." + k + ", which Windows can't open by itself. Install 7-Zip (free, from 7-zip.org), then install the game again.");
         }
         static void CopyTree(string src, string dst)
         {

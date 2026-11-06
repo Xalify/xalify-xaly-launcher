@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.6";
+var VER="1.5.7";
 var NOTES=[
+ {v:"1.5.7",d:"5 Nov 2026",t:["New in the Store: Super Smash Bros. Crusade, the fan-made Smash with a huge roster","Games hosted on Google Drive now download properly, including big files that show Google\u2019s virus-scan warning","Games packed as .7z or .rar can now be installed, not just .zip","If a link opens a web page instead of a game, the download now stops with a clear message instead of failing at install"]},
  {v:"1.5.6",d:"5 Nov 2026",t:["Fixed: the old Windows scrollbars showed up in the library, menus and pop-ups. Every list now uses the slim Xaly scrollbar","Fixed: the ticked option in the View and Sort menus was squashed and cut off","Fixed: games that are a single .exe couldn\u2019t be uninstalled or moved. They now get their own folder, including ones you already have","Fixed: updating a game after moving it to another drive"]},
  {v:"1.5.5",d:"5 Nov 2026",t:["Move games to another drive: open a game and press Move. Play time, achievements and updates stay with it","Messages now arrive within a second through a live connection, instead of waiting for the next check","Fixed: your message stayed in the box after you sent it","Friend activity: see what friends played, installed and unlocked, with Get it and Play buttons, in the Friends panel and on the Store page","Game pages show the download size and your free space, and Xaly warns you before installing if the drive is too full"]},
  {v:"1.5.4",d:"5 Nov 2026",t:["New sounds: a chime when a game finishes downloading or updating, and a fanfare when you unlock an achievement. You hear them even while you\u2019re in a game","Turn sounds off or listen to them in Settings \u203A General"]},
@@ -980,13 +981,16 @@ function seeds(){
    ["i20", "Indie", "Horror", "DO NOT PLAY", "You were warned.", "A short experimental horror game.", "https://experimentalphase.itch.io/do-not-play"],
    ["i21", "Indie", "Horror", "We Found It On itch.io", "Something was found.", "A found-footage style horror game.", "https://enderactually.itch.io/we-found-it-on-itchio"],
    ["i22", "Indie", "Adventure", "Lost Constellation", "A winter story from the Night in the Woods team.", "A free story from the Night in the Woods universe, made by Infinite Fall.", "https://finji.itch.io/lost-constellation"],
+   ["ssb1", "Smash", "Fighting", "Super Smash Bros. Crusade", "The fan-made Smash Bros. with a huge roster.", "A free Super Smash Bros. fan game in development since 2008. Pick from a huge roster of fighters from Nintendo and other classic series and battle friends locally or online. Made in GameMaker by the Crusade team. This is version 0.9.6a, downloaded from the team's Google Drive.", "https://super-smash-bros-crusade.itch.io/super-smash-bros-crusade-ver-096a", "https://drive.usercontent.google.com/download?id=1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A&export=download"],
    ["i23", "Indie", "Adventure", "Hello Charlotte", "A surreal horror adventure.", "A dark, surreal RPG Maker horror adventure.", "https://etherane.itch.io/hello-charlotte"]];
   return L.map(function(a){
     var gh=/^gh:/.test(a[6]),o={id:a[0],fr:a[1],genre:a[2],name:a[3],source:gh?"GitHub":"itch.io",tagline:a[4],desc:a[5]+((a[1]==="Indie"||a[1]==="Recomp")?"":FAN),url:gh?"https://github.com/"+a[6].substr(3):a[6],price:"Free",kind:"page",featured:true,image:gh?ghImg(a[6].substr(3)):"",launch:""};
-    if(gh)o.gh=a[6].substr(3);return o;
+    if(gh)o.gh=a[6].substr(3);
+    if(a[7]){o.page=a[6];o.url=a[7];o.kind="archive";o.host=/google\./.test(a[7])?"Google Drive":"";}
+    return o;
   });
 }
-var CATV=5;
+var CATV=6;
 function ghImg(r){return "https://opengraph.githubassets.com/1/"+r;}
 function newState(name,first){
   var s={v:1,user:{name:name,code:genCode(),color:0,status:"online",joined:now()},
@@ -1617,12 +1621,12 @@ function wishN(){var n=0,k,w=wishMap();for(k in w)if(w[k])n++;return n;}
 function toggleWish(it){var w=wishMap();if(w[it.id])delete w[it.id];else w[it.id]=1;save();var c=$("wcnt");if(c)c.textContent=wishN();}
 function priceOf(it){return it.price||"Free";}
 function fmtN(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
-var FR={"Mario":["#ff4b4b","#ffb02e"],"Sonic":["#2f7bff","#27d3ff"],"FNAF":["#d1203f","#ff8a3d"],"Pok\u00e9mon":["#e8b800","#3b7bd4"],"Indie":["#8a5cff","#ff5cc8"],"Recomp":["#19b5a5","#6fe38a"]};
-var FRO=["Recomp","Mario","Sonic","FNAF","Pok\u00e9mon","Indie"];
+var FR={"Mario":["#ff4b4b","#ffb02e"],"Sonic":["#2f7bff","#27d3ff"],"FNAF":["#d1203f","#ff8a3d"],"Pok\u00e9mon":["#e8b800","#3b7bd4"],"Indie":["#8a5cff","#ff5cc8"],"Recomp":["#19b5a5","#6fe38a"],"Smash":["#e8423f","#f5c542"]};
+var FRO=["Recomp","Mario","Sonic","FNAF","Pok\u00e9mon","Smash","Indie"];
 function frOf(it){
   if(it.fr&&FR[it.fr])return it.fr;
   var n=(it.name||"").toLowerCase();
-  return /mario/.test(n)?"Mario":/sonic/.test(n)?"Sonic":/fnaf|freddy|five nights/.test(n)?"FNAF":/pok[e\u00e9]mon/.test(n)?"Pok\u00e9mon":"Indie";
+  return /mario/.test(n)?"Mario":/sonic/.test(n)?"Sonic":/fnaf|freddy|five nights/.test(n)?"FNAF":/pok[e\u00e9]mon/.test(n)?"Pok\u00e9mon":/smash bros/.test(n)?"Smash":"Indie";
 }
 function frGrad(fr){var c=FR[fr]||FR.Indie;return "linear-gradient(135deg,"+c[0]+","+c[1]+")";}
 function closeMenus(){if(SMENU){SMENU.className="sdd";SMENU=null;}}
@@ -1847,7 +1851,7 @@ function sdSlides(it){
 }
 function sdRow(l,v){var r=el("div","ir");r.appendChild(el("span","",l));r.appendChild(el("span","",v));return r;}
 function devName(it){
-  if(it.devs)return it.devs;var m=(it.url||"").match(/^https?:\/\/([^.\/]+)\.itch\.io\//i);if(m)return m[1];
+  if(it.devs)return it.devs;var m=(pageUrl(it)||it.url||"").match(/^https?:\/\/([^.\/]+)\.itch\.io\//i);if(m)return m[1];
   if(it.gh)return it.gh.split("/")[0];return it.source||host(it.url)||"—";
 }
 function renderDetail(){
@@ -1896,7 +1900,7 @@ function renderDetail(){
   var bd=el("div","sdbd"),bi=el("div","sdbi",fr.charAt(0));bi.style.background=frGrad(fr);bd.appendChild(bi);
   var bt=el("div");bt.appendChild(el("b","",fr==="Recomp"?"Native PC port":fr==="Indie"?"Indie game":"Fan game"));
   bt.appendChild(el("span","",fr==="Recomp"?"Needs your own copy of the original game":"Not affiliated with the original rights holders"));bd.appendChild(bt);R.appendChild(bd);
-  R.appendChild(el("span","sdtg",kindOf(it)==="page"?"Direct download":KINDS[kindOf(it)]));
+  R.appendChild(el("span","sdtg",kindOf(it)==="page"||it.host?"Direct download":KINDS[kindOf(it)]));if(it.host)R.appendChild(el("span","sdtg","via "+it.host));
   if(it.genre)R.appendChild(el("span","sdtg",it.genre));
   R.appendChild(el("div","sdpr",priceOf(it)));
   if(it.rt&&it.rt.n)R.appendChild(el("div","sdrt",stars(it.rt.v)+"  "+it.rt.v.toFixed(1)+"  \u00B7  "+it.rt.n+" ratings"));
@@ -1974,6 +1978,8 @@ function storeForm(it){
 function fmtB(n){return n>=1073741824?(n/1073741824).toFixed(2)+" GB":n>=1048576?(n/1048576).toFixed(1)+" MB":n>=1024?Math.round(n/1024)+" KB":Math.round(n)+" B";}
 function fmtEta(s){s=Math.round(s);if(s<60)return s+" s";if(s<3600){var r=s%60;return Math.floor(s/60)+" min "+pad2(r)+" s";}var m=Math.floor(s/60)%60;return Math.floor(s/3600)+" h "+pad2(m)+" min";}
 function pad2(n){return n<10?"0"+n:""+n;}
+function driveId(u){var m=String(u||"").match(/^https?:\/\/(?:drive|docs|drive\.usercontent)\.google(?:usercontent)?\.com\/(?:file\/d\/([\w-]{10,})|.*[?&]id=([\w-]{10,}))/i);return m?(m[1]||m[2]):"";}
+function driveUrl(u){var id=driveId(u);return id?"https://drive.usercontent.google.com/download?id="+id+"&export=download&confirm=t":u;}
 function fname(u){var n="download";try{n=decodeURIComponent(u.split("#")[0].split("?")[0].split("/").pop()||"download");}catch(e){}return n.replace(/[\\\/:*?"<>|]/g,"_");}
 /* ---------- download queue: one download at a time, the rest wait; pause / resume / retry ---------- */
 var DQ=[],dl=null,dqT=null;
@@ -1999,6 +2005,7 @@ function install(it){
   if(isItch(it)||isGh(it)){if(!install.chk){install.chk=1;spaceCheck(it,function(){install.chk=0;if(!jobOf(it))addJob(newJob(it,{}));});setTimeout(function(){install.chk=0;},4000);}return;}
   var fn=fname(it.url);
   if(k==="page"||!it.url)return;
+  if(driveId(it.url)){addJob(newJob(it,{direct:1,url:driveUrl(it.url),fn:"xaly-"+String(it.id).replace(/[^\w-]/g,"")+(k==="standalone"?".exe":".download"),kind:k==="installer"?"installer":k==="standalone"?"standalone":"archive"}));return;}
   if(k==="standalone"&&!/\.exe$/i.test(fn)){toast("A standalone game must link straight to an .exe");return;}
   if(k==="archive"&&!/\.zip$/i.test(fn)){toast("A game archive must link straight to a .zip");return;}
   if(k==="installer"&&!/\.(exe|msi)$/i.test(fn)){toast("An installer must link straight to an .exe or .msi");return;}
@@ -3934,6 +3941,14 @@ function selfTest(){   // run by the build server: proves both directions of the
         T(function(){return X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","1");});return;}
       r.checks.download=k+" "+(a||"")+" ("+steps.join(",").replace(/(p,)+/g,"p..,")+")";window.onDl=od;fin();
     };
+    var gdo=window.onDl;window.onDl=function(i3,k3,a3,b3){
+      if(i3==="selfgd"){if(k3==="p"&&+a3>0&&!r.gdDone){r.gdDone=1;r.checks.gdrive="file "+(+b3>0?Math.round(b3/1048576)+" MB":"size ?")+", type "+T(function(){return X.SniffFile("selftest-gd.bin");},"?");T(function(){return X.DownloadCancel("selfgd","selftest-gd.bin");});}
+        else if(k3!=="p"&&!r.gdDone){r.gdDone=1;r.checks.gdrive=k3+" "+a3;}return;}
+      if(i3==="selfhtml"){if(k3!=="p")r.checks.htmlguard=k3+" "+a3;return;}
+      if(gdo)gdo(i3,k3,a3,b3);
+    };
+    X.DownloadEx("selfgd",driveUrl("https://drive.google.com/file/d/1_xd_Y6nkUCjMjo8249P0ZKdMZuO0rk3A/view"),"selftest-gd.bin","0");
+    X.DownloadEx("selfhtml","https://example.com/","selftest-html.bin","0");
     r.checks.dlstart=X.DownloadEx("selfdl","https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime","selftest-dl.bin","0");
   };
   c("http",function(){return X.Http(id,"https://api.github.com/repos/"+UPD_REPO);});

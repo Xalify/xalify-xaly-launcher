@@ -959,7 +959,7 @@ html,body{overflow:hidden}
 .ovstrip{display:flex;flex-wrap:wrap;margin-top:12px}
 .ovth{width:54px;height:54px;border-radius:8px;background:#0d1018 center/cover;margin:0 6px 6px 0;cursor:pointer;border:1px solid rgba(255,255,255,.08)}.ovth:hover{border-color:#2ee6f0}
 .ovnote textarea{width:100%;height:120px;resize:vertical;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#e8ebf5;padding:10px 12px;font:13.5px/1.5 Segoe UI,sans-serif;box-sizing:border-box}
-.ovqa{padding:12px}.ovqr{display:flex}.ovqr .btn{flex:1 1 0%;margin-right:8px}.ovqr .btn:last-child{margin-right:0}
+.ovqc b{display:block;font-size:16px}.ovqc .ovmuted{display:block;margin:3px 0 10px}.ovqa{padding:12px}.ovqr{display:flex}.ovqr .btn{flex:1 1 0%;margin-right:8px}.ovqr .btn:last-child{margin-right:0}
 .ovch .chr{padding:6px 0}
 .ovnone{max-width:520px}.ovnone h2{margin:0 0 6px}
 
@@ -1025,8 +1025,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.10";
+var VER="1.8.11";
 var NOTES=[
+{v:"1.8.11",d:"6 Nov 2026",t:["Quitting a game from the Xaly overlay now asks right in the overlay, instead of hiding the question in the launcher behind it"]},
 {v:"1.8.10",d:"6 Nov 2026",t:["Fixed: in TV mode, store games were invisible, so the Store tab and Home’s Popular right now row looked empty"]},
 {v:"1.8.9",d:"6 Nov 2026",t:["Choose the drive: installing a game asks which drive it goes on, showing the free space on each. You can also pick one drive for every game in Settings \u203A Downloads","TV mode redesigned: Home, Library, Store, Friends and Downloads tabs (LB/RB), a backdrop that slowly drifts between game art, bigger tiles, full-screen game pages with screenshots, and installing with the drive picker","The Xaly overlay glides over your game instead of flashing, and never takes focus from the game, so fullscreen games no longer minimise or change screen mode when you open it. Use the arrow keys, Enter and Esc, or a controller, while it\u2019s open"]},
  {v:"1.8.8",d:"6 Nov 2026",t:["Games opened on 1.8.6 that picked artwork as their logo are checked again right away and get the right art"]},
@@ -5650,9 +5651,16 @@ function renderOverlay(){
   // quick actions
   var qa=ovCard("ovqa",""),row=el("div","ovqr");
   if(g.path&&g.path.indexOf("://")<0)row.appendChild(btn("Game folder","btn",function(){var d=g.path.replace(/[\\\/][^\\\/]*$/,"");T(function(){return X.Open(d);});}));
-  row.appendChild(btn("Quit game","btn dng",function(){openForm("Quit "+g.name+"? Unsaved progress may be lost.",[],"Quit game",function(){T(function(){return X.Stop(g.id);});},null);}));
+  // quitting asks right here in the overlay (the launcher's own dialogs sit underneath it)
+  row.appendChild(btn("Quit game","btn dng",function(){ovQuit(qa,row,g);}));
   qa.appendChild(row);c2.appendChild(qa);
   ovShots(g);tickOverlay();
+}
+function ovQuit(qa,row,g){
+  row.style.display="none";var q=el("div","ovqc");q.appendChild(el("b","","Quit "+g.name+"?"));q.appendChild(el("span","ovmuted","Unsaved progress may be lost."));
+  var r2=el("div","ovqr"),keep=btn("Keep playing","btn",function(){qa.removeChild(q);row.style.display="";ovSet(row.lastChild);});
+  r2.appendChild(keep);r2.appendChild(btn("Quit game","btn dng",function(){T(function(){return X.Stop(g.id);});T(function(){return X.OverlayClose();});}));
+  q.appendChild(r2);qa.appendChild(q);if(ovOn)ovSet(keep);
 }
 function ovShots(g){
   var s=$("ovstrip");if(!s)return;s.innerHTML="";

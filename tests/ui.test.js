@@ -33,6 +33,15 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     ok(errs.length === before, name + (errs.length === before ? "" : " \u2014 " + errs.slice(before).join(" | ")));
   }
   ok(await p.evaluate(() => document.querySelectorAll("#pStore .gc").length >= 0), "store renders");
+  // quitting from the overlay asks inside the overlay, not in a launcher dialog hidden behind it
+  const ovq = await p.evaluate(() => {
+    run.gt = { t: now() - 60000 }; S.fr = S.fr || { inc: [], out: [], seen: {} }; openOverlay("");
+    var q = [].slice.call(document.querySelectorAll("#ovl .ovqr .btn.dng"))[0]; if (!q) return "no quit button";
+    q.click(); var c = document.querySelector("#ovl .ovqc"), modal = $("modal").className.indexOf("open") >= 0;
+    var r = c && c.getBoundingClientRect().height > 0 && !modal && /ovf/.test((ovFoc || {}).className || "") ? "ok" : "confirm=" + !!c + " modal=" + modal;
+    closeOverlay(); delete run.gt; return r;
+  });
+  ok(ovq === "ok", "overlay quit asks inside the overlay (" + ovq + ")");
   // TV mode: every kind of tile must actually be visible (1.8.10: store tiles were see-through)
   const tvVis = await p.evaluate(() => {
     var out = {}; enterTV();

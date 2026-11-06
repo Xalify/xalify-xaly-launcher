@@ -108,13 +108,23 @@ namespace Xaly
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
         // deletes an unpacked game folder, only if it lives inside <downloads>\Games
+        // a game folder Xaly may touch: <Downloads>\Xaly Launcher\Games\<game> or <drive>:\Xaly Games\<game>
+        static bool UnderGameRoot(MainForm mf, string path)
+        {
+            try
+            {
+                string full = Path.GetFullPath(path).TrimEnd('\\') + "\\";
+                string r1 = Path.GetFullPath(Path.Combine(mf.DownloadsDir, "Games")).TrimEnd('\\') + "\\";
+                if (full.StartsWith(r1, StringComparison.OrdinalIgnoreCase) && full.Length > r1.Length) return true;
+                return System.Text.RegularExpressions.Regex.IsMatch(full, @"^[A-Za-z]:\\Xaly Games\\[^\\]+\\", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            }
+            catch (Exception) { return false; }
+        }
         public string DeleteGame(string path)
         {
             try
             {
-                string root = Path.GetFullPath(Path.Combine(f.DownloadsDir, "Games")).TrimEnd('\\') + "\\";
-                string full = Path.GetFullPath(path).TrimEnd('\\') + "\\";
-                if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase) || full.Length <= root.Length) return "ERR:Refusing to delete outside the Xaly games folder.";
+                if (!UnderGameRoot(f, path)) return "ERR:Refusing to delete outside the Xaly games folders.";
                 if (Directory.Exists(path)) Directory.Delete(path, true);
                 return "ok";
             }
@@ -454,9 +464,7 @@ namespace Xaly
         {
             try
             {
-                string root = Path.GetFullPath(Path.Combine(f.DownloadsDir, "Games")).TrimEnd('\\') + "\\";
-                string full = Path.GetFullPath(dir).TrimEnd('\\') + "\\";
-                if (!full.StartsWith(root, StringComparison.OrdinalIgnoreCase) || full.Length <= root.Length) return "ERR:Only games installed by Xaly can be updated.";
+                if (!UnderGameRoot(f, dir)) return "ERR:Only games installed by Xaly can be updated.";
                 string tmp = Path.Combine(Path.GetTempPath(), "XalyGameUpdate_" + DateTime.Now.Ticks);
                 ZipFile.ExtractToDirectory(zip, tmp);
                 CopyTree(tmp, dir);
@@ -505,6 +513,134 @@ namespace Xaly
         // ---- TV mode
         public string SetFullscreen(string on) { f.SetFullscreen(on == "1"); return "ok"; }
         public string PadNative(string on) { f.PadNative(on == "1"); return "ok"; }
+
+        // ---- move a game folder to another drive (<drive>:\Xaly Games\<game>), with progress and cancel
+        public string FreeSpace(string path)
+        {
+            try { return new DriveInfo(Path.GetPathRoot(Path.GetFullPath(path))).AvailableFreeSpace.ToString(); }
+            catch (Exception) { return "-1"; }
+        }
+        public string DirBytes(string path) { try { return Directory.Exists(path) ? DirSize(path).ToString() : "0"; } catch (Exception) { return "0"; } }
+        public string MoveGame(string id, string src, string drive)
+        {
+            try
+            {
+                src = Path.GetFullPath(src).TrimEnd('\\');
+                if (!UnderGameRoot(f, src) || !Directory.Exists(src)) return "ERR:Only games installed by Xaly can be moved.";
+                string root = Path.GetPathRoot(drive);
+                if (string.IsNullOrEmpty(root) || !Directory.Exists(root)) return "ERR:That drive isn't available.";
+                string dst = Path.Combine(Path.Combine(root, "Xaly Games"), Path.GetFileName(src));
+                bool same = string.Equals(Path.GetPathRoot(src), root, StringComparison.OrdinalIgnoreCase);
+                if (string.Equals(Path.GetFullPath(dst).TrimEnd('\\'), src, StringComparison.OrdinalIgnoreCase)) return "ERR:The game is already there.";
+                if (Directory.Exists(dst)) return "ERR:" + dst + " already exists. Move or rename that folder first.";
+                long size = DirSize(src);
+                if (!same && new DriveInfo(root).AvailableFreeSpace < size + 64L * 1024 * 1024) return "ERR:There isn't enough free space on " + root.TrimEnd('\\') + ".";
+                DlJob job = new DlJob();
+                lock (jobs2) { if (jobs2.ContainsKey("mv" + id)) return "ERR:This game is already being moved."; jobs2["mv" + id] = job; }
+                ThreadPool.QueueUserWorkItem(delegate(object o) { RunMove(id, src, dst, size, same, job); });
+                return dst;
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string CancelMove(string id) { DlJob j; lock (jobs2) { if (jobs2.TryGetValue("mv" + id, out j)) j.stop = 2; } return "ok"; }
+        void RunMove(string id, string src, string dst, long size, bool same, DlJob job)
+        {
+            string result = "err", detail = "";
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(dst));
+                if (same) { Directory.Move(src, dst); result = "done"; detail = dst; }
+                else
+                {
+                    long[] done = new long[] { 0 }; int[] last = new int[] { 0 };
+                    CopyWithProgress(src, dst, done, size, job, id, last);
+                    if (job.stop != 0) { try { Directory.Delete(dst, true); } catch (Exception) { } result = "cancel"; }
+                    else
+                    {
+                        if (DirSize(dst) < size) throw new IOException("The copy is incomplete, so the original was kept.");
+                        result = "done"; detail = dst;
+                        try { Directory.Delete(src, true); } catch (Exception ex2) { detail = dst + "|" + ex2.Message; }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                detail = ex.Message;
+                if (!same) { try { if (Directory.Exists(dst)) Directory.Delete(dst, true); } catch (Exception) { } }
+            }
+            lock (jobs2) { jobs2.Remove("mv" + id); }
+            f.Js("onMove", id, result, detail, "");
+        }
+        void CopyWithProgress(string s, string d, long[] done, long total, DlJob job, string id, int[] last)
+        {
+            Directory.CreateDirectory(d);
+            byte[] buf = new byte[1048576];
+            foreach (string file in Directory.GetFiles(s))
+            {
+                if (job.stop != 0) return;
+                string to = Path.Combine(d, Path.GetFileName(file));
+                using (FileStream fi = File.OpenRead(file))
+                using (FileStream fo = new FileStream(to, FileMode.Create, FileAccess.Write))
+                {
+                    int n;
+                    while ((n = fi.Read(buf, 0, buf.Length)) > 0)
+                    {
+                        if (job.stop != 0) return;
+                        fo.Write(buf, 0, n); done[0] += n;
+                        int t = Environment.TickCount;
+                        if (t - last[0] > 250) { last[0] = t; f.Js("onMove", id, "p", done[0].ToString(), total.ToString()); }
+                    }
+                }
+                try { File.SetLastWriteTimeUtc(to, File.GetLastWriteTimeUtc(file)); } catch (Exception) { }
+            }
+            foreach (string dir in Directory.GetDirectories(s)) { if (job.stop != 0) return; CopyWithProgress(dir, Path.Combine(d, Path.GetFileName(dir)), done, total, job, id, last); }
+        }
+
+        // ---- live friend relay: one long-lived ntfy.sh stream, so messages arrive within a second
+        static int streamGen = 0;
+        HttpWebRequest streamRq;
+        public string RelayStream(string topics, string since)
+        {
+            if (!OkTopics(topics)) return "ERR:Bad topic.";
+            int gen = Interlocked.Increment(ref streamGen);
+            try { if (streamRq != null) streamRq.Abort(); } catch (Exception) { }
+            Thread t = new Thread(delegate() { StreamLoop(gen, topics, since); });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+        public string RelayStreamStop() { Interlocked.Increment(ref streamGen); try { if (streamRq != null) streamRq.Abort(); } catch (Exception) { } return "ok"; }
+        void StreamLoop(int gen, string topics, string since)
+        {
+            string sinceArg = since ?? ""; int fails = 0;
+            while (gen == streamGen)
+            {
+                try
+                {
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    HttpWebRequest rq = (HttpWebRequest)WebRequest.Create("https://ntfy.sh/" + topics + "/json" + (sinceArg.Length > 0 ? "?since=" + Uri.EscapeDataString(sinceArg) : ""));
+                    rq.UserAgent = "XalyLauncher"; rq.Timeout = 30000; rq.ReadWriteTimeout = 120000; rq.KeepAlive = true;
+                    streamRq = rq;
+                    using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                    using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8))
+                    {
+                        fails = 0; f.Js("onRelayState", "1");
+                        string line;
+                        while (gen == streamGen && (line = sr.ReadLine()) != null)
+                        {
+                            if (line.IndexOf("\"event\":\"message\"") < 0) continue;
+                            f.Js("onRelayMsg", line);
+                            System.Text.RegularExpressions.Match m = System.Text.RegularExpressions.Regex.Match(line, "\"time\":(\\d+)");
+                            if (m.Success) { long tm; if (long.TryParse(m.Groups[1].Value, out tm)) sinceArg = (tm - 5).ToString(); }
+                        }
+                    }
+                }
+                catch (Exception) { }
+                if (gen != streamGen) break;
+                f.Js("onRelayState", "0");
+                fails++;
+                Thread.Sleep(Math.Min(30000, 1500 * fails));
+            }
+        }
 
         public string Http(string id, string url)
         {

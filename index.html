@@ -704,6 +704,21 @@ select::-ms-expand{display:none}
 .prach{display:flex;flex-wrap:wrap;margin-right:-10px}
 .prak{display:flex;align-items:center;width:calc(50% - 10px);margin:0 10px 10px 0;background:#10141d;border-radius:12px;padding:10px;box-sizing:border-box;cursor:pointer}.prak:hover{background:#171d2a}
 .prak>div:last-child{margin-left:12px;min-width:0}.prak b{display:block;font-size:14px}.prak span{display:block;color:#8a8ea6;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== 1.5.5 ===== */
+.mvinfo{color:#9aa1b8;font-size:13.5px;line-height:1.5;margin:-4px 0 14px}
+.mvlist{margin-bottom:14px}
+.mvd{display:block;width:100%;text-align:left;background:#10141d;border:1px solid #1f2636;border-radius:12px;padding:12px 14px;margin-bottom:8px;color:#e8ebf5}
+.mvd:hover{border-color:#2ee6f0}.mvd[disabled]{opacity:.55;cursor:default;border-color:#1f2636}.mvd.full .mvt span{color:#ff8a95}
+.mvt{display:flex;justify-content:space-between;margin-bottom:8px}.mvt b{font-size:14px}.mvt span{color:#9aa1b8;font-size:13px}
+.mvp{margin:4px 0 18px}.mvto{color:#9aa1b8;font-size:12.5px;margin-bottom:10px;word-break:break-all}
+.ftabs{display:flex;margin-top:14px;background:#141925;border-radius:10px;padding:3px}
+.ftabs button{flex:1 1 0%;background:transparent;color:#9aa1b8;font-weight:700;font-size:13px;padding:7px 0;border-radius:8px}.ftabs button.on{background:#0f3540;color:#fff}
+.fa{display:flex;align-items:center;padding:9px 6px;border-radius:10px}.fa:hover{background:#151a26}
+.fat{flex:1 1 0%;min-width:0;margin:0 10px}.fal{font-size:13px;line-height:1.4;color:#c8cddc}.fal b{color:#fff;font-weight:700}.fas{display:block;color:#7d8299;font-size:11.5px;margin-top:2px}
+.fath{width:54px;height:40px;border-radius:7px;background-size:cover;background-position:center;flex:0 0 auto;margin-right:8px;cursor:pointer}
+.fa .sm{flex:0 0 auto}
+.sdi .ir.low span:last-child{color:#ff8a95}
 </style>
 <style id="theme"></style>
 </head>
@@ -738,7 +753,7 @@ select::-ms-expand{display:none}
     <div class="page" id="pProf"></div>
     <div class="page" id="pSet"><div class="sw0"><div class="smenu" id="smenu"></div><div class="sbody" id="sbody"></div></div></div>
     <div id="fp">
-      <div id="fph"><h3>Friends</h3><div class="me" id="fpme"></div></div>
+      <div id="fph"><h3>Friends</h3><div class="me" id="fpme"></div><div class="ftabs"><button id="ftF" class="on">Friends</button><button id="ftA">Activity</button></div></div>
       <div id="fpa"><input type="text" id="fq" placeholder="Search friends"><button class="btn" id="fadd">+ Add</button></div>
       <div id="fpb"></div>
     </div>
@@ -757,8 +772,9 @@ select::-ms-expand{display:none}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.4";
+var VER="1.5.5";
 var NOTES=[
+ {v:"1.5.5",d:"5 Nov 2026",t:["Move games to another drive: open a game and press Move. Play time, achievements and updates stay with it","Messages now arrive within a second through a live connection, instead of waiting for the next check","Fixed: your message stayed in the box after you sent it","Friend activity: see what friends played, installed and unlocked, with Get it and Play buttons, in the Friends panel and on the Store page","Game pages show the download size and your free space, and Xaly warns you before installing if the drive is too full"]},
  {v:"1.5.4",d:"5 Nov 2026",t:["New sounds: a chime when a game finishes downloading or updating, and a fanfare when you unlock an achievement. You hear them even while you\u2019re in a game","Turn sounds off or listen to them in Settings \u203A General"]},
  {v:"1.5.3",d:"5 Nov 2026",t:["New achievements for every game: First Launch, Night Shift, Marathon, Week Streak, Legend and more. Unlocking one pops up a little trophy","Each game\u2019s page shows its achievements with progress bars, and your profile shows your latest ones to friends. Achievements also give XP","Crash reports: if something goes wrong, the details are sent to the developer automatically so it can be fixed. You can turn this off in Settings \u203A About"]},
  {v:"1.5.2",d:"5 Nov 2026",t:["Download queue: install as many games as you like and they download one after another. Pause, resume, reorder or cancel them on the Downloads page","Downloads now continue where they stopped if your internet drops, and after you restart Xaly","Xaly now installs updates by itself when it starts, with a progress screen that shows your download speed","A What\u2019s new popup shows the changes after each update. Tick Don\u2019t show again to turn it off"]},
@@ -1025,7 +1041,7 @@ function startSession(a){
   if(S.set.dlDir)T(function(){return X.SetDownloads(S.set.dlDir);});
   T(function(){return X.SetTray(S.set.tray?"1":"0");});
   S.set.startup=T(function(){return X.StartupGet();},"0")==="1"?1:0;
-  P.chat=null;P.draft="";frErr="";frPollT=0;frBusy=0;frInit();
+  P.chat=null;P.draft="";frErr="";frPollT=0;frBusy=0;frStreamSig="";frLive=0;T(function(){return X.RelayStreamStop();});frInit();
   chip();renderFriends();render();
   loadDQ();setTimeout(function(){pumpQ();paintDl();},4000);
   if(!S.achInit){S.games.forEach(function(g){checkAch(g,true);});S.achInit=1;save();}
@@ -1727,6 +1743,8 @@ function renderStore(keep){
     function lfShelf(k,title){var l=lfl(k);if(l.length>=4)body.appendChild(shelf(title||LFN[k],l.slice(0,24),function(){f.lf=k;P.lim=60;renderStore();$("pStore").scrollTop=0;},"",l.length));}
     var topR=lfl("top");if(topR.length<4)topR=all.filter(function(x){return x.rt&&x.rt.n>=3;}).sort(function(a,b){return (b.rt.v-a.rt.v)||(b.rt.n-a.rt.n);});
     if(topR.length>=4)body.appendChild(shelf("Top rated on itch.io",topR.slice(0,24),lfl("top").length>=4?function(){f.lf="top";renderStore();$("pStore").scrollTop=0;}:null,"",topR.length));
+    var ff=[],seen0={};friendFeed().forEach(function(x){var it=feedGame(x.e);if(it&&!seen0[it.id]&&visIt(it)){seen0[it.id]=1;ff.push(it);}});
+    if(ff.length)body.appendChild(shelf("Your friends are playing",ff.slice(0,16),function(){setFP(true);P.ftab="act";renderFriends();},"linear-gradient(#3ddc84,#1fbf75)",ff.length));
     lfShelf("popular");lfShelf("newpop","New & popular");
     var fl=all.filter(function(x){return frOf(x)==="FNAF";});
     if(fl.length)body.appendChild(shelf("Five Nights at Freddy's fan games",fl.slice(0,24),function(){f.fr="FNAF";renderStore();$("pStore").scrollTop=0;},frGrad("FNAF"),fl.length));
@@ -1799,6 +1817,7 @@ function reqCard(it){
 /* ---------- uninstall ---------- */
 function gameDir(g){
   var d0=(T(function(){return X.Paths();},"|").split("|")[0]||"").replace(/[\\\/]+$/,""),root=(d0+"\\Games\\"),p=g.path||"";
+  var mv=p.match(/^([A-Za-z]:\\Xaly Games\\[^\\]+)\\/i);if(mv)return mv[1];
   if(!d0||p.toLowerCase().indexOf(root.toLowerCase())!==0)return "";
   var seg=p.substr(root.length).split("\\")[0];return seg?p.substr(0,root.length)+seg:"";
 }
@@ -1878,6 +1897,9 @@ function renderDetail(){
   var ub=el("button","wb dng","Uninstall");ub.id="ubtn";ub.style.display="none";R.appendChild(ub);
   if(pageUrl(it))R.appendChild(btn("Open source page","wb",function(){T(function(){return X.Open(pageUrl(it));});}));
   var inf=el("div","sdi");
+  var fd0=dlDirFree(),szr=sdRow("Download size",it.dlSize?fmtB(it.dlSize):(isItch(it)||isGh(it))?"Checking\u2026":"\u2014");inf.appendChild(szr);
+  if(fd0.free>=0){var frw=sdRow("Free on "+fd0.drive,fmtB(fd0.free));if(it.dlSize&&fd0.free<needFor(it,it.dlSize))frw.className+=" low";inf.appendChild(frw);}
+  if(!it.dlSize&&(isItch(it)||isGh(it)))fetchSize(it,function(){if(P.page==="detail"&&P.sel===it)renderDetail();});
   inf.appendChild(sdRow("Developer",devName(it)));inf.appendChild(sdRow("Source",isGh(it)?"GitHub":isItch(it)?"itch.io":(it.source||host(it.url))));
   inf.appendChild(sdRow("Series",fr));if(it.rel)inf.appendChild(sdRow("Release date",it.rel));inf.appendChild(sdRow("Platform","Windows"));
   R.appendChild(inf);
@@ -1965,7 +1987,7 @@ function loadDQ(){
 function install(it){
   var k=kindOf(it),ex=jobOf(it);
   if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else{toast(it.name+" is already in your downloads");}return;}
-  if(isItch(it)||isGh(it)){addJob(newJob(it,{}));return;}
+  if(isItch(it)||isGh(it)){if(!install.chk){install.chk=1;spaceCheck(it,function(){install.chk=0;if(!jobOf(it))addJob(newJob(it,{}));});setTimeout(function(){install.chk=0;},4000);}return;}
   var fn=fname(it.url);
   if(k==="page"||!it.url)return;
   if(k==="standalone"&&!/\.exe$/i.test(fn)){toast("A standalone game must link straight to an .exe");return;}
@@ -2056,6 +2078,7 @@ function addToLib(it,path){
   if(inLib(it.id))return;
   var g={id:rid(),name:it.name,path:path,args:"",fav:0,seconds:0,plays:0,last:0,storeId:it.id,image:it.image||"",added:now()};
   if(finUp)g.up=finUp;
+  setTimeout(function(){logAct("inst",g);},0);
   S.games.push(g);getIcon(g);save();return g;
 }
 function finish(it,dest,kk){
@@ -2444,11 +2467,13 @@ function buildGameDetail(c,g){
     it.push({t:"Edit details",fn:function(){gameForm(g);}});
     if(updatable(g))it.push({t:g.updAvail?"Update now":"Check for updates",fn:function(){if(g.updAvail)updateGame(g);else checkGameUpdates(true);}});
     it.push({sep:1});
+    if(gameDir(g))it.push({t:"Move to another drive\u2026",fn:function(){moveGame(g);}});
     if(gameDir(g))it.push({t:"Uninstall (delete files)",cls:"dng",fn:function(){uninstallGame(g);}});
     it.push({t:"Remove from library (keep files)",cls:"dng",fn:function(){S.games.splice(S.games.indexOf(g),1);if(P.cur===g.id)P.cur=null;if(P.page==="game")P.page="lib";save();render();}});
     ctxMenu(mb,it);};
   bar.appendChild(mb);
-  if(gameDir(g)){var ub2=btn("Uninstall","lpill",function(){uninstallGame(g);});ub2.style.marginLeft="0";bar.appendChild(ub2);}
+  if(gameDir(g)){var mvb=btn(g.moving?"Moving\u2026 "+(g.moving.pct>=0?g.moving.pct+"%":""):"Move","lpill",function(){moveGame(g);});mvb.style.marginLeft="0";bar.appendChild(mvb);
+    var ub2=btn("Uninstall","lpill",function(){uninstallGame(g);});bar.appendChild(ub2);}
   var sts=el("div","gstats");
   sts.appendChild(gstat("Size on disk",sizeInit(g),"gsz"));
   sts.appendChild(gstat("Last updated",m&&m.mt?dstr(m.mt):"—"));
@@ -2489,11 +2514,12 @@ function tickGame(){
 function playToggle(){
   var g=game();if(!g)return;
   if(run[g.id]){T(function(){return X.Stop(g.id);});return;}
+  if(g.moving){toast(g.name+" is being moved. Wait for it to finish.");return;}
   var r=T(function(){return X.Launch(g.id,g.path,g.args||"");});
   if(r.indexOf("ERR")===0){toast("Couldn't start "+g.name+": "+r.replace("ERR:",""));return;}
   if(r==="ok")run[g.id]={t:now()};
   ovHotkey();
-  g.plays=(g.plays||0)+1;g.last=now();checkAch(g);save();render();syncNow();
+  g.plays=(g.plays||0)+1;g.last=now();logAct("play",g);checkAch(g);save();render();syncNow();
 }
 window.onExit=function(id){
   if(!S)return;var g=gameBy(id);if(g&&run[id]){var dur=Math.round((now()-run[id].t)/1000);g.seconds=(g.seconds||0)+dur;g.last=now();g.sess=g.sess||[];g.sess.push([run[id].t,dur]);if(g.sess.length>120)g.sess.splice(0,g.sess.length-120);}
@@ -2585,7 +2611,10 @@ function removeFriend(f){
 function myStatus(){var inv=S.user.status==="invisible";return {t:"st",status:inv?"offline":S.user.status,playing:(S.set.showPlaying&&!inv)?playingName():"",name:S.user.name,color:S.user.color,p:profShare()};}
 function pubStatus(force){
   if(!frOn()||!S.fr.sk||!S.friends.length)return;
-  var o=myStatus(),sig=JSON.stringify(o);
+  var o=myStatus();
+  if(o.p&&JSON.stringify(o).length>2600){o.p.rec=(o.p.rec||[]).map(function(r){return r?{n:r.n,h:r.h,l:r.l,sid:r.sid,i:""}:r;});if(o.p.fav)o.p.fav.i="";}
+  if(o.p&&JSON.stringify(o).length>2600)o.p.ev=(o.p.ev||[]).slice(0,3);
+  var sig=JSON.stringify(o);
   if(!force&&sig===S.fr.last&&(o.status==="offline"||now()-S.fr.lastT<FR_HB))return;
   var s=seal(S.fr.sk,o);if(!s)return;
   S.fr.last=sig;S.fr.lastT=now();
@@ -2595,6 +2624,26 @@ function pubStatus(force){
   if(force||S.fr.avSent!==avs.length){var sa=seal(S.fr.sk,{t:"av",d:avs});if(sa&&sa.length<3700){S.fr.avSent=avs.length;relay(S.fr.stopic,"",sa);}}
 }
 /* polling */
+/* live relay: messages, requests and status arrive through one open connection */
+var frLive=0,frStreamSig="";
+function frTopics(){var tp=[frTopicReq(S.user.code)];S.friends.forEach(function(f){tp.push(frPairTopic(f));if(f.sk){if(!f.stopic)f.stopic=frStTopic(f.sk);tp.push(f.stopic);}});return tp.slice(0,150);}
+function frStream(){
+  if(!frOn()){if(frStreamSig){frStreamSig="";T(function(){return X.RelayStreamStop();});}return;}
+  var sig=frTopics().join(",");if(sig===frStreamSig)return;
+  frStreamSig=sig;T(function(){return X.RelayStream(sig,String(Math.floor(now()/1000)-60));});
+}
+var frLiveT=null;
+window.onRelayState=function(on){frLive=on==="1"?1:0;};
+window.onRelayMsg=function(line){
+  if(!S||!frOn())return;var m;try{m=JSON.parse(line);}catch(e){return;}
+  if(!m||m.event!=="message"||!m.id||S.fr.seen[m.id])return;
+  S.fr.seen[m.id]=m.time||Math.floor(now()/1000);
+  if(frHandle(m)){
+    S.friends.forEach(function(f){sendRc(f);});save();
+    clearTimeout(frLiveT);frLiveT=setTimeout(function(){renderFriends();if(P.page==="profile")renderProfile();},60);
+    if(frTopics().join(",")!==frStreamSig)frStream();
+  }
+};
 function frPoll(){
   if(!frOn()||frBusy)return;
   var tp=[frTopicReq(S.user.code)];
@@ -2615,7 +2664,7 @@ function frPoll(){
     S.friends.forEach(function(f){if(!f.sk&&now()-(f.askT||0)>3600000){f.askT=now();ch=1;frSend(f,{t:"hi",ask:1,sk:S.fr.sk,name:S.user.name,color:S.user.color});}});
     S.friends.forEach(function(f){sendRc(f);});
     if(ch)save();
-    renderFriends();
+    renderFriends();frStream();
   });
 }
 function frHandle(m){
@@ -2681,6 +2730,7 @@ function frPair(f,o,ts,id){
 /* chat + sharing */
 function sendChat(f,text){
   text=trim(text);if(!text)return;if(text.length>1000)text=text.substr(0,1000);
+  if(chatI)chatI.value="";
   var e={x:text,ts:now(),me:1,pend:1,mid:"m"+now().toString(36)+Math.floor(Math.random()*1e6).toString(36),st:"sending"};f.msgs.push(e);if(f.msgs.length>300)f.msgs.splice(0,f.msgs.length-300);P.draft="";
   renderFriends(true);
   frSend(f,{t:"msg",x:text,mid:e.mid},function(ok){delete e.pend;if(!ok){e.fail=1;e.st="fail";}else{delete e.fail;if(e.st==="sending")e.st="sent";}save();renderFriends();});
@@ -2713,6 +2763,10 @@ function renderFriends(toBottom){
   sel.value=S.user.status;sel.onchange=function(){S.user.status=sel.value;save();chip();renderFriends();syncNow();};
   mn.appendChild(sel);if(S.fr&&S.fr.pub)mn.appendChild(el("span","mcode","Code "+fmtCode(S.user.code)));me.appendChild(mn);
   var b=$("fpb"),cf=P.chat?findF(P.chat):null;
+  $("ftF").className=P.ftab==="act"?"":"on";$("ftA").className=P.ftab==="act"?"on":"";
+  if(!cf&&P.ftab==="act"&&frOn()){chatL=null;chatI=null;$("fpa").style.display="none";b.className="";b.innerHTML="";
+    var fl=friendFeed();if(!fl.length)b.appendChild(el("div","fempty",S.friends.length?"Nothing yet. When friends play, install or unlock something, it shows up here.":"Add friends to see what they\u2019re playing."));
+    fl.forEach(function(x){b.appendChild(feedRow(x));});updBadge();return;}
   if(!cf){chatL=null;chatI=null;}
   $("fpa").style.display=cf?"none":"";b.className=cf?"chat":"";
   if(cf){renderChat(cf,b,toBottom);updBadge();return;}
@@ -2821,8 +2875,8 @@ function updBadge(){
 function syncNow(){
   if(!S)return;
   if(!frOn()){renderFriends();return;}
-  pubStatus(false);
-  if(now()-frPollT>4000)frPoll();else renderFriends();
+  pubStatus(false);frStream();
+  if(now()-frPollT>(frLive?180000:4000))frPoll();else renderFriends();
 }
 
 /* ---------- slim scrollbars (the native ones are hidden) ---------- */
@@ -2891,7 +2945,7 @@ function checkAch(g,silent){
   if(!g)return;var got=[];g.ach=g.ach||{};
   achProg(g).forEach(function(p){if(!p.got&&p.v>=p.goal){g.ach[p.a[0]]=now();got.push(p.a);}});
   if(!got.length)return;save();
-  if(!silent){got.forEach(function(a,i){setTimeout(function(){achPop(a,g);},i*1600);});pubStatus(true);}
+  if(!silent){got.forEach(function(a,i){setTimeout(function(){achPop(a,g);},i*1600);});logAct("ach",g,got[got.length-1][0]);}
 }
 var achQ=0;
 function achPop(a,g){
@@ -2917,6 +2971,37 @@ function achSection(g){
     c.appendChild(t);grid.appendChild(c);
   });
   box.appendChild(grid);return box;
+}
+/* ---------- friend activity: what you and your friends played, installed and unlocked ---------- */
+function logAct(k,g,a){
+  if(!S||!g)return;S.act=S.act||[];
+  if(k==="play"&&S.act.some(function(e){return e.k==="play"&&e.g===g.name&&now()-e.t<3600000;}))return;
+  S.act.unshift({k:k,g:String(g.name).substr(0,60),sid:g.storeId||"",a:a||"",t:now()});if(S.act.length>20)S.act.length=20;
+  save();if(frOn())pubStatus(true);
+}
+function friendFeed(){
+  var l=[];if(!S)return l;
+  S.friends.forEach(function(f){
+    if(f.playing&&pstate(f)!=="offline")l.push({f:f,e:{k:"now",g:f.playing,sid:"",t:f.seen||now()}});
+    ((f.prof&&f.prof.ev)||[]).forEach(function(e){if(!(e.k==="play"&&f.playing===e.g&&pstate(f)!=="offline"))l.push({f:f,e:e});});
+  });
+  return l.sort(function(a,b){return b.e.t-a.e.t;}).slice(0,40);
+}
+function feedGame(e){var it=e.sid?storeById(e.sid):null;if(!it){var a=allStore(),i,n=String(e.g||"").toLowerCase();for(i=0;i<a.length;i++)if(a[i].name.toLowerCase()===n){it=a[i];break;}}return it;}
+function feedRow(x,compact){
+  var f=x.f,e=x.e,it=feedGame(e),mine=it?inLib(it.id):null,r=el("div","fa");
+  r.appendChild(avatar(fname2(f),f.color,36,pstate(f),f.av));
+  var t=el("div","fat"),line=el("div","fal");
+  line.appendChild(el("b","",fname2(f)));
+  var verb=e.k==="now"?" is playing ":e.k==="play"?" played ":e.k==="inst"?" installed ":" unlocked ";
+  line.appendChild(document.createTextNode(verb));
+  if(e.k==="ach"&&ACHM[e.a]){line.appendChild(el("b","",ACHM[e.a][1]));line.appendChild(document.createTextNode(" in "));}
+  line.appendChild(el("b","",e.g));t.appendChild(line);
+  t.appendChild(el("span","fas",e.k==="now"?"right now":ago(e.t)));r.appendChild(t);
+  if(it){var th=el("div","fath");paint(th,it.name,it.image||it.hero||"");r.appendChild(th);
+    r.appendChild(mine?btn("Play","btn sm",function(){P.cur=mine.id;setFP(false);nav("game");if(!run[mine.id])playToggle();}):jobOf(it)?btn("Queued","btn sm",function(){nav("downloads");}):btn("Get it","pri sm",function(){install(it);renderFriends();}));
+    th.onclick=function(){setFP(false);openDetail(it);};}
+  return r;
 }
 /* ---------- profiles ---------- */
 var COUNTRIES=["","United States","Canada","Mexico","Brazil","Argentina","Colombia","Chile","United Kingdom","Ireland","France","Germany","Spain","Portugal","Italy","Netherlands","Belgium","Sweden","Norway","Denmark","Finland","Poland","Ukraine","Romania","Greece","Turkey","Russia","India","Pakistan","Philippines","Indonesia","Malaysia","Singapore","Vietnam","Thailand","China","Japan","South Korea","Australia","New Zealand","South Africa","Nigeria","Egypt","Saudi Arabia","United Arab Emirates","Israel"];
@@ -2977,13 +3062,15 @@ function profShare(){
   return {lv:m.lvi.lv,xp:m.xp,bd:m.bd,feat:m.feat,rn:cut(m.rn,40),cn:cut(m.cn,30),bio:cut(m.bio,180),since:m.since,gc:m.gc,hrs:Math.round(m.hrs),h2:Math.round(m.h2*10)/10,fc:m.fc,
     fav:m.fav?{n:cut(m.fav.n,60),i:cut(m.fav.i,300),h:Math.round(m.fav.h*10)/10,l:m.fav.l,sid:m.fav.sid}:null,
     rec:m.rec.slice(0,3).map(function(r){return {n:cut(r.n,60),i:cut(r.i,300),h:Math.round(r.h*10)/10,l:r.l,sid:r.sid};}),
-    ac:m.ac,ar:m.ar.slice(0,4).map(function(x){return {id:x.id,g:cut(x.g,60),t:x.t};})};
+    ac:m.ac,ar:m.ar.slice(0,4).map(function(x){return {id:x.id,g:cut(x.g,60),t:x.t};}),
+    ev:(S.act||[]).slice(0,6).map(function(e){return {k:e.k,g:cut(e.g,50),sid:cut(e.sid,24),a:e.a,t:e.t};})};
 }
 function cleanProf(o){
   var s=function(v,n){return String(v||"").substr(0,n);},num=function(v){return Math.max(0,+v||0);},img=function(v){v=s(v,300);return /^https:\/\//.test(v)?v:"";};
   var g=function(r){return r&&typeof r==="object"?{n:s(r.n,60),i:img(r.i),h:num(r.h),l:num(r.l),sid:s(r.sid,40)}:null;};
   return {lv:Math.min(999,Math.max(1,Math.floor(num(o.lv))||1)),xp:num(o.xp),bd:(o.bd&&o.bd.length?o.bd:[]).filter(function(b){return BADGE[b];}).slice(0,20),feat:BADGE[o.feat]?o.feat:"",
     rn:s(o.rn,40),cn:s(o.cn,30),bio:s(o.bio,180),since:num(o.since),gc:num(o.gc),hrs:num(o.hrs),h2:num(o.h2),fc:num(o.fc),fav:g(o.fav),rec:(o.rec&&o.rec.length?o.rec:[]).slice(0,3).map(g),
+    ev:(o.ev&&o.ev.length?o.ev:[]).filter(function(e){return e&&/^(play|inst|ach)$/.test(e.k);}).slice(0,6).map(function(e){return {k:e.k,g:s(e.g,50),sid:s(e.sid,24),a:ACHM[e.a]?e.a:"",t:num(e.t)};}),
     ac:num(o.ac),ar:(o.ar&&o.ar.length?o.ar:[]).filter(function(x){return x&&ACHM[x.id];}).slice(0,4).map(function(x){return {id:x.id,g:s(x.g,60),t:num(x.t)};})};
 }
 function profFriend(f){
@@ -3122,6 +3209,7 @@ function checkGameUpdates(manual){
 function updateGame(g){
   if(!g||!g.updAvail)return;
   if(run[g.id]){toast("Close "+g.name+" before updating it");return;}
+  if(g.moving){toast("Wait until "+g.name+" has finished moving");return;}
   var ex=jobOfGame(g);if(ex){if(ex.st==="paused"||ex.st==="error")resumeJob(ex);else nav("downloads");return;}
   var it=storeById(g.storeId);if(!it){toast("This game is no longer in the store, so it can’t be updated");return;}
   addJob(newJob(it,{upd:g}));
@@ -3257,6 +3345,81 @@ function reportError(kind,msg,where,stack){
   }catch(e){}
 }
 window.onerror=function(msg,src,line,col,err){reportError("Script error",String(msg),"line "+line+":"+(col||0),err&&err.stack?String(err.stack).substr(0,3000):"");return false;};
+/* ---------- move a game to another drive ---------- */
+function driveList(){
+  var raw=T(function(){return X.Drives();},""),out=[];
+  raw.split("\n").forEach(function(r){if(!r)return;var f=r.split("|"),tot=+f[3],fr=+f[4];if(!tot||f[2]==="CDRom"||f[2]==="Network")return;out.push({root:f[0],label:f[1]||driveTypeName(f[2]),free:fr,total:tot});});
+  return out;
+}
+function moveGame(g){
+  var dir=gameDir(g);if(!dir){toast("Only games installed by Xaly can be moved");return;}
+  if(run[g.id]){toast("Close "+g.name+" before moving it");return;}
+  if(jobOfGame(g)){toast("Wait for the update of "+g.name+" to finish first");return;}
+  if(g.moving){showMove(g);return;}
+  var size=+T(function(){return X.DirBytes(dir);},"0")||0,cur=dir.substr(0,3).toUpperCase(),drives=driveList();
+  openForm("Move "+g.name,[],"Cancel",function(){},null);
+  var bx=$("mbox"),ok=bx.getElementsByTagName("button");ok[ok.length-1].style.display="none";
+  var info=el("div","mvinfo","Size: "+fmtB(size)+"   ·   now on "+cur.replace(/\\$/,"")+". Pick where it should go. Your play time, achievements and updates stay with it.");
+  var list=el("div","mvlist");
+  drives.forEach(function(d){
+    var here=d.root.toUpperCase()===cur,fits=d.free>size+67108864,r=el("button","mvd"+(here?" here":"")+(!fits&&!here?" full":""));
+    var bar=el("div","bar2"),fl=el("div","fl"+((d.total-d.free)/d.total>.9?" hi":""));fl.style.width=Math.round((d.total-d.free)*100/d.total)+"%";bar.appendChild(fl);
+    var t=el("div","mvt");t.appendChild(el("b","",d.label+" ("+d.root.replace(/\\$/,"")+")"));t.appendChild(el("span","",here?"The game is here now":fmtG(d.free)+" free"+(fits?"":"  ·  not enough space")));r.appendChild(t);r.appendChild(bar);
+    if(here||!fits)r.disabled=true;else r.onclick=function(){closeForm();startMove(g,d.root);};
+    list.appendChild(r);
+  });
+  bx.insertBefore(list,bx.childNodes[1]);bx.insertBefore(info,bx.childNodes[1]);
+}
+function startMove(g,root){
+  var r=T(function(){return X.MoveGame(g.id,gameDir(g),root);});
+  if(r.indexOf("ERR")===0){toast(r.replace("ERR:",""));return;}
+  g.moving={from:gameDir(g),to:r,pct:-1,b:0,t:0,st:now()};render();showMove(g);
+}
+function showMove(g){
+  var m=g.moving;if(!m)return;
+  openForm("Moving "+g.name,[],"Cancel move",function(){T(function(){return X.CancelMove(g.id);});toast("Cancelling…");},null);
+  var bx=$("mbox"),bs=bx.getElementsByTagName("button");bs[0].textContent="Hide";
+  var w=el("div","mvp");w.appendChild(el("div","mvto","To "+m.to));var bar=el("div","ubar"),fi=el("i");fi.id="mvfill";bar.appendChild(fi);w.appendChild(bar);
+  var st=el("div","ustat");var a=el("span");a.id="mvpct";var b=el("span");b.id="mvinf";st.appendChild(a);st.appendChild(b);w.appendChild(st);
+  bx.insertBefore(w,bx.childNodes[1]);paintMove(g);
+}
+function paintMove(g){
+  var m=g.moving;if(!m||!$("mvfill"))return;
+  $("mvfill").style.width=(m.pct>=0?m.pct:4)+"%";$("mvpct").textContent=m.pct>=0?m.pct+"%":"Starting…";
+  var sp=m.b/Math.max(1,(now()-m.st)/1000);$("mvinf").textContent=m.t?fmtB(m.b)+" of "+fmtB(m.t)+(m.b>0?"  ·  "+fmtB(sp)+"/s":""):"";
+}
+window.onMove=function(id,kind,a,b){
+  if(!S)return;var g=gameBy(id);if(!g||!g.moving)return;var m=g.moving;
+  if(kind==="p"){m.b=+a;m.t=+b;m.pct=m.t?Math.min(99,Math.floor(m.b*100/m.t)):-1;paintMove(g);return;}
+  delete g.moving;if($("mvfill"))closeForm();
+  if(kind==="done"){
+    var parts=String(a).split("|"),nd=parts[0];
+    if(g.path&&g.path.toLowerCase().indexOf(m.from.toLowerCase())===0)g.path=nd+g.path.substr(m.from.length);
+    sizeQ[g.id]=0;save();
+    notify("ok","Moved "+g.name,"It’s now in "+nd+"."+(parts[1]?" The old folder couldn’t be fully removed ("+parts[1]+"), you can delete it by hand.":""),g,gArt(g));
+  }else if(kind==="cancel")toast("Move cancelled. "+g.name+" stayed where it was.");
+  else notify("err","Couldn’t move "+g.name,a||"Something went wrong. The game stayed where it was.",g,gArt(g));
+  render();
+};
+/* ---------- download size and free space ---------- */
+function dlDirFree(){var d=T(function(){return X.Paths();},"|").split("|")[0]||"";return {dir:d,drive:d.substr(0,2).toUpperCase(),free:+T(function(){return X.FreeSpace(d);},"-1")};}
+function needFor(it,size){var k=it.kind&&it.kind!=="page"?it.kind:(it.dlKind||"archive");return Math.round(size*(k==="archive"?2.5:1.2));}
+function fetchSize(it,cb){
+  if(it.dlSize){if(cb)cb(it.dlSize);return;}
+  if(!(isItch(it)||isGh(it))){if(cb)cb(0);return;}
+  if(fetchSize.b[it.id]){return;}fetchSize.b[it.id]=1;
+  resolveAny(it,function(err,r){delete fetchSize.b[it.id];if(!err&&r&&r.up&&r.up.sz){it.dlSize=r.up.sz;it.dlKind=r.kind;if(it.live)saveCat();else save();}if(cb)cb(it.dlSize||0);},true);
+}
+fetchSize.b={};
+function spaceCheck(it,go){
+  fetchSize(it,function(size){
+    var fd=dlDirFree();
+    if(!size||fd.free<0||fd.free>=needFor(it,size)){go();return;}
+    openForm("Not enough space on "+fd.drive,[],"Install anyway",function(){go();},null);
+    var bx=$("mbox"),n=el("div","fbm",it.name+" is a "+fmtB(size)+" download and needs about "+fmtB(needFor(it,size))+" while it installs. Only "+fmtB(Math.max(0,fd.free))+" is free on "+fd.drive+". Free up some space, or pick another download folder in Settings › Downloads.");
+    bx.insertBefore(n,bx.childNodes[1]);
+  });
+}
 /* ---------- sounds ---------- */
 function playSnd(n){if(!S||S.set.sounds===0)return;T(function(){return X.PlaySound(n);});}
 /* ---------- notifications ---------- */
@@ -3651,6 +3814,7 @@ $("chip").onclick=function(e){stp(e);ctxMenu($("chip"),[{h:"Signed in as "+S.use
 $("ovx").onclick=function(){T(function(){return X.OverlayClose();});};
 $("fbtn").onclick=function(){if(ovOn)return;var o=$("fp").className==="open";setFP(!o);if(!o){renderFriends(true);if(now()-frPollT>5000)frPoll();}};
 $("fq").onkeyup=renderFriends;
+$("ftF").onclick=function(){P.ftab="";P.chat=null;renderFriends();};$("ftA").onclick=function(){P.ftab="act";P.chat=null;renderFriends();};
 $("fadd").onclick=function(){if(!frOn()){toast(frErr||"Turn on online friends in Settings \u203A Friends first");return;}openForm("Add a friend",[{id:"code",label:"Their friend code (yours is "+fmtCode(S.user.code)+")",ph:"123 456 789"},{id:"nick",label:"Nickname (optional)"}],"Send request",function(v){return addFriend(v.code,v.nick);},null);};
 $("dlb").onclick=function(){nav("downloads");};
 $("tDl").onclick=function(){nav("downloads");};$("tTv").onclick=function(){enterTV();};$("tProf").onclick=function(){openProfile("");};$("tSet").onclick=function(){nav("settings",P.page==="settings"?P.tab:"account");};
@@ -3703,7 +3867,7 @@ function init(){
   setInterval(function(){refreshLive(false);},30*60000);
   setInterval(function(){if(S&&(!S.guT||now()-S.guT>6*3600000))checkGameUpdates(false);},15*60000);
   setInterval(padTick,33);if(ENGINE==="ie")T(function(){return X.PadNative("1");});
-  setInterval(function(){if(chatOpen()&&now()-frPollT>6000)frPoll();},2000);
+  setInterval(function(){if(chatOpen()&&!frLive&&now()-frPollT>6000)frPoll();},2000);
   if(T(function(){return X.SelfTest();},"0")==="1"){SELFTEST=true;setTimeout(selfTest,1500);}
 }
 function selfTest(){   // run by the build server: proves both directions of the page <-> app bridge work
@@ -3719,6 +3883,15 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("crashlog",function(){return X.CrashLog("page","self-test entry (not a real crash)");});
   c("ach",function(){var g={id:"t",name:"T",plays:12,seconds:3*3600+60,sess:[[new Date(2026,0,3,1,0).getTime(),11000],[new Date(2026,0,4,20,0).getTime(),600],[new Date(2026,0,5,20,0).getTime(),600]]};checkAch(g,true);var k,l=[];for(k in g.ach)l.push(k);return l.sort().join(",");});
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});
+  c("drives",function(){return X.Drives().split("\n").length+" drive(s)";});
+  c("freespace",function(){var v=+X.FreeSpace(X.Paths().split("|")[0]);return v>0?"ok "+Math.round(v/1073741824)+" GB":"bad "+v;});
+  c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
+  c("relaylive",function(){
+    var tp="xaly-selftest-"+X.RandHex("6"),orm=window.onRelayMsg,ors=window.onRelayState,t0=new Date().getTime();
+    window.onRelayState=function(on){if(on==="1"&&!r.relayPub){r.relayPub=1;cbs.selfpub=function(){};X.Relay("selfpub",tp,"","ping");}};
+    window.onRelayMsg=function(line){if(line.indexOf("ping")>-1){r.checks.relaylive="message after "+(new Date().getTime()-t0)+" ms";X.RelayStreamStop();window.onRelayMsg=orm;window.onRelayState=ors;}};
+    return X.RelayStream(tp,String(Math.floor(t0/1000)))+" waiting";
+  });
   var id="h_self",done=false;
   function fin(){if(done)return;done=true;r.ok=r.checks.seal==="h\u00e9llo\n\"x\""&&/^done/.test(r.checks.download||"");r.checks.dlsize=T(function(){return X.FileSizeOf("selftest-dl.bin");},"?");T(function(){return X.SelfTestDone(JSON.stringify(r));});}
   cbs[id]=function(ok,text,st){

@@ -1,2 +1,5 @@
-- **Sounds:** a soft chime plays when a game finishes downloading or updating, and a little fanfare plays when you unlock an achievement. You hear them even while you're in a game.
-- Turn sounds off, or press the buttons to hear them, in Settings › General.
+- **Move games to another drive:** open a game and press **Move** (or ⋯ › Move to another drive). Xaly shows each drive's free space, copies the game with a progress bar you can cancel, and keeps your play time, achievements and updates.
+- **Instant messages:** friends' messages, requests and status now arrive within about a second through a live connection, instead of waiting for the next check.
+- Fixed: your message stayed in the box after you pressed send.
+- **Friend activity:** a new Activity tab in the Friends panel shows what friends played, installed and unlocked, with **Get it** and **Play** buttons. The Store also gets a "Your friends are playing" shelf.
+- **Size and space check:** game pages show the download size and how much space is free, and Xaly warns you before installing if the drive is too full.

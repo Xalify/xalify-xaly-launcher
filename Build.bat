@@ -25,7 +25,7 @@ if exist "webview2\Microsoft.Web.WebView2.WinForms.dll" (
 "%CSC%" /nologo /target:winexe /optimize+ /out:"Xaly Launcher.exe" /win32icon:xaly.ico %REFS% %WV% Xaly.cs
 if errorlevel 1 (
   echo.
-  echo The build failed. Please send the messages above to Claude.
+  echo The build failed. The messages above say what went wrong.
   pause
   exit /b 1
 )

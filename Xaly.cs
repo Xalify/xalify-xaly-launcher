@@ -562,11 +562,22 @@ namespace Xaly
             if (dls.TryGetValue(id, out wc)) wc.CancelAsync();
             return "ok";
         }
-        public string Extract(string zip, string name)
+        // 1.8.9: where games go on a drive: the usual Games folder on the download folder's drive, "X:\Xaly Games" on any other
+        string GamesDirFor(string drive)
+        {
+            string home = Path.Combine(f.DownloadsDir, "Games");
+            if (string.IsNullOrEmpty(drive)) return home;
+            string root = Path.GetPathRoot(drive);
+            if (string.IsNullOrEmpty(root) || !Directory.Exists(root)) return home;
+            if (string.Equals(root, Path.GetPathRoot(Path.GetFullPath(f.DownloadsDir)), StringComparison.OrdinalIgnoreCase)) return home;
+            return Path.Combine(root, "Xaly Games");
+        }
+        public string Extract(string zip, string name) { return ExtractTo(zip, name, ""); }
+        public string ExtractTo(string zip, string name, string drive)
         {
             try
             {
-                string dir = Path.Combine(Path.Combine(f.DownloadsDir, "Games"), SafeName(name));
+                string dir = Path.Combine(GamesDirFor(drive), SafeName(name));
                 if (Directory.Exists(dir)) Directory.Delete(dir, true);
                 Directory.CreateDirectory(dir);
                 Unpack(zip, dir);
@@ -613,7 +624,8 @@ namespace Xaly
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
         // a single-.exe game gets its own folder under Games, so it can be moved and uninstalled like any other game
-        public string PlaceStandalone(string file, string game)
+        public string PlaceStandalone(string file, string game) { return PlaceStandaloneTo(file, game, ""); }
+        public string PlaceStandaloneTo(string file, string game, string drive)
         {
             try
             {
@@ -621,7 +633,7 @@ namespace Xaly
                 string root = Path.GetFullPath(f.DownloadsDir).TrimEnd('\\');
                 if (!string.Equals((Path.GetDirectoryName(full) ?? "").TrimEnd('\\'), root, StringComparison.OrdinalIgnoreCase)) return "ERR:Not a loose download.";
                 if (!File.Exists(full) || !full.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return "ERR:File not found.";
-                string games = Path.Combine(root, "Games"), nm = SafeName((game ?? "").Trim().TrimEnd('.'));
+                string games = GamesDirFor(drive), nm = SafeName((game ?? "").Trim().TrimEnd('.'));
                 if (nm == "x") nm = Path.GetFileNameWithoutExtension(full);
                 string dir = Path.Combine(games, nm); int n = 2;
                 while (Directory.Exists(dir) && Directory.GetFileSystemEntries(dir).Length > 0) { dir = Path.Combine(games, nm + " (" + n + ")"); n++; }
@@ -1989,6 +2001,10 @@ namespace Xaly
         // ---- in-game overlay (Shift+Tab)
         public string OverlayHotkey(string on) { return f.SetHotkey(on == "1") ? "ok" : "ERR:Shift+Tab is already used by another app."; }
         public string OverlayClose() { f.CloseOverlay(); return "ok"; }
+        // 1.8.9: the page has drawn the overlay off-screen / finished its closing animation / wants the keyboard for typing
+        public string OverlayReady() { f.OverlayReady(); return "ok"; }
+        public string OverlayDone() { f.OverlayDone(); return "ok"; }
+        public string OverlayFocus() { f.OverlayFocus(); return "ok"; }
         public string OverlayShots()
         {
             try { string d = ShotDir(); Directory.CreateDirectory(d); Process.Start(d); return "ok"; }
@@ -2271,6 +2287,19 @@ namespace Xaly
         [DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+        [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int cmd);
+        [DllImport("user32.dll")] static extern int GetWindowLong(IntPtr hWnd, int index);
+        [DllImport("user32.dll")] static extern int SetWindowLong(IntPtr hWnd, int index, int value);
+        static readonly IntPtr HWND_TOPMOST = new IntPtr(-1), HWND_NOTOPMOST = new IntPtr(-2);
+        const uint SWP_NOSIZE = 0x1, SWP_NOMOVE = 0x2, SWP_NOACTIVATE = 0x10, SWP_SHOWWINDOW = 0x40;
+        const int GWL_EXSTYLE = -20, WS_EX_NOACTIVATE = 0x08000000;
+        // keys the overlay borrows while it's open, so it can be used without taking focus from the game
+        static readonly int[][] OV_KEYS = new int[][] { new int[] { 0x26, 1 }, new int[] { 0x28, 2 }, new int[] { 0x25, 3 }, new int[] { 0x27, 4 }, new int[] { 0x0D, 5 }, new int[] { 0x1B, 6 } };
+        static readonly string[] OV_KEYN = new string[] { "", "up", "down", "left", "right", "a", "b" };
+        bool ovKeysOn = false, ovShowing = false, ovFocused = false, ovClosing = false;
+        protected override bool ShowWithoutActivation { get { return overlayOn; } }
+        System.Windows.Forms.Timer ovTimer;
         const int OVERLAY_HOTKEY = 0x58A1;
         bool hotkeyOn = false, overlayOn = false, ovWasVisible = false;
         IntPtr ovGame = IntPtr.Zero;
@@ -2307,6 +2336,11 @@ namespace Xaly
             if (m.Msg == 0x0312 && m.WParam.ToInt32() == OVERLAY_HOTKEY)
             {
                 if (overlayOn) CloseOverlay(); else OpenOverlay();
+                return;
+            }
+            if (m.Msg == 0x0312 && m.WParam.ToInt32() > OVERLAY_HOTKEY && m.WParam.ToInt32() <= OVERLAY_HOTKEY + 6)
+            {
+                if (overlayOn) Js("onOvKey", OV_KEYN[m.WParam.ToInt32() - OVERLAY_HOTKEY]);
                 return;
             }
             base.WndProc(ref m);
@@ -2353,7 +2387,7 @@ namespace Xaly
         }
         void PadPoll()
         {
-            if (Form.ActiveForm != this || padApi == 0) return;
+            if ((Form.ActiveForm != this && !overlayOn) || padApi == 0) return;
             int bits = 0;
             for (int i = 0; i < 4; i++)
             {
@@ -2369,13 +2403,37 @@ namespace Xaly
             if (bits != padLast) { padLast = bits; Js("onPad", bits.ToString()); }
         }
 
+        void OvKeys(bool on)
+        {
+            if (on == ovKeysOn) return;
+            foreach (int[] k in OV_KEYS)
+            {
+                if (on) RegisterHotKey(Handle, OVERLAY_HOTKEY + k[1], 0x4000, (uint)k[0]);
+                else UnregisterHotKey(Handle, OVERLAY_HOTKEY + k[1]);
+            }
+            ovKeysOn = on;
+        }
+        void NoActivate(bool on)
+        {
+            try { int st = GetWindowLong(Handle, GWL_EXSTYLE); SetWindowLong(Handle, GWL_EXSTYLE, on ? (st | WS_EX_NOACTIVATE) : (st & ~WS_EX_NOACTIVATE)); } catch (Exception) { }
+        }
+        void OvAfter(int ms, Action a)
+        {
+            if (ovTimer != null) { ovTimer.Stop(); ovTimer.Dispose(); }
+            ovTimer = new System.Windows.Forms.Timer(); ovTimer.Interval = ms;
+            ovTimer.Tick += delegate(object s, EventArgs e) { ovTimer.Stop(); a(); };
+            ovTimer.Start();
+        }
+        Rectangle ovTarget;
+        // 1.8.9: the overlay never takes focus from the game (fullscreen games often minimise or switch screen mode when they
+        // lose it). It is drawn off-screen first, over a freeze-frame of the game, then slid into place in one step.
         public void OpenOverlay()
         {
             if (overlayOn) return;
             IntPtr fg = GetForegroundWindow();
             ovGame = fg == Handle ? IntPtr.Zero : fg;
             Screen sc = ovGame != IntPtr.Zero ? Screen.FromHandle(ovGame) : Screen.FromPoint(Cursor.Position);
-            Rectangle b = sc.Bounds;
+            Rectangle b = sc.Bounds; ovTarget = b;
             string url = "";
             try
             {
@@ -2391,29 +2449,61 @@ namespace Xaly
             ovState = WindowState;
             ovBorder = FormBorderStyle;
             ovBounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
-            overlayOn = true;
+            overlayOn = true; ovShowing = false; ovFocused = false; ovClosing = false;
             allowVisible = true;
+            NoActivate(true);
             if (WindowState != FormWindowState.Normal) WindowState = FormWindowState.Normal;
             FormBorderStyle = FormBorderStyle.None;
-            Bounds = b;
-            TopMost = true;
-            if (!Visible) Show();
-            Activate();
-            FocusView();
+            // off-screen, at the final size, so the page can draw the overlay before anyone sees it
+            int off = 0; foreach (Screen s2 in Screen.AllScreens) off = Math.Max(off, s2.Bounds.Right);
+            SetWindowPos(Handle, HWND_TOPMOST, off + 200, b.Y, b.Width, b.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            if (!Visible) Show();   // ShowWithoutActivation keeps the game focused
+            OvKeys(true);
             Js("onOverlay", "1", url);
+            OvAfter(700, delegate { OverlayReady(); });   // the page didn't answer: show it anyway
         }
-
+        public void OverlayReady()
+        {
+            if (!overlayOn || ovShowing) return;
+            ovShowing = true;
+            if (ovTimer != null) ovTimer.Stop();
+            SetWindowPos(Handle, HWND_TOPMOST, ovTarget.X, ovTarget.Y, ovTarget.Width, ovTarget.Height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            Js("onOverlayShown");
+        }
+        // typing a message needs the keyboard: only then does the overlay take focus
+        public void OverlayFocus()
+        {
+            if (!overlayOn || ovFocused) return;
+            ovFocused = true; OvKeys(false); NoActivate(false);
+            Activate(); FocusView();
+        }
         public void CloseOverlay()
         {
             if (!overlayOn) return;
-            overlayOn = false;
+            overlayOn = false; ovClosing = true;
+            OvKeys(false);
             Js("onOverlay", "0", "");
+            OvAfter(400, delegate { OverlayDone(); });   // the page didn't finish its animation: close anyway
+        }
+        public void OverlayDone()
+        {
+            if (overlayOn || !ovClosing) return;
+            ovClosing = false;
+            if (ovTimer != null) ovTimer.Stop();
+            ovShowing = false;
+            NoActivate(false);
+            if (!ovWasVisible) Hide();
             TopMost = false;
             FormBorderStyle = ovBorder;
             Bounds = ovBounds;
             WindowState = ovState;
-            if (!ovWasVisible) Hide();
-            if (ovGame != IntPtr.Zero) { try { SetForegroundWindow(ovGame); } catch (Exception) { } }
+            if (ovGame != IntPtr.Zero)
+            {
+                // tuck the launcher back under the game without touching the game's focus
+                if (ovWasVisible) SetWindowPos(Handle, ovGame, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                if (ovFocused) { try { SetForegroundWindow(ovGame); } catch (Exception) { } }
+            }
+            Js("onOverlayGone");
         }
 
         public MainForm(bool startHidden)

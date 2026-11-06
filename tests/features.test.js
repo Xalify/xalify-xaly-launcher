@@ -47,6 +47,18 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
  vm.runInContext(code,ctx);
  ctx.ONLINE_ACCOUNTS=0;ctx.createAcc();fill(["Alice","alice@gmail.com","pw1234","pw1234"]);mbtn("Create account").onclick({});
  ok(ctx.S&&ctx.S.user,"signed in");
+ // ---- 1.8.9 pick a drive before installing
+ {const it={id:"dpk",name:"Drive Pick Game",url:"https://dp.itch.io/g",fr:"Indie",live:1,dlSize:1000000000};ctx.CAT.items.push(it);
+  const oldX=X.ExtractTo;let ex=null;X.ExtractTo=(z,n,d)=>{ex=d;return "D:\\Xaly Games\\Drive Pick Game\\g.exe|D:\\Xaly Games\\Drive Pick Game";};
+  ctx.install(it);ok(reg.mbox.children[0]&&/Where should Drive Pick Game go/.test(reg.mbox.children[0].textContent),"installing asks which drive first");
+  ok(reg.mbox.find(c=>c.className&&/^dpr/.test(c.className)).length===3,"every drive is listed");
+  ok(reg.mbox.find(c=>c.className&&/dpr low/.test(c.className)).length===1,"a drive without room for the game can't be picked");
+  const rows=reg.mbox.find(c=>c.className&&/^dpr/.test(c.className));rows[1].onclick({});mbtn("Install here").onclick({});await sleep(400);
+  const jb=ctx.jobOf(it);ok(jb&&jb.drive==="D:","the game is queued for the chosen drive");
+  ctx.finish(it,"C:\\dl\\x.download","archive",jb.drive);ok(ex==="D:","it unpacks onto that drive");
+  ok(ctx.S.set.instDrive==="D:","the drive is remembered for next time");
+  ctx.DQ.length=0;ctx.dl=null;ctx.S.games=ctx.S.games.filter(g=>g.storeId!=="dpk");X.ExtractTo=oldX;
+  ctx.S.set.instAsk=0;ctx.S.set.instDrive="";}   // the older install tests below don't answer the drive question
  // ---- move
  const g={id:"gx",name:"Zed",path:"C:\\dl\\Games\\Zed\\bin\\zed.exe",storeId:"m1",seconds:0,added:1};ctx.S.games.push(g);
  ok(ctx.gameDir(g)==="C:\\dl\\Games\\Zed","gameDir default root");

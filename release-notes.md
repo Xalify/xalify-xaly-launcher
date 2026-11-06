@@ -1,1 +1,9 @@
-- **Fixed:** games opened on 1.8.6 that picked a piece of artwork as their logo are checked again the next time you open them, and get the right art.
+- **Choose the drive:** installing a game now asks which drive it goes on. It lists every drive with its free space and how much room the game needs, and greys out drives that are too full. Tick "Always install games on this drive" to stop being asked, or change it any time in **Settings › Downloads › Where games go**. Games on another drive go into its **Xaly Games** folder, and Move, Storage and Uninstall work as before.
+- **TV mode redesigned:**
+  - **Home, Library, Store, Friends and Downloads** tabs, switched with LB/RB or Q/E.
+  - A backdrop that fades and slowly drifts between game art, with the game's logo art in the spotlight.
+  - Bigger tiles that lift and glow.
+  - Full-screen game pages with a screenshot slideshow, play time, achievements and big buttons.
+  - Downloads with live progress, and friends showing what they're playing.
+  - Installing from TV mode uses a controller-friendly drive picker.
+- **Smoother overlay that doesn't break fullscreen games:** the overlay no longer takes focus from your game. Many fullscreen games minimise or change screen mode when they lose focus, and that no longer happens. The overlay is prepared off-screen over a freeze-frame of your game, then the game blurs and the panels glide in, with no flash of the launcher. Closing plays it backwards. While it's open, move around with the arrow keys, Enter and Esc, or a controller. It only takes the keyboard when you click into a text box to type.

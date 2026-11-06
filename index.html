@@ -763,6 +763,13 @@ html,body{overflow:hidden}
 .fgth{width:64px;height:36px;border-radius:6px;flex:0 0 auto;margin-right:12px;background-size:cover;background-position:center}
 .fgt{min-width:0}.fgt b{display:block;font-size:13.5px}.fgt span{display:block;color:#7d8299;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px}
 .lemail+.lemail{margin-left:10px}
+
+/* ===== 1.7.0 ===== */
+.im{position:relative}
+.imo{opacity:0;display:inline-block;vertical-align:middle;background:transparent;color:#8a90a8;font-size:16px;line-height:1;padding:4px 6px;border-radius:8px;margin:0 4px;transition:opacity .12s}
+.im:hover .imo{opacity:1}.imo:hover{background:#1e2433;color:#fff}
+.blr{display:flex;align-items:center;background:#141821;border-radius:12px;padding:10px 14px;margin:-4px 0 10px;max-width:720px;box-sizing:border-box}
+.blt{flex:1 1 0%;margin-left:12px;min-width:0}.blt b{display:block;font-size:14px}.blt span{display:block;color:#7d8299;font-size:12px}
 </style>
 <style id="theme"></style>
 </head>
@@ -816,8 +823,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.6.9";
+var VER="1.7.0";
 var NOTES=[
+ {v:"1.7.0",d:"6 Nov 2026",t:["Block people: from their chat, by right-clicking them in your friends list, or from a friend request. They can\u2019t message you, see you online, challenge you or send requests, and they aren\u2019t told","Delete messages: right-click a message or use its \u22EF button. Delete any message for yourself, or your own messages for everyone","Blocked people are listed in Settings \u203A Friends, where you can unblock them"]},
  {v:"1.6.9",d:"5 Nov 2026",t:["Click the Xaly logo for a menu with every page, each part of Settings, Find games, updates, What\u2019s new, feedback, Hide to tray, Sign out and Quit"]},
  {v:"1.6.8",d:"5 Nov 2026",t:["Find games on PC now looks for itch.io games you downloaded yourself (Downloads, Desktop, Documents, Program Files, Games folders, the itch.io app) and adds them with the Store\u2019s name and cover art. Steam, Epic and GOG are no longer scanned","Games from the Store that you download outside Xaly, like Super Smash Bros. Crusade, are added to your library by themselves","A downloaded .zip of a Store game can be unpacked and installed straight from Find games on PC"]},
  {v:"1.6.7",d:"5 Nov 2026",t:["Find games on your PC: Library \u203A Find games on PC adds your Steam, Epic Games, GOG and itch.io app games, plus any folder you pick, in one go","Account backup: save your library, play time, achievements and friends to a password-protected file and restore it on another PC (Settings \u203A Account, or the sign-in screen)","Desktop and Start menu shortcuts for any game, from its \u22EF menu. They start the game through Xaly, so play time still counts","Xaly Launcher now shows up in Windows Settings \u203A Apps with a proper uninstaller, and in the Start menu"]},
@@ -2900,6 +2908,7 @@ function addFriend(code,nick){
   if(code.length!==9){toast("A friend code has 9 digits");return false;}
   if(code===S.user.code){toast("That's your own code");return false;}
   if(findF(code)){toast("They're already your friend");return false;}
+  if(isBlocked(code)){toast("You blocked this person. Unblock them in Settings \u203A Friends first.");return false;}
   var ii=findIn(S.fr.inc,code);if(ii>=0){acceptReq(S.fr.inc[ii]);return;}
   relay(frTopicReq(code),"",meCard("req"),function(ok,t,st){
     if(!ok){frNet(st);toast("Couldn't send the request. Check your connection and try again.");return;}
@@ -2998,6 +3007,7 @@ function frHandle(m){
   if(tp===frTopicReq(S.user.code)){
     try{o=JSON.parse(msg);}catch(e){return false;}
     if(!o||o.xaly!==1||!/^\d{9}$/.test(o.code||"")||o.code===S.user.code||!o.pub)return false;
+    if(isBlocked(o.code))return false;   // blocked: their requests are silently ignored
     if(T(function(){return X.PubCode(o.pub);},"")!==o.code)return false;
     o.name=cleanName(o.name)||"Player";o.color=cleanCol(o.color);
     f=findF(o.code);
@@ -3052,6 +3062,10 @@ function frPair(f,o,ts,id){
     if(!looking)msgAlert(f,e);
     return true;
   }
+  if(o.t==="del"){
+    var dk;for(dk=f.msgs.length-1;dk>=0;dk--)if(!f.msgs[dk].me&&f.msgs[dk].mid&&f.msgs[dk].mid===String(o.mid||"")){f.msgs.splice(dk,1);if(f.unread)f.unread--;return true;}
+    return false;
+  }
   if(o.t==="rc"){
     var k,hit=-1,rank={sending:0,fail:0,sent:1,dlv:2,read:3},ns=o.s==="r"?"read":"dlv";
     for(k=f.msgs.length-1;k>=0;k--)if(f.msgs[k].me&&f.msgs[k].mid===o.id){hit=k;break;}
@@ -3080,6 +3094,46 @@ function frPair(f,o,ts,id){
   if(o.t==="bye"){var i=S.friends.indexOf(f);if(i>=0)S.friends.splice(i,1);if(P.chat===f.code)P.chat=null;return true;}
   return false;
 }
+/* ---------- 1.7.0: blocking people and deleting messages ---------- */
+function isBlocked(code){return !!(S&&S.blocked&&S.blocked[code]);}
+function blockUser(code,name,f){
+  openForm("Block "+name+"?",[],"Block",function(){
+    S.blocked=S.blocked||{};S.blocked[code]={name:String(name||"").substr(0,40),t:now()};
+    f=f||findF(code);
+    if(f){frSend(f,{t:"bye"});var i=S.friends.indexOf(f);if(i>=0)S.friends.splice(i,1);}
+    var a=findIn(S.fr.inc,code);if(a>=0)S.fr.inc.splice(a,1);
+    var o=findIn(S.fr.out,code);if(o>=0)S.fr.out.splice(o,1);
+    (S.chal||[]).forEach(function(c){if(c.fc===code&&c.st==="open")c.st="declined";});
+    if(P.chat===code)P.chat=null;
+    save();frStreamSig="";frStream();renderFriends();if(P.page==="settings")renderSettings();
+    toast(name+" is blocked");
+  },null);
+  var bx=$("mbox");bx.insertBefore(el("div","fbm","They’ll be removed from your friends and can’t message you, see when you’re online, challenge you or send you friend requests. They aren’t told that you blocked them. You can unblock them in Settings › Friends."),bx.childNodes[1]);
+}
+function unblockUser(code){if(!S.blocked||!S.blocked[code])return;var n=S.blocked[code].name;delete S.blocked[code];save();renderSettings();toast(n+" is unblocked. They can send you a friend request again.");}
+function friendRowMenu(f,anchor){
+  ctxMenu(anchor,[{h:fname2(f)},
+    {t:"Message",fn:function(){P.chat=f.code;f.unread=0;P.draft="";save();renderFriends(true);sendRc(f);}},
+    {t:"View profile",fn:function(){openProfile(f.code);}},
+    {t:"Challenge",fn:function(){chalForm(f,null);}},
+    {sep:1},{t:"Remove friend",cls:"dng",fn:function(){removeFriend(f);}},
+    {t:"Block",cls:"dng",fn:function(){blockUser(f.code,fname2(f),f);}}]);
+}
+function deleteMsg(f,m,everyone){
+  var i=f.msgs.indexOf(m);if(i<0)return;
+  f.msgs.splice(i,1);
+  if(everyone&&m.mid)frSend(f,{t:"del",mid:m.mid},function(ok){if(!ok)toast("Couldn’t reach "+fname2(f)+". The message was only deleted for you.");});
+  save();renderFriends();toast(everyone?"Message deleted for everyone":"Message deleted for you");
+}
+function msgMenu(f,m,anchor){
+  var it=[];
+  if(m.x)it.push({t:"Copy text",fn:function(){try{copyText(m.x);toast("Copied");}catch(e){}}});
+  it.push({t:"Delete for me",cls:"dng",fn:function(){deleteMsg(f,m,false);}});
+  if(m.me&&m.mid&&!m.fail&&m.st!=="fail")it.push({t:"Delete for everyone",cls:"dng",fn:function(){
+    openForm("Delete this message for everyone?",[],"Delete",function(){deleteMsg(f,m,true);},null);
+    $("mbox").insertBefore(el("div","fbm","It disappears from "+fname2(f)+"’s chat too, as soon as their Xaly Launcher is online (within about 12 hours). If they already read it, they may remember it."),$("mbox").childNodes[1]);}});
+  ctxMenu(anchor,it);
+}
 /* chat + sharing */
 function sendChat(f,text){
   text=trim(text);if(!text)return;if(text.length>1000)text=text.substr(0,1000);
@@ -3093,8 +3147,8 @@ function shareGame(it){
   if(!S.friends.length){toast("Add a friend first, then you can recommend games to them");return;}
   openForm("Recommend "+it.name,[{id:"to",label:"Send to",opts:S.friends.map(function(f){return [f.code,fname2(f)];})},{id:"x",label:"Message (optional)"}],"Send",function(v){
     var f=findF(v.to);if(!f)return false;
-    var e={x:v.x.substr(0,1000),ts:now(),me:1,pend:1,g:{sid:it.id,name:it.name}};f.msgs.push(e);
-    frSend(f,{t:"game",sid:it.id,gname:it.name,x:e.x},function(ok){delete e.pend;if(!ok)e.fail=1;save();renderFriends();toast(ok?"Sent to "+fname2(f):"Couldn't send. Check your connection.");});
+    var e={x:v.x.substr(0,1000),ts:now(),me:1,pend:1,g:{sid:it.id,name:it.name},mid:"m"+now().toString(36)+Math.floor(Math.random()*1e6).toString(36)};f.msgs.push(e);
+    frSend(f,{t:"game",sid:it.id,gname:it.name,x:e.x,mid:e.mid},function(ok){delete e.pend;if(!ok)e.fail=1;save();renderFriends();toast(ok?"Sent to "+fname2(f):"Couldn't send. Check your connection.");});
   },null);
 }
 function storeById(id){var a=allStore(),i;for(i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
@@ -3137,7 +3191,8 @@ function renderFriends(toBottom){
     b.appendChild(el("div","gh","Friend requests — "+S.fr.inc.length));
     S.fr.inc.forEach(function(r){var w=el("div","fr frq"),n=el("div","fn");w.appendChild(avatar(r.name,r.color,44,"offline"));
       n.appendChild(el("b","",r.name));n.appendChild(el("span","",fmtCode(r.code)));w.appendChild(n);
-      w.appendChild(btn("Accept","pri sm",function(){acceptReq(r);}));w.appendChild(btn("✕","btn sm",function(){declineReq(r);}));b.appendChild(w);});
+      w.appendChild(btn("Accept","pri sm",function(){acceptReq(r);}));var xb=btn("✕","btn sm",function(){declineReq(r);});xb.title="Decline";w.appendChild(xb);
+      var bb=btn("\u2298","btn sm dng",function(){blockUser(r.code,r.name,null);});bb.title="Block";w.appendChild(bb);b.appendChild(w);});
   }
   var on=[],off=[];
   S.friends.forEach(function(f){if(q&&fname2(f).toLowerCase().indexOf(q)<0)return;(pstate(f)==="offline"?off:on).push(f);});
@@ -3148,6 +3203,7 @@ function renderFriends(toBottom){
     n.appendChild(el("b","",fname2(f)));var ln=el("span",s!=="offline"&&f.playing?"pl":"",fline(f));n.appendChild(ln);r.appendChild(n);
     if(f.unread)r.appendChild(el("span","unr",f.unread>9?"9+":String(f.unread)));
     r.onclick=function(){P.chat=f.code;f.unread=0;P.draft="";save();renderFriends(true);sendRc(f);};
+    r.oncontextmenu=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();stp(e);friendRowMenu(f,r);return false;};
     return r;
   }
   if(on.length){b.appendChild(el("div","gh","Online — "+on.length));on.forEach(function(f){b.appendChild(row(f));});}
@@ -3186,8 +3242,9 @@ function renderChat(f,b,toBottom){
     {t:"Set nickname",fn:function(){openForm("Nickname for "+(f.name||fname2(f)),[{id:"nick",label:"Nickname",value:f.nick||"",ph:f.name||""}],"Save",function(v){f.nick=v.nick;save();renderFriends();},null);}},
     {t:"Copy friend code",fn:function(){try{copyText(f.code);toast("Copied "+fmtCode(f.code));}catch(e2){toast(fmtCode(f.code));}}},
     {t:(S.set.readRc!==0?"Turn off":"Turn on")+" read receipts",fn:function(){S.set.readRc=S.set.readRc!==0?0:1;save();toast("Read receipts "+(S.set.readRc?"on":"off"));}},
-    {t:"Clear chat history",fn:function(){f.msgs=[];save();renderFriends();}},
-    {sep:1},{t:"Remove friend",cls:"dng",fn:function(){removeFriend(f);}}]);};
+    {t:"Delete conversation (just for me)",fn:function(){openForm("Delete your whole conversation with "+fname2(f)+"?",[],"Delete",function(){f.msgs=[];f.unread=0;save();renderFriends();toast("Conversation deleted for you");},null);}},
+    {sep:1},{t:"Remove friend",cls:"dng",fn:function(){removeFriend(f);}},
+    {t:"Block "+fname2(f),cls:"dng",fn:function(){blockUser(f.code,fname2(f),f);}}]);};
   h.appendChild(mb);b.appendChild(h);
   var L=el("div","chl ios"),prevT=0,lastMe=-1,i;
   for(i=f.msgs.length-1;i>=0;i--)if(f.msgs[i].me){lastMe=i;break;}
@@ -3207,7 +3264,10 @@ function renderChat(f,b,toBottom){
     }
     if(m.x)bub.appendChild(el("div","ctx",m.x));
     bub.title=hhmm(d);
-    w.appendChild(bub);L.appendChild(w);
+    w.appendChild(bub);
+    var mo=btn("\u22EF","imo",null);mo.title="More";mo.onclick=function(e){stp(e);msgMenu(f,m,mo);};if(m.me)w.insertBefore(mo,bub);else w.appendChild(mo);
+    bub.oncontextmenu=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();stp(e);msgMenu(f,m,bub);return false;};
+    L.appendChild(w);
     if(m.me&&(k===lastMe||m.fail||m.st==="fail")){var rc=el("div","irc"+(m.fail||m.st==="fail"?" bad":""),rcLine(m));
       if(m.fail||m.st==="fail")rc.onclick=function(){var t=m.x;f.msgs.splice(f.msgs.indexOf(m),1);sendChat(f,t);};
       L.appendChild(rc);}
@@ -4471,6 +4531,12 @@ function renderSettings(){
       cp2.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Your code is "+S.user.code);}}));
       b.appendChild(srow("Your friend code","Give this to friends so they can send you a request.",cp2));
       b.appendChild(srow("Show what I'm playing","Friends can see the game you're in.",sw(!!S.set.showPlaying,function(v){S.set.showPlaying=v?1:0;save();syncNow();})));
+      var bl=S.blocked||{},bk=Object.keys(bl);
+      b.appendChild(srow("Blocked people",bk.length?"They can\u2019t message you, see you online, challenge you or send you friend requests.":"Nobody is blocked. Block someone from their chat, by right-clicking them in your friends list, or from a friend request.",null));
+      bk.sort(function(a,c){return bl[c].t-bl[a].t;}).forEach(function(code){
+        var rw=el("div","blr");rw.appendChild(avatar(bl[code].name||"?",hash(code)%AV.length,36,""));
+        var t=el("div","blt");t.appendChild(el("b","",bl[code].name||"Unknown"));t.appendChild(el("span","",fmtCode(code)+"  \u00B7  blocked "+ago(bl[code].t)));rw.appendChild(t);
+        rw.appendChild(btn("Unblock","btn sm",function(){unblockUser(code);}));b.appendChild(rw);});
     }
     if(frErr)b.appendChild(el("div","fnote",frErr));
     b.appendChild(srow("Privacy","Friend requests, status and messages travel through ntfy.sh, a free public message relay. Status and chat are end-to-end encrypted, so the relay only sees scrambled text. A friend request carries your name and friend code. Chat history is kept on this PC only.",null));

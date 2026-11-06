@@ -1224,6 +1224,337 @@ namespace Xaly
             }
             catch (Exception) { return "0"; }
         }
+        // ================= 1.6.7: find games on this PC =================
+        static string Line(params string[] f) { for (int i = 0; i < f.Length; i++) f[i] = (f[i] ?? "").Replace("|", " ").Replace("\n", " ").Replace("\r", ""); return string.Join("|", f) + "\n"; }
+        static string RegStr(RegistryKey root, string sub, string name)
+        {
+            try { using (RegistryKey k = root.OpenSubKey(sub)) { object v = k == null ? null : k.GetValue(name); return v == null ? null : v.ToString(); } }
+            catch (Exception) { return null; }
+        }
+        // the biggest .exe in a folder, looking at most 3 levels deep and 600 files, skipping helpers and installers
+        static string GameExe(string dir)
+        {
+            string best = null; long size = -1; int seen = 0;
+            Queue<KeyValuePair<string, int>> q = new Queue<KeyValuePair<string, int>>(); q.Enqueue(new KeyValuePair<string, int>(dir, 0));
+            while (q.Count > 0 && seen < 600)
+            {
+                KeyValuePair<string, int> cur = q.Dequeue();
+                try
+                {
+                    foreach (string p in Directory.GetFiles(cur.Key, "*.exe"))
+                    {
+                        seen++;
+                        string n = Path.GetFileName(p).ToLowerInvariant();
+                        if (n.IndexOf("unins") >= 0 || n.IndexOf("crash") >= 0 || n.IndexOf("redist") >= 0 || n.IndexOf("setup") >= 0 || n.IndexOf("install") >= 0 || n.IndexOf("helper") >= 0 || n.IndexOf("dxwebsetup") >= 0 || n.IndexOf("vc_redist") >= 0 || n.IndexOf("ue4prereq") >= 0 || n.IndexOf("dotnet") >= 0 || n.IndexOf("launcherpatcher") >= 0 || n == "notification_helper.exe" || n == "unitycrashhandler64.exe" || n == "unitycrashhandler32.exe") continue;
+                        long sz = new FileInfo(p).Length;
+                        if (cur.Value == 0) sz *= 4;   // prefer the exe at the top of the game folder
+                        if (sz > size) { size = sz; best = p; }
+                    }
+                    if (cur.Value < 3)
+                        foreach (string d in Directory.GetDirectories(cur.Key))
+                        {
+                            string dn = Path.GetFileName(d).ToLowerInvariant();
+                            if (dn == "_commonredist" || dn == "redist" || dn == "directx" || dn == "__installer" || dn == "support" || dn == "engine" && cur.Value == 0 && best != null) continue;
+                            q.Enqueue(new KeyValuePair<string, int>(d, cur.Value + 1));
+                        }
+                }
+                catch (Exception) { }
+            }
+            return best;
+        }
+        public string ScanPC(string extra)
+        {
+            string ours = Path.GetFullPath(Path.Combine(f.DownloadsDir, "Games")).ToLowerInvariant();
+            Thread t = new Thread(delegate()
+            {
+                StringBuilder sb = new StringBuilder();
+                Dictionary<string, bool> done = new Dictionary<string, bool>();
+                Action<string, string, string, string, string> add = delegate(string src, string name, string path, string args, string idk)
+                {
+                    if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(name)) return;
+                    string key = (idk ?? path).ToLowerInvariant();
+                    if (done.ContainsKey(key)) return; done[key] = true;
+                    sb.Append(Line(src, name, path, args, idk));
+                };
+                // Steam
+                try
+                {
+                    string sp = RegStr(Registry.CurrentUser, @"Software\Valve\Steam", "SteamPath");
+                    if (!string.IsNullOrEmpty(sp))
+                    {
+                        sp = sp.Replace('/', '\\');
+                        List<string> libs = new List<string>(); libs.Add(sp);
+                        string vdf = Path.Combine(sp, @"steamapps\libraryfolders.vdf");
+                        if (File.Exists(vdf)) foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(vdf), "\"path\"\\s+\"([^\"]+)\"")) libs.Add(m.Groups[1].Value.Replace("\\\\", "\\"));
+                        foreach (string lib in libs)
+                        {
+                            string sa = Path.Combine(lib, "steamapps");
+                            if (!Directory.Exists(sa)) continue;
+                            foreach (string acf in Directory.GetFiles(sa, "appmanifest_*.acf"))
+                            {
+                                string a = File.ReadAllText(acf);
+                                string id = System.Text.RegularExpressions.Regex.Match(a, "\"appid\"\\s+\"(\\d+)\"").Groups[1].Value;
+                                string nm = System.Text.RegularExpressions.Regex.Match(a, "\"name\"\\s+\"([^\"]+)\"").Groups[1].Value;
+                                string dir = System.Text.RegularExpressions.Regex.Match(a, "\"installdir\"\\s+\"([^\"]+)\"").Groups[1].Value;
+                                if (id == "" || nm == "" || id == "228980" || System.Text.RegularExpressions.Regex.IsMatch(nm, "Redistributable|Steam Linux Runtime|Proton|SteamVR|Steamworks|Dedicated Server|Soundtrack", System.Text.RegularExpressions.RegexOptions.IgnoreCase)) continue;
+                                string gd = Path.Combine(Path.Combine(sa, "common"), dir);
+                                if (!Directory.Exists(gd)) continue;
+                                add("Steam", nm, "steam://rungameid/" + id, GameExe(gd) ?? "", "steam:" + id);
+                            }
+                        }
+                    }
+                }
+                catch (Exception) { }
+                // Epic Games
+                try
+                {
+                    string man = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Epic\EpicGamesLauncher\Data\Manifests");
+                    if (Directory.Exists(man))
+                        foreach (string it in Directory.GetFiles(man, "*.item"))
+                        {
+                            string j = File.ReadAllText(it);
+                            Func<string, string> jf = delegate(string k) { return System.Text.RegularExpressions.Regex.Unescape(System.Text.RegularExpressions.Regex.Match(j, "\"" + k + "\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").Groups[1].Value); };
+                            string nm = jf("DisplayName"), loc = jf("InstallLocation"), exe = jf("LaunchExecutable"), app = jf("AppName"), ns = jf("CatalogNamespace"), cid = jf("CatalogItemId");
+                            if (nm == "" || loc == "" || !Directory.Exists(loc) || j.IndexOf("\"bIsIncompleteInstall\": true") >= 0) continue;
+                            string full = exe != "" ? Path.Combine(loc, exe) : GameExe(loc);
+                            add("Epic Games", nm, "com.epicgames.launcher://apps/" + Uri.EscapeDataString(ns + ":" + cid + ":" + app) + "?action=launch&silent=true", full ?? "", "epic:" + app);
+                        }
+                }
+                catch (Exception) { }
+                // GOG Galaxy / GOG installers
+                foreach (string gk in new string[] { @"SOFTWARE\WOW6432Node\GOG.com\Games", @"SOFTWARE\GOG.com\Games" })
+                {
+                    try
+                    {
+                        using (RegistryKey k = Registry.LocalMachine.OpenSubKey(gk))
+                        {
+                            if (k == null) continue;
+                            foreach (string id in k.GetSubKeyNames())
+                                using (RegistryKey g = k.OpenSubKey(id))
+                                {
+                                    string nm = (g.GetValue("gameName") ?? g.GetValue("GAMENAME") ?? "").ToString(), exe = (g.GetValue("exe") ?? g.GetValue("EXE") ?? "").ToString(), dir = (g.GetValue("path") ?? g.GetValue("PATH") ?? "").ToString();
+                                    if (exe != "" && !Path.IsPathRooted(exe) && dir != "") exe = Path.Combine(dir, exe);
+                                    if ((exe == "" || !File.Exists(exe)) && Directory.Exists(dir)) exe = GameExe(dir);
+                                    if (!string.IsNullOrEmpty(exe) && File.Exists(exe)) add("GOG", nm, exe, "", "gog:" + id);
+                                }
+                        }
+                    }
+                    catch (Exception) { }
+                }
+                // folders: the itch.io app, "Games" folders on every drive, and folders the player picked
+                List<KeyValuePair<string, string>> roots = new List<KeyValuePair<string, string>>();
+                roots.Add(new KeyValuePair<string, string>("itch.io app", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"itch\apps")));
+                try { foreach (DriveInfo d in DriveInfo.GetDrives()) if (d.DriveType == DriveType.Fixed && d.IsReady) { roots.Add(new KeyValuePair<string, string>("Games folder", Path.Combine(d.RootDirectory.FullName, "Games"))); } } catch (Exception) { }
+                foreach (string x in (extra ?? "").Split('\n')) if (x.Trim() != "") roots.Add(new KeyValuePair<string, string>("Folder", x.Trim()));
+                foreach (KeyValuePair<string, string> r in roots)
+                {
+                    try
+                    {
+                        if (!Directory.Exists(r.Value)) continue;
+                        foreach (string d in Directory.GetDirectories(r.Value))
+                        {
+                            if (Path.GetFullPath(d).ToLowerInvariant().StartsWith(ours)) continue;
+                            string exe = GameExe(d);
+                            if (exe != null) add(r.Key, Path.GetFileName(d), exe, "", null);
+                        }
+                        foreach (string e in Directory.GetFiles(r.Value, "*.exe")) add(r.Key, Path.GetFileNameWithoutExtension(e), e, "", null);
+                    }
+                    catch (Exception) { }
+                }
+                string payload = sb.ToString();
+                try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onScanPC", payload); })); } catch (Exception) { }
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+        public string Exists(string paths)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (string p in (paths ?? "").Split('\n')) { bool ok = false; try { ok = p.IndexOf("://") > 0 || File.Exists(p) || Directory.Exists(p); } catch (Exception) { } sb.Append(ok ? "1" : "0"); }
+            return sb.ToString();
+        }
+
+        // ================= account backup files =================
+        public string SaveBackup(string fileName, string text)
+        {
+            try
+            {
+                using (SaveFileDialog d = new SaveFileDialog())
+                {
+                    d.Filter = "Xaly account backup|*.xalybackup"; d.FileName = SafeName(fileName); d.DefaultExt = "xalybackup";
+                    d.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    if (d.ShowDialog(f) != DialogResult.OK) return "";
+                    File.WriteAllText(d.FileName, text, new UTF8Encoding(false));
+                    return d.FileName;
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string OpenBackup()
+        {
+            try
+            {
+                using (OpenFileDialog d = new OpenFileDialog())
+                {
+                    d.Filter = "Xaly account backup|*.xalybackup|All files|*.*"; d.CheckFileExists = true;
+                    d.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    if (d.ShowDialog(f) != DialogResult.OK) return "";
+                    if (new FileInfo(d.FileName).Length > 60L * 1024 * 1024) return "ERR:That file is too big to be a Xaly backup.";
+                    return File.ReadAllText(d.FileName, Encoding.UTF8);
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+
+        // ================= shortcuts =================
+        static string StartMenuDir() { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs"); }
+        static void WriteLnk(string lnkPath, string target, string args, string icon, string workDir, string desc)
+        {
+            Type t = Type.GetTypeFromProgID("WScript.Shell");
+            object sh = Activator.CreateInstance(t);
+            try
+            {
+                object l = t.InvokeMember("CreateShortcut", System.Reflection.BindingFlags.InvokeMethod, null, sh, new object[] { lnkPath });
+                Type lt = l.GetType();
+                lt.InvokeMember("TargetPath", System.Reflection.BindingFlags.SetProperty, null, l, new object[] { target });
+                lt.InvokeMember("Arguments", System.Reflection.BindingFlags.SetProperty, null, l, new object[] { args ?? "" });
+                lt.InvokeMember("WorkingDirectory", System.Reflection.BindingFlags.SetProperty, null, l, new object[] { workDir ?? "" });
+                lt.InvokeMember("Description", System.Reflection.BindingFlags.SetProperty, null, l, new object[] { desc ?? "" });
+                if (!string.IsNullOrEmpty(icon)) lt.InvokeMember("IconLocation", System.Reflection.BindingFlags.SetProperty, null, l, new object[] { icon + ",0" });
+                lt.InvokeMember("Save", System.Reflection.BindingFlags.InvokeMethod, null, l, null);
+                Marshal.FinalReleaseComObject(l);
+            }
+            finally { Marshal.FinalReleaseComObject(sh); }
+        }
+        static string LnkTarget(string lnkPath)
+        {
+            Type t = Type.GetTypeFromProgID("WScript.Shell"); object sh = Activator.CreateInstance(t);
+            try { object l = t.InvokeMember("CreateShortcut", System.Reflection.BindingFlags.InvokeMethod, null, sh, new object[] { lnkPath }); string r = (string)l.GetType().InvokeMember("TargetPath", System.Reflection.BindingFlags.GetProperty, null, l, null); Marshal.FinalReleaseComObject(l); return r ?? ""; }
+            catch (Exception) { return ""; }
+            finally { Marshal.FinalReleaseComObject(sh); }
+        }
+        // where: "desktop" or "start"; a game shortcut starts the game through Xaly so play time is counted
+        public string MakeShortcut(string where, string name, string gameId, string icon)
+        {
+            try
+            {
+                string dir = where == "desktop" ? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) : (string.IsNullOrEmpty(gameId) ? StartMenuDir() : Path.Combine(StartMenuDir(), "Xaly Games"));
+                Directory.CreateDirectory(dir);
+                string lnk = Path.Combine(dir, SafeName(string.IsNullOrEmpty(name) ? "Xaly Launcher" : name) + ".lnk");
+                string ic = (!string.IsNullOrEmpty(icon) && File.Exists(icon) && icon.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) ? icon : Application.ExecutablePath;
+                WriteLnk(lnk, Application.ExecutablePath, string.IsNullOrEmpty(gameId) ? "" : "--play " + gameId, ic, f.AppDir, string.IsNullOrEmpty(gameId) ? "Xaly Launcher" : "Play " + name + " with Xaly Launcher");
+                return lnk;
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string HasShortcut(string where, string name, string gameId)
+        {
+            string dir = where == "desktop" ? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) : (string.IsNullOrEmpty(gameId) ? StartMenuDir() : Path.Combine(StartMenuDir(), "Xaly Games"));
+            return File.Exists(Path.Combine(dir, SafeName(string.IsNullOrEmpty(name) ? "Xaly Launcher" : name) + ".lnk")) ? "1" : "0";
+        }
+        public string RemoveShortcut(string where, string name, string gameId)
+        {
+            try
+            {
+                string dir = where == "desktop" ? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) : (string.IsNullOrEmpty(gameId) ? StartMenuDir() : Path.Combine(StartMenuDir(), "Xaly Games"));
+                string lnk = Path.Combine(dir, SafeName(string.IsNullOrEmpty(name) ? "Xaly Launcher" : name) + ".lnk");
+                if (File.Exists(lnk) && string.Equals(LnkTarget(lnk), Application.ExecutablePath, StringComparison.OrdinalIgnoreCase)) File.Delete(lnk);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        // every shortcut on the desktop and in the Start menu that points at this launcher
+        static List<string> OurShortcuts()
+        {
+            List<string> l = new List<string>();
+            foreach (string root in new string[] { Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), StartMenuDir() })
+            {
+                try
+                {
+                    if (!Directory.Exists(root)) continue;
+                    foreach (string p in Directory.GetFiles(root, "*.lnk", root == StartMenuDir() ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                        if (string.Equals(LnkTarget(p), Application.ExecutablePath, StringComparison.OrdinalIgnoreCase)) l.Add(p);
+                }
+                catch (Exception) { }
+            }
+            return l;
+        }
+
+        // ================= Apps & features entry + uninstalling =================
+        const string UninstKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\XalyLauncher";
+        public string RegisterApp(string version)
+        {
+            try
+            {
+                using (RegistryKey k = Registry.CurrentUser.CreateSubKey(UninstKey))
+                {
+                    string exe = Application.ExecutablePath;
+                    k.SetValue("DisplayName", "Xaly Launcher"); k.SetValue("DisplayVersion", version ?? ""); k.SetValue("Publisher", "Xalify");
+                    k.SetValue("DisplayIcon", exe); k.SetValue("InstallLocation", f.AppDir.TrimEnd('\\'));
+                    k.SetValue("UninstallString", "\"" + exe + "\" --uninstall"); k.SetValue("QuietUninstallString", "\"" + exe + "\" --uninstall");
+                    k.SetValue("URLInfoAbout", "https://github.com/Xalify/xalify-xaly-launcher"); k.SetValue("HelpLink", "https://github.com/Xalify/xalify-xaly-launcher");
+                    k.SetValue("NoModify", 1, RegistryValueKind.DWord); k.SetValue("NoRepair", 1, RegistryValueKind.DWord);
+                    long kb = 0; try { kb = DirSize(f.AppDir) / 1024; } catch (Exception) { }
+                    k.SetValue("EstimatedSize", (int)Math.Min(int.MaxValue, kb), RegistryValueKind.DWord);
+                    if (k.GetValue("InstallDate") == null) k.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
+                }
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string ShowWindow() { f.ShowMain(); return "ok"; }
+        public string StartCommand() { string c = f.StartCmd ?? ""; f.StartCmd = ""; return c; }
+        // gameDirs: folders of games installed by Xaly (one per line), deleted only when delGames is "1"
+        public string UninstallSelf(string delGames, string delData, string gameDirs)
+        {
+            try
+            {
+                foreach (string l in OurShortcuts()) { try { File.Delete(l); } catch (Exception) { } }
+                try { string xg = Path.Combine(StartMenuDir(), "Xaly Games"); if (Directory.Exists(xg) && Directory.GetFileSystemEntries(xg).Length == 0) Directory.Delete(xg); } catch (Exception) { }
+                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true)) { if (k != null) k.DeleteValue("XalyLauncher", false); } } catch (Exception) { }
+                try { Registry.CurrentUser.DeleteSubKeyTree(UninstKey); } catch (Exception) { }
+                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION", true)) { if (k != null) k.DeleteValue(Path.GetFileName(Application.ExecutablePath), false); } } catch (Exception) { }
+                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true)) { if (k != null && k.OpenSubKey("xaly") != null) k.DeleteSubKeyTree("xaly"); } } catch (Exception) { }
+
+                List<string> rm = new List<string>();     // folders removed after Xaly has closed
+                if (delGames == "1")
+                {
+                    foreach (string d in (gameDirs ?? "").Split('\n')) { string x = d.Trim(); if (x != "" && UnderGameRoot(f, x + "\\")) rm.Add(x); }
+                    rm.Add(Path.Combine(f.DownloadsDir, "Games"));
+                }
+                if (delData == "1") rm.Add(f.DataDir);
+                string app = f.AppDir.TrimEnd('\\'), exe = Application.ExecutablePath;
+                int pid = Process.GetCurrentProcess().Id;
+                string cmd = Path.Combine(Path.GetTempPath(), "xaly_uninstall_" + pid + ".cmd");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("@echo off");
+                sb.AppendLine(":wait");
+                sb.AppendLine("tasklist /fi \"PID eq " + pid + "\" | find \"" + pid + "\" >nul && (ping -n 2 127.0.0.1 >nul & goto wait)");
+                sb.AppendLine("ping -n 4 127.0.0.1 >nul");   // give WebView2's helper processes a moment to let go of their files
+                foreach (string d in rm) sb.AppendLine("rmdir /s /q \"" + d + "\" 2>nul");
+                if (delGames == "1")
+                {
+                    sb.AppendLine("del /q \"" + Path.Combine(f.DownloadsDir, "*.part") + "\" 2>nul");
+                    sb.AppendLine("rmdir \"" + f.DownloadsDir.TrimEnd('\\') + "\" 2>nul");
+                    foreach (DriveInfo dv in DriveInfo.GetDrives()) { try { if (dv.DriveType == DriveType.Fixed) sb.AppendLine("rmdir \"" + Path.Combine(dv.RootDirectory.FullName, "Xaly Games") + "\" 2>nul"); } catch (Exception) { } }
+                }
+                // only the launcher's own files are removed, so a shared folder like Downloads is never wiped
+                sb.AppendLine("del /f /q \"" + exe + "\" 2>nul");
+                foreach (string fn in new string[] { "index.html", "xaly.ico", "Microsoft.Web.WebView2.Core.dll", "Microsoft.Web.WebView2.WinForms.dll", "Microsoft.Web.WebView2.Wpf.dll", "WebView2Loader.dll", "use-ie.txt", "webview2-error.txt", "selftest.txt", "release-notes.md", "README.md" })
+                    sb.AppendLine("del /f /q \"" + Path.Combine(app, fn) + "\" 2>nul");
+                foreach (string dn in new string[] { "x64", "x86", "arm64", "sounds", "runtimes" }) sb.AppendLine("rmdir /s /q \"" + Path.Combine(app, dn) + "\" 2>nul");
+                sb.AppendLine("cd /d \"%TEMP%\"");
+                sb.AppendLine("rmdir \"" + app + "\" 2>nul");
+                sb.AppendLine("(goto) 2>nul & del \"%~f0\"");
+                File.WriteAllText(cmd, sb.ToString(), Encoding.Default);
+                ProcessStartInfo psi = new ProcessStartInfo("cmd.exe", "/c \"" + cmd + "\"");
+                psi.CreateNoWindow = true; psi.UseShellExecute = false; psi.WindowStyle = ProcessWindowStyle.Hidden;
+                Process.Start(psi);
+                f.BeginInvoke(new MethodInvoker(delegate { f.RealExit(); }));
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
         public string StartupSet(string on, string minimized)
         {
             try
@@ -1593,6 +1924,7 @@ namespace Xaly
         Bridge bridge;
         public NotifyIcon tray;
         public bool CloseToTray = true;
+        public string StartCmd = "";
         public string DataDir, DownloadsDir, AppDir;
         bool allowVisible = true, exiting = false, tipShown = false;
 
@@ -1902,6 +2234,9 @@ namespace Xaly
         {
             try { if (selfTimer != null) selfTimer.Stop(); } catch (Exception) { }
             try { File.WriteAllText(Path.Combine(AppDir, "selftest.txt"), result ?? ""); } catch (Exception) { }
+            // CI only: run the real uninstaller on a throw-away copy of the launcher
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--selftest-uninstall") >= 0 && File.Exists(Path.Combine(AppDir, "uninstall-test.txt")))
+            { try { new Bridge(this).UninstallSelf("0", "0", ""); return; } catch (Exception) { } }
             RealExit();
         }
 
@@ -1993,9 +2328,20 @@ namespace Xaly
         [STAThread]
         static void Main(string[] args)
         {
+            string cmd = "";
+            int pi = Array.IndexOf(args, "--play");
+            if (pi >= 0 && pi + 1 < args.Length && System.Text.RegularExpressions.Regex.IsMatch(args[pi + 1], "^[A-Za-z0-9_-]{1,40}$")) cmd = "play " + args[pi + 1];
+            if (Array.IndexOf(args, "--uninstall") >= 0) cmd = "uninstall";
+            string cmdFile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "XalyLauncher"), "command.txt");
             bool created;
             EventWaitHandle ev = new EventWaitHandle(false, EventResetMode.AutoReset, "Local\\XalyLauncherShow", out created);
-            if (!created) { ev.Set(); return; }   // already running: just bring it forward
+            if (!created)
+            {
+                // already running: hand over the command (play a game / uninstall) and bring it forward
+                try { if (cmd != "") File.WriteAllText(cmdFile, cmd); } catch (Exception) { }
+                ev.Set(); return;
+            }
+            try { if (File.Exists(cmdFile)) File.Delete(cmdFile); } catch (Exception) { }
 
             try { SetProcessDPIAware(); } catch (Exception) { }
             try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)(3072 | 768 | 192); } catch (Exception) { }   // TLS 1.2 / 1.1 / 1.0
@@ -2011,12 +2357,23 @@ namespace Xaly
             Application.ThreadException += delegate(object s, ThreadExceptionEventArgs e) { MainForm.LogCrash("ui", e.Exception.ToString()); };
             AppDomain.CurrentDomain.UnhandledException += delegate(object s, UnhandledExceptionEventArgs e) { MainForm.LogCrash("fatal", e.ExceptionObject == null ? "unknown" : e.ExceptionObject.ToString()); };
             Application.EnableVisualStyles();
-            MainForm form = new MainForm(Array.IndexOf(args, "--tray") >= 0);
+            MainForm form = new MainForm(Array.IndexOf(args, "--tray") >= 0 || cmd.StartsWith("play "));
+            form.StartCmd = cmd;
             Thread t = new Thread(delegate()
             {
                 while (ev.WaitOne())
                 {
-                    try { form.BeginInvoke(new MethodInvoker(form.ShowMain)); } catch (Exception) { }
+                    string c = "";
+                    try { if (File.Exists(cmdFile)) { c = File.ReadAllText(cmdFile).Trim(); File.Delete(cmdFile); } } catch (Exception) { }
+                    try
+                    {
+                        form.BeginInvoke(new MethodInvoker(delegate
+                        {
+                            if (!c.StartsWith("play ")) form.ShowMain();
+                            if (c != "") form.Js("onCommand", c);
+                        }));
+                    }
+                    catch (Exception) { }
                 }
             });
             t.IsBackground = true;

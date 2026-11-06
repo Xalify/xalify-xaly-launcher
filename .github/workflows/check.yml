@@ -50,6 +50,16 @@ jobs:
           Remove-Item (Join-Path $env:APPDATA "XalyLauncher\use-ie.txt")
           Copy-Item legacy.exe "Legacy Only.exe" -ErrorAction SilentlyContinue
           SelfTest "Legacy Only.exe" "legacy-only build"
+          L "== uninstaller test (throw-away copy) =="
+          $u = "C:\xaly-uninstall-test"; New-Item -ItemType Directory -Force $u | Out-Null
+          Copy-Item "Xaly Launcher.exe","index.html","xaly.ico" $u; Copy-Item *.dll $u -ErrorAction SilentlyContinue; Copy-Item sounds "$u\sounds" -Recurse
+          foreach ($a in "x64","x86","arm64") { if (Test-Path $a) { Copy-Item $a "$u\$a" -Recurse } }
+          Set-Content "$u\uninstall-test.txt" "1"; Set-Content "$u\keep-me.txt" "a file that isn't Xaly's"
+          $p = Start-Process -FilePath "$u\Xaly Launcher.exe" -ArgumentList "--selftest","--selftest-uninstall" -PassThru
+          if (-not $p.WaitForExit(170000)) { L "still running, killing"; $p.Kill() }
+          Start-Sleep -Seconds 12
+          L ("left in folder: " + ((Get-ChildItem $u -Force -ErrorAction SilentlyContinue | ForEach-Object Name) -join ", "))
+          L ("apps-and-features entry still there: " + (Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\XalyLauncher"))
           $log | Set-Content -Path "$env:RUNNER_TEMP\check.log" -Encoding utf8
       - name: Publish log
         if: always()

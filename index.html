@@ -133,6 +133,29 @@ button{border:0;font-family:inherit;color:inherit;cursor:pointer;outline:0}
 .sbp{color:#b9bccf;font-size:13px;line-height:1.5;margin:4px 0 12px}.sbst{min-height:18px;color:#ff8a80;font-size:13px;margin:10px 0 0;line-height:1.4}.sbst.ok{color:#3ddc84}
 .sbrow{display:block}.sbrow .sl{padding-right:0}.sbbx{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}.sbbx .btn,.sbbx .pri{margin-left:0!important}.sbbx .code{margin-right:6px}
 .sbl{margin:8px 0 0}.sbl a{color:#2ee6f0;font-size:13px;margin-right:16px;text-decoration:none;cursor:pointer}.sbl a:hover{text-decoration:underline}
+/* 1.8.3 settings */
+.smenu{width:250px;padding:18px 12px;display:flex;flex-direction:column}
+.ssrch{position:relative;margin:0 2px 14px}.ssrch svg{position:absolute;left:12px;top:12px}
+.ssrch input{width:100%;box-sizing:border-box;height:39px;padding:0 12px 0 34px;border-radius:10px;background:#16161f;border:1px solid #25253a;color:#fff;font-size:13.5px;outline:none}.ssrch input:focus{border-color:#2ee6f0}
+.smh{margin:14px 12px 6px;color:#6f6f88;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.smsp{height:10px}
+.mi{display:flex;align-items:center;padding:9px 12px;margin-bottom:2px;font-size:14px;font-weight:600}.mi span{flex:1 1 0%}
+.mii{width:18px;height:18px;margin-right:12px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8;flex:0 0 auto}
+.mi.on{background:#1b2a33;color:#fff;box-shadow:inset 3px 0 0 #2ee6f0}.mi.on .mii{opacity:1;stroke:#2ee6f0}
+.smacc{margin-top:auto;display:flex;align-items:center;padding:10px;border-radius:12px;background:#14141e;border:1px solid #22222f;cursor:pointer}.smacc:hover{border-color:rgba(46,230,240,.45)}
+.smacc>div:not(.av){flex:1 1 0%;min-width:0;margin-left:10px}.smacc b{display:block;color:#fff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.smacc span{display:block;color:#8a8aa5;font-size:11.5px}.smacc i{font-style:normal;color:#8a8aa5;font-size:16px;margin-left:6px}
+.sbody{padding:30px 44px 60px}
+.shd{max-width:760px;margin-bottom:8px}.shd h2{margin:0;font-size:28px;font-weight:800}.shd p{margin:6px 0 0;color:#9a9db3;font-size:14px}
+.sgh{max-width:760px;margin:26px 0 10px;color:#8a8aa5;font-size:12px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}
+.sgh2{max-width:760px;display:flex;align-items:center;justify-content:space-between;margin:24px 0 10px;color:#fff;font-weight:700}.slk{background:transparent;color:#2ee6f0;font-size:13px;padding:4px 6px}
+.sgrp{max-width:760px;background:#15151f;border:1px solid #22222f;border-radius:14px;overflow:hidden}
+.sgrp .srow{background:transparent;border-radius:0;margin:0;max-width:none;border-top:1px solid #20202d;padding:16px 20px}.sgrp .srow:first-child{border-top:0}
+.sgrp .blr{padding:10px 20px;border-top:1px solid #20202d;margin:0}
+.srw{display:flex;align-items:center}.srw .btn{margin-left:8px}
+.shero{max-width:760px;display:flex;align-items:center;margin-top:18px;padding:20px;border-radius:16px;background:linear-gradient(120deg,rgba(46,230,240,.10),rgba(122,92,255,.08) 60%,rgba(21,21,31,.6));border:1px solid #25304a}
+.shero>.av{flex:0 0 auto}.sht2{flex:1 1 0%;min-width:0;margin-left:18px}.sht2 b{display:block;color:#fff;font-size:22px;font-weight:800}
+.shs{margin-top:4px;color:#9a9db3;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.shtag{display:inline-block;margin-right:8px;font-size:11px;font-weight:800;color:#2ee6f0;background:rgba(46,230,240,.12);border-radius:7px;padding:2px 8px}
+.shb{flex:0 0 auto;display:flex}.shb .btn{margin-left:8px}
+.sempty{max-width:760px;margin-top:24px;padding:30px;text-align:center;color:#8a8aa5;border:1px dashed #2a2a3c;border-radius:14px}
 /* 1.8.2 sign-in screen */
 #login.auon{background:#0a0a11}#lbox.aum{width:auto;max-width:none;margin:0;padding:0;text-align:left}
 .au{display:flex;min-height:100vh}
@@ -955,8 +978,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.8.2";
+var VER="1.8.3";
 var NOTES=[
+ {v:"1.8.3",d:"6 Nov 2026",t:["Settings redesigned: a sidebar with icons, settings grouped into clear sections, and a search box that finds any setting","General is split into General, Appearance and Notifications, so things are easier to find","Switch account: jump to another account on this PC from Settings, the menu under your name, or the Xaly logo menu","Account settings open with your profile card, showing your username, email and online status"]},
  {v:"1.8.2",d:"6 Nov 2026",t:["New sign-in screen: sign in and create an account on one page, with a Xaly panel full of games","Usernames are checked as you type, passwords show how strong they are, and an eye button shows what you typed","Email codes go in six boxes that move on by themselves; paste the whole code at once if you like","Pick your account from a cleaner list, and every mistake is explained right under the field it\u2019s about"]},
  {v:"1.8.1",d:"6 Nov 2026",t:["Fixed: if the confirmation email was slow to send, creating an online account showed an error even though it worked. It now goes straight to the code screen"]},
  {v:"1.8.0",d:"6 Nov 2026",t:["Online accounts: sign up with an email, username and password, and sign in on any PC. Forgot your password? Reset it with a code we email you","Your existing account keeps working exactly as before. Put it online whenever you like in Settings \u203A Account, without losing anything","Add friends by username instead of a 9-digit code","Your library, play time and achievements still stay on each PC. Back them up in Settings \u203A Account to move them","You can still sign in when you\u2019re offline, and you can disconnect or delete your online account at any time"]},
@@ -5372,52 +5396,94 @@ function applyAccent(){
   var a=ACC[S.set.accent||0],css=".pri,.sw.on,#dlfill,.tab.on:after{background:linear-gradient(90deg,"+a[0]+","+a[1]+")}.pri.stop{background:#d9534f}#badge{background:"+a[1]+"}.sec:before{background:"+a[0]+"}";
   var t=$("theme");if(t.styleSheet)t.styleSheet.cssText=css;else t.textContent=css;
 }
+var SICO={account:'<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 19.5c1.2-3.4 4-5 7.2-5s6 1.6 7.2 5"/>',friends:'<circle cx="9" cy="9" r="3.2"/><path d="M3.5 18.5c.9-2.8 3-4.2 5.5-4.2s4.6 1.4 5.5 4.2M15.5 6.2a3 3 0 0 1 0 5.6M17.5 14.6c1.6.6 2.6 1.9 3 3.9"/>',
+  general:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4L18 18M6 18l1.6-1.6M16.4 7.6L18 6"/>',
+  appearance:'<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.9 1.6-2-.3-1.2.5-2.3 1.8-2.3h1.4a3.7 3.7 0 0 0 3.7-3.7C20.5 7.5 16.7 3.5 12 3.5z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="10.5" cy="7.6" r="1.1"/><circle cx="15" cy="8" r="1.1"/>',
+  notifications:'<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15zM10 20.5a2.2 2.2 0 0 0 4 0"/>',
+  downloads:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/>',storage:'<rect x="3.5" y="5" width="17" height="6" rx="2"/><rect x="3.5" y="13" width="17" height="6" rx="2"/><path d="M7 8h.01M7 16h.01"/>',
+  cache:'<path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 12.5h9L17.5 7"/>',about:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6h.01"/>'};
+var STABS=[["You",[["account","Account"],["friends","Friends"]]],["App",[["general","General"],["appearance","Appearance"],["notifications","Notifications"]]],["Games",[["downloads","Downloads"],["storage","Storage"],["cache","Cache"]]],["",[["about","About"]]]];
 function renderSettings(){
-  var m=$("smenu"),b=$("sbody");m.innerHTML="";b.innerHTML="";m.appendChild(el("h3","","SETTINGS"));
-  [["account","Account"],["friends","Friends"],["general","General"],["downloads","Downloads"],["storage","Storage"],["cache","Cache"],["about","About"]].forEach(function(t){
-    m.appendChild(btn(t[1],"mi"+(P.tab===t[0]?" on":""),function(){P.tab=t[0];renderSettings();}));});
-  var tab=P.tab;
+  var m=$("smenu"),b=$("sbody");m.innerHTML="";b.innerHTML="";
+  var q=P.sq2||"",sb2=el("div","ssrch"),si=el("input");si.setAttribute("type","text");si.setAttribute("placeholder","Search settings");si.value=q;si.id="ssq";
+  sb2.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5" fill="none" stroke="#8a8aa5" stroke-width="2.4"/><path d="M15 15l6 6" stroke="#8a8aa5" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  sb2.appendChild(si);m.appendChild(sb2);
+  si.oninput=function(){P.sq2=si.value;clearTimeout(si._t);si._t=setTimeout(function(){renderSettings();var n=$("ssq");if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length);}catch(e){}}},150);};
+  STABS.forEach(function(gr){m.appendChild(el("div",gr[0]?"smh":"smsp",gr[0]));
+    gr[1].forEach(function(t){var x=btn("","mi"+(!q&&P.tab===t[0]?" on":""),function(){P.sq2="";P.tab=t[0];renderSettings();$("sbody").scrollTop=0;});
+      x.innerHTML='<svg class="mii" viewBox="0 0 24 24">'+SICO[t[0]]+'</svg><span>'+t[1]+'</span>';m.appendChild(x);});});
+  var sw0=el("div","smacc");sw0.appendChild(avatar(S.user.name,S.user.color,32,S.user.status==="invisible"?"offline":S.user.status,myAv()));
+  var st0=el("div");st0.appendChild(el("b","",S.user.name));st0.appendChild(el("span","","Switch account"));sw0.appendChild(st0);sw0.appendChild(el("i","","⇄"));
+  sw0.onclick=function(e){stp(e);switchMenu(sw0);};m.appendChild(sw0);
+  if(q){settingsSearch(q,b);return;}
+  settingsTab(P.tab,b);
+}
+/* search: build every section off-screen and keep the rows that match; they still work */
+function settingsSearch(q,b){
+  var ql=q.toLowerCase(),found=0,hd=el("div","shd");hd.appendChild(el("h2","","Results for “"+q+"”"));b.appendChild(hd);
+  STABS.forEach(function(gr){gr[1].forEach(function(t){
+    if(t[0]==="storage")return;
+    var tmp=el("div");try{settingsTab(t[0],tmp);}catch(e){return;}
+    var all=tmp.getElementsByTagName("div"),hit=[],i;
+    for(i=0;i<all.length;i++){if(all[i].className!=="srow")continue;var tx=(all[i].textContent||all[i].innerText||"").toLowerCase();if(tx.indexOf(ql)>=0)hit.push(all[i]);}
+    if(!hit.length)return;found+=hit.length;
+    var h=el("div","sgh2");h.appendChild(el("span","",t[1]));
+    h.appendChild(btn("Open "+t[1]+" ›","slk",function(){P.sq2="";P.tab=t[0];renderSettings();}));b.appendChild(h);
+    var g=el("div","sgrp");hit.forEach(function(r){g.appendChild(r);});b.appendChild(g);});});
+  if("storage leftovers clean drive disk space move games".indexOf(ql)>=0&&ql.length>2){found++;var h2=el("div","sgh2");h2.appendChild(el("span","","Storage"));b.appendChild(h2);var g2=el("div","sgrp");g2.appendChild(srow("Storage","Drives, game sizes, moving games and cleaning up leftover files.",btn("Open Storage","btn",function(){P.sq2="";P.tab="storage";renderSettings();})));b.appendChild(g2);}
+  if(!found)b.appendChild(el("div","sempty","No settings match “"+q+"”."));
+}
+function settingsTab(tab,b0){
+  var b=b0;
+  function hdr(t,d){b=b0;var h=el("div","shd");h.appendChild(el("h2","",t));if(d)h.appendChild(el("p","",d));b0.appendChild(h);}
+  function grp(t){if(t)b0.appendChild(el("h3","sgh",t));var g=el("div","sgrp");b0.appendChild(g);b=g;return g;}
   if(tab==="account"){
-    b.appendChild(el("h2","","Account"));
-    var a=el("div","acct");a.appendChild(avatar(S.user.name,S.user.color,84,S.user.status==="invisible"?"offline":S.user.status));
-    var n=el("div");n.appendChild(el("div","",S.user.name)).style.cssText="font-size:24px;font-weight:700";n.appendChild(el("div","","Member since "+new Date(S.user.joined||now()).toLocaleDateString())).style.color="#9a9ab0";a.appendChild(n);b.appendChild(a);
+    hdr("Account","Your profile, sign-in and backups.");
+    var hero=el("div","shero");hero.appendChild(avatar(S.user.name,S.user.color,72,S.user.status==="invisible"?"offline":S.user.status,myAv()));
+    var ht=el("div","sht2");ht.appendChild(el("b","",S.user.name));
+    var on=sbOn()&&curAcc.sb&&curAcc.sb.uid,sub=el("div","shs");
+    if(on)sub.appendChild(el("span","shtag","Online"));
+    sub.appendChild(document.createTextNode((on?"@"+(curAcc.sb.user||"")+"  ·  ":"")+(curAcc.email||"No email")+"  ·  Member since "+new Date(S.user.joined||now()).toLocaleDateString()));
+    ht.appendChild(sub);hero.appendChild(ht);
+    var hb=el("div","shb"),swb=btn("Switch account","btn",function(e){stp(e);switchMenu(swb);});hb.appendChild(swb);hb.appendChild(btn("Sign out","btn dng",signOut));hero.appendChild(hb);b.appendChild(hero);
+    grp("Profile");
     var ni=el("input");ni.setAttribute("type","text");ni.value=S.user.name;ni.maxLength=24;
-    var sv=btn("Save name","btn",function(){var v=trim(ni.value);if(!v){toast("Your name can't be empty");return;}S.user.name=v;save();syncAcc();render();renderFriends();syncNow();toast("Name updated");});
-    var er=el("div");er.style.cssText="display:flex;align-items:center";er.appendChild(el("span","code",curAcc.email||"Not set"));
-    er.appendChild(btn(curAcc.email?"Change":"Add email","btn",function(){
-      var f2=[{id:"e",label:"Gmail address",value:curAcc.email||"",ph:"you@gmail.com"}];if(curAcc.pw)f2.push({id:"pw",label:"Your password",pass:1});else f2.push({id:"n1",label:"Choose a password (at least 6 characters)",pass:1});
-      openForm(curAcc.email?"Change email":"Add an email",f2,"Save",function(v){
-        var e=(v.e||"").toLowerCase();if(!okEmail(e)){toast("Please enter a valid email address");return false;}
-        var o=accByEmail(e);if(o&&o!==curAcc){toast("Another account already uses that email");return false;}
-        if(curAcc.pw){if(hashPw(curAcc,v.pw)!==curAcc.pw){toast("That password isn\u2019t right");return false;}}
-        else{if((v.n1||"").length<6){toast("Pick a password with at least 6 characters");return false;}curAcc.pw=hashPw(curAcc,v.n1);}
-        curAcc.email=e;saveAcc();renderSettings();toast("Email saved. You can now sign in with it.");
-      },null);}));
-    if(sbOn()&&curAcc.sb&&(curAcc.sb.uid||curAcc.sb.pending)){er.removeChild(er.lastChild);}
-    b.appendChild(srow("Email",sbOn()&&curAcc.sb&&curAcc.sb.uid?"The email of your online account.":"Sign in with your email address and password. Accounts are stored on this PC.",er));
-    sbAccountRow(b);
-    var bk=el("div");bk.style.cssText="display:flex;align-items:center";bk.appendChild(btn("Back up\u2026","btn",backupAcc));bk.appendChild(btn("Restore\u2026","btn",restoreAcc));
-    b.appendChild(srow("Account backup","Save your library, play time, achievements, friends and settings to one password-protected file, and restore it on another PC."+(S.lastBackup?" Last backup: "+ago(S.lastBackup)+".":" You haven\u2019t made a backup yet."),bk));
-    b.appendChild(srow("Account name","This is what your friends see.",(function(){var d=el("div");d.style.cssText="display:flex;align-items:center";d.appendChild(ni);d.appendChild(sv);return d;})()));
-    var sc=el("div");AV.forEach(function(c,i){var s=el("span","swatch"+(S.user.color===i?" on":""));s.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s.onclick=function(){S.user.color=i;save();syncAcc();render();renderFriends();syncNow();};sc.appendChild(s);});
-    var rr=srow("Avatar colour",null,sc);b.appendChild(rr);
-    var cp=el("div");cp.style.cssText="display:flex;align-items:center";cp.appendChild(el("span","code",fmtCode(S.user.code)));
-    cp.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Couldn't copy. Your code is "+S.user.code);}}));
-    b.appendChild(srow("Friend code","Give this to friends so they can add you.",cp));
+    var sv=btn("Save","btn",function(){var v=trim(ni.value);if(!v){toast("Your name can't be empty");return;}S.user.name=v;save();syncAcc();render();renderFriends();syncNow();toast("Name updated");});
+    b.appendChild(srow("Display name","What your friends see.",(function(){var d=el("div","srw");d.appendChild(ni);d.appendChild(sv);return d;})()));
+    var sc=el("div");AV.forEach(function(c,i){var s2=el("span","swatch"+(S.user.color===i?" on":""));s2.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s2.onclick=function(){S.user.color=i;save();syncAcc();render();renderFriends();syncNow();};sc.appendChild(s2);});
+    b.appendChild(srow("Avatar colour",null,sc));
     var ss=el("select");[["online","Online"],["away","Away"],["busy","Do not disturb"],["invisible","Invisible"]].forEach(function(o){var op=el("option","",o[1]);op.value=o[0];ss.appendChild(op);});
     ss.value=S.user.status;ss.style.width="180px";ss.onchange=function(){S.user.status=ss.value;save();render();renderFriends();syncNow();};
     b.appendChild(srow("Status","How you appear to friends.",ss));
-    if(sbOn()&&curAcc.sb&&curAcc.sb.uid){}else b.appendChild(srow("Password",curAcc&&curAcc.pw?"This account asks for a password when you sign in.":"Optional. Asks for a password when you pick this account on the sign-in screen. It keeps casual users out; it does not encrypt your files.",btn(curAcc&&curAcc.pw?"Change":"Set password","btn",changePw)));
-    b.appendChild(srow("Sign out","Go back to the sign-in screen to use a different account. Your library, friends and settings stay saved with this one.",btn("Sign out","btn dng",signOut)));
+    var cp=el("div","srw");cp.appendChild(el("span","code",fmtCode(S.user.code)));
+    cp.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Couldn't copy. Your code is "+S.user.code);}}));
+    b.appendChild(srow("Friend code","Give this to friends so they can add you"+(on?", or they can search for @"+(curAcc.sb.user||"")+".":"."),cp));
+    grp("Sign-in");
+    var er=el("div","srw");er.appendChild(el("span","code",curAcc.email||"Not set"));
+    if(!(sbOn()&&curAcc.sb&&(curAcc.sb.uid||curAcc.sb.pending)))er.appendChild(btn(curAcc.email?"Change":"Add email","btn",function(){
+      var f2=[{id:"e",label:"Email",value:curAcc.email||"",ph:"you@gmail.com"}];if(curAcc.pw)f2.push({id:"pw",label:"Your password",pass:1});else f2.push({id:"n1",label:"Choose a password (at least 6 characters)",pass:1});
+      openForm(curAcc.email?"Change email":"Add an email",f2,"Save",function(v){
+        var e=(v.e||"").toLowerCase();if(!okEmail(e)){toast("Please enter a valid email address");return false;}
+        var o=accByEmail(e);if(o&&o!==curAcc){toast("Another account already uses that email");return false;}
+        if(curAcc.pw){if(hashPw(curAcc,v.pw)!==curAcc.pw){toast("That password isn’t right");return false;}}
+        else{if((v.n1||"").length<6){toast("Pick a password with at least 6 characters");return false;}curAcc.pw=hashPw(curAcc,v.n1);}
+        curAcc.email=e;saveAcc();renderSettings();toast("Email saved. You can now sign in with it.");
+      },null);}));
+    b.appendChild(srow("Email",on?"The email of your online account.":"Sign in with your email address and password.",er));
+    if(!on)b.appendChild(srow("Password",curAcc.pw?"This account asks for a password when you sign in.":"Optional. Asks for a password when you pick this account on the sign-in screen. It keeps casual users out; it does not encrypt your files.",btn(curAcc.pw?"Change password":"Set a password","btn",changePw)));
+    sbAccountRow(b);
+    grp("Backup");
+    var bk=el("div","srw");bk.appendChild(btn("Back up…","btn",backupAcc));bk.appendChild(btn("Restore…","btn",restoreAcc));
+    b.appendChild(srow("Account backup","Save your library, play time, achievements, friends and settings to one password-protected file, and restore it on another PC."+(S.lastBackup?" Last backup: "+ago(S.lastBackup)+".":" You haven’t made a backup yet."),bk));
   }else if(tab==="friends"){
-    b.appendChild(el("h2","","Friends"));
+    hdr("Friends","Chat, friend requests and who can reach you.");grp("Online friends");
     b.appendChild(srow("Online friends","Send and accept friend requests, see who's online and what they're playing, chat, and recommend games.",sw(S.set.online!==0,function(v){S.set.online=v?1:0;if(v)frInit();save();renderFriends();if(v)syncNow();renderSettings();})));
     if(frOn()){
       var cp2=el("div");cp2.style.cssText="display:flex;align-items:center";cp2.appendChild(el("span","code",fmtCode(S.user.code)));
       cp2.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Your code is "+S.user.code);}}));
       b.appendChild(srow("Your friend code","Give this to friends so they can send you a request.",cp2));
       b.appendChild(srow("Show what I'm playing","Friends can see the game you're in.",sw(!!S.set.showPlaying,function(v){S.set.showPlaying=v?1:0;save();syncNow();})));
-      var bl=S.blocked||{},bk=Object.keys(bl);
+      grp("Blocked people");var bl=S.blocked||{},bk=Object.keys(bl);
       b.appendChild(srow("Blocked people",bk.length?"They can\u2019t message you, see you online, challenge you or send you friend requests.":"Nobody is blocked. Block someone from their chat, by right-clicking them in your friends list, or from a friend request.",null));
       bk.sort(function(a,c){return bl[c].t-bl[a].t;}).forEach(function(code){
         var rw=el("div","blr");rw.appendChild(avatar(bl[code].name||"?",hash(code)%AV.length,36,""));
@@ -5425,51 +5491,65 @@ function renderSettings(){
         rw.appendChild(btn("Unblock","btn sm",function(){unblockUser(code);}));b.appendChild(rw);});
     }
     if(frErr)b.appendChild(el("div","fnote",frErr));
+    grp("Privacy");
     b.appendChild(srow("Privacy","Friend requests, status and messages travel through ntfy.sh, a free public message relay. Status and chat are end-to-end encrypted, so the relay only sees scrambled text. A friend request carries your name and friend code. Chat history is kept on this PC only.",null));
     b.appendChild(srow("Offline messages","The relay keeps messages for about 12 hours. If a friend is away longer than that, messages and requests sent in the meantime may not reach them.",null));
   }else if(tab==="general"){
-    b.appendChild(el("h2","","General"));
+    hdr("General","How Xaly starts, finds games and keeps them up to date.");
+    grp("Startup");
     b.appendChild(srow("Keep running in the tray when I close the window","The launcher stays in the hidden icons area (^ in the taskbar) so friends still see you online. Turn this off to quit when you close it.",sw(!!S.set.tray,function(v){S.set.tray=v?1:0;save();T(function(){return X.SetTray(v?"1":"0");});})));
     b.appendChild(srow("Start Xaly Launcher when I sign in to Windows",null,sw(!!S.set.startup,function(v){S.set.startup=v?1:0;save();var r=T(function(){return X.StartupSet(v?"1":"0",S.set.startMin?"1":"0");});if(r!=="ok")toast("Couldn't change startup: "+r.replace("ERR:",""));renderSettings();})));
     if(S.set.startup)b.appendChild(srow("Start minimised to the tray","Open quietly in the background instead of showing the window.",sw(!!S.set.startMin,function(v){S.set.startMin=v?1:0;save();T(function(){return X.StartupSet("1",v?"1":"0");});})));
-    var eng=el("div","seg");[["webview2","Modern (Edge)"],["ie","Legacy (IE)"]].forEach(function(o){eng.appendChild(btn(o[1],"sgb"+(ENGINE===o[0]?" on":""),function(){
-      if(o[0]===ENGINE)return;if(o[0]==="webview2"&&T(function(){return X.ModernAvailable();},"0")!=="1"){toast("This build doesn\u2019t include the modern engine. Install the latest release from GitHub.");return;}
-      T(function(){return X.UseEngine(o[0]);});openForm("Restart to switch the display engine?",[],"Restart now",function(){T(function(){return X.Restart();});},null);}));});
-    b.appendChild(srow("Display engine","Modern uses Microsoft Edge WebView2: faster and smoother. Legacy uses the old Internet Explorer engine, in case something looks wrong."+(ENGINE==="ie"&&T(function(){return X.ModernAvailable();},"0")==="1"?" Modern couldn\u2019t start on this PC, so Legacy is being used. Installing the free WebView2 Runtime from Microsoft fixes that.":""),eng));
-    var lay=el("div","seg");[["side","Sidebar"],["classic","Classic"]].forEach(function(o){lay.appendChild(btn(o[1],"sgb"+((S.set.layout||"side")===o[0]?" on":""),function(){S.set.layout=o[0];save();applyLayout();renderSettings();}));});
-    b.appendChild(srow("Layout","Sidebar is the new look. Classic brings back the top bar with Store and Library tabs and the bar along the bottom.",lay));
+    grp("Store and games");
     var lu=el("div");lu.style.cssText="display:flex;align-items:center";
     lu.appendChild(btn(liveBusy?"Updating…":"Update now","btn",function(){if(!liveBusy){CAT.err="";refreshLive(true,true);toast("Checking itch.io for new games…");}}));
     var cs=fmtN(CAT.items.length)+" games from itch.io. "+(CAT.shared?"Everyone with Xaly sees this same list. New lists go live for everyone at the same moment, every 6 hours. ":"")+(CAT.t?"Last updated "+ago(CAT.sh||CAT.t)+". ":"")+(CAT.err?"Last problem: "+CAT.err+". ":(CAT.items.length<CAT_TARGET?"Still adding more in the background. ":""))+"New free Windows games are added automatically every 6 hours.";
     b.appendChild(srow("Store catalog",cs,lu));
     var gu=el("div");gu.style.cssText="display:flex;align-items:center";gu.appendChild(btn(guBusy?"Checking\u2026":"Check now","btn",function(){checkGameUpdates(true);}));gu.appendChild(sw(S.set.gameUpd!==0,function(v){S.set.gameUpd=v?1:0;save();}));gu.lastChild.style.marginLeft="14px";
     b.appendChild(srow("Game updates","Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. "+(updCount()?updCount()+" update"+(updCount()===1?"":"s")+" waiting. ":"")+(S.guT?"Last checked "+ago(S.guT)+".":""),gu));
+    b.appendChild(srow("Add games I download myself","Every few hours Xaly looks in Downloads, Desktop, Documents, Program Files and Games folders for games from the Store, and adds them to your library with their cover art. Games you remove are never added again.",sw(S.set.autoFind!==0,function(v){S.set.autoFind=v?1:0;if(v){S.autoFindT=0;autoFind();}save();})));
+    grp("TV mode");
     b.appendChild(srow("TV mode","A full-screen view made for controllers and TVs. Open it from the sidebar or press Start on a controller.",btn("Open TV mode","btn",function(){enterTV();})));
     b.appendChild(srow("Start Xaly in TV mode",null,sw(!!S.set.tvStart,function(v){S.set.tvStart=v?1:0;save();})));
-    var snd=el("div");snd.style.cssText="display:flex;align-items:center";
-    snd.appendChild(btn("\u25B6 Download","btn",function(){T(function(){return X.PlaySound("download");});}));
-    snd.appendChild(btn("\u25B6 Achievement","btn",function(){T(function(){return X.PlaySound("achievement");});}));snd.lastChild.style.marginLeft="8px";
-    snd.appendChild(sw(S.set.sounds!==0,function(v){S.set.sounds=v?1:0;save();}));snd.lastChild.style.marginLeft="14px";
-    b.appendChild(srow("Add games I download myself","Every few hours Xaly looks in Downloads, Desktop, Documents, Program Files and Games folders for games from the Store, and adds them to your library with their cover art. Games you remove are never added again.",sw(S.set.autoFind!==0,function(v){S.set.autoFind=v?1:0;if(v){S.autoFindT=0;autoFind();}save();})));
+    grp("Shortcuts");
     var ld=T(function(){return X.HasShortcut("desktop","Xaly Launcher","");},"0")==="1",ls=T(function(){return X.HasShortcut("start","Xaly Launcher","");},"0")==="1";
     b.appendChild(srow("Desktop shortcut","A Xaly Launcher icon on your desktop.",sw(ld,function(v){T(function(){return v?X.MakeShortcut("desktop","Xaly Launcher","",""):X.RemoveShortcut("desktop","Xaly Launcher","");});})));
     b.appendChild(srow("Start menu shortcut","Find Xaly Launcher in the Start menu and Windows search.",sw(ls,function(v){T(function(){return v?X.MakeShortcut("start","Xaly Launcher","",""):X.RemoveShortcut("start","Xaly Launcher","");});AC.smLnk=1;saveAcc();})));
+  }else if(tab==="appearance"){
+    hdr("Appearance","Make Xaly look the way you like.");
+    grp("Look");
+    var lay=el("div","seg");[["side","Sidebar"],["classic","Classic"]].forEach(function(o){lay.appendChild(btn(o[1],"sgb"+((S.set.layout||"side")===o[0]?" on":""),function(){S.set.layout=o[0];save();applyLayout();renderSettings();}));});
+    b.appendChild(srow("Layout","Sidebar is the new look. Classic brings back the top bar with Store and Library tabs and the bar along the bottom.",lay));
+    var sc2=el("div");ACC.forEach(function(c,i){var s=el("span","swatch"+((S.set.accent||0)===i?" on":""));s.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s.onclick=function(){S.set.accent=i;save();applyAccent();renderSettings();};sc2.appendChild(s);});
+    b.appendChild(srow("Accent colour",null,sc2));
+    b.appendChild(srow("Opening animation",null,sw(AC.intro!==0,function(v){S.set.intro=v?1:0;AC.intro=v?1:0;save();saveAcc();})));
+    grp("Display engine");
+    var eng=el("div","seg");[["webview2","Modern (Edge)"],["ie","Legacy (IE)"]].forEach(function(o){eng.appendChild(btn(o[1],"sgb"+(ENGINE===o[0]?" on":""),function(){
+      if(o[0]===ENGINE)return;if(o[0]==="webview2"&&T(function(){return X.ModernAvailable();},"0")!=="1"){toast("This build doesn\u2019t include the modern engine. Install the latest release from GitHub.");return;}
+      T(function(){return X.UseEngine(o[0]);});openForm("Restart to switch the display engine?",[],"Restart now",function(){T(function(){return X.Restart();});},null);}));});
+    b.appendChild(srow("Display engine","Modern uses Microsoft Edge WebView2: faster and smoother. Legacy uses the old Internet Explorer engine, in case something looks wrong."+(ENGINE==="ie"&&T(function(){return X.ModernAvailable();},"0")==="1"?" Modern couldn\u2019t start on this PC, so Legacy is being used. Installing the free WebView2 Runtime from Microsoft fixes that.":""),eng));
+  }else if(tab==="notifications"){
+    hdr("Notifications","Pop-ups and sounds, in the launcher and while you play.");
+    grp("Friends");
     b.appendChild(srow("When a friend messages you","A pop-up with the message, also while you\u2019re in a game. Click it to open the chat.",sw(S.set.nMsg!==0,function(v){S.set.nMsg=v?1:0;save();})));
     b.appendChild(srow("Message sound","A short pop when a message arrives.",sw(S.set.nMsgSnd!==0,function(v){S.set.nMsgSnd=v?1:0;save();if(v)playSnd("message");})));
     b.appendChild(srow("When a friend comes online","Show a pop-up in the bottom-right corner, also while you\u2019re in a game.",sw(S.set.nOnline!==0,function(v){S.set.nOnline=v?1:0;save();})));
     b.appendChild(srow("When a friend starts playing a game","Show a pop-up with the game they started.",sw(S.set.nPlay!==0,function(v){S.set.nPlay=v?1:0;save();})));
     b.appendChild(srow("Friend sound","A short chime with those pop-ups and with challenges.",sw(S.set.nSound!==0,function(v){S.set.nSound=v?1:0;save();if(v)playSnd("friend");})));
-    b.appendChild(srow("Sounds","A chime when a game finishes downloading and a fanfare when you unlock an achievement. Press the buttons to hear them.",snd));
+    grp("Downloads and achievements");
     b.appendChild(srow("Notify me when a download finishes","Shows a card in the launcher with a Play button, and keeps a list under the bell.",sw(S.set.notify!==0,function(v){S.set.notify=v?1:0;save();})));
     b.appendChild(srow("Windows notifications","Also pop up a Windows notification when the launcher is in the background or in the tray.",sw(S.set.winNotify!==0,function(v){S.set.winNotify=v?1:0;save();})));
-    b.appendChild(srow("Opening animation",null,sw(AC.intro!==0,function(v){S.set.intro=v?1:0;AC.intro=v?1:0;save();saveAcc();})));
-    var sc2=el("div");ACC.forEach(function(c,i){var s=el("span","swatch"+((S.set.accent||0)===i?" on":""));s.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s.onclick=function(){S.set.accent=i;save();applyAccent();renderSettings();};sc2.appendChild(s);});
-    b.appendChild(srow("Accent colour",null,sc2));
+    var snd=el("div");snd.style.cssText="display:flex;align-items:center";
+    snd.appendChild(btn("\u25B6 Download","btn",function(){T(function(){return X.PlaySound("download");});}));
+    snd.appendChild(btn("\u25B6 Achievement","btn",function(){T(function(){return X.PlaySound("achievement");});}));snd.lastChild.style.marginLeft="8px";
+    snd.appendChild(sw(S.set.sounds!==0,function(v){S.set.sounds=v?1:0;save();}));snd.lastChild.style.marginLeft="14px";
+    b.appendChild(srow("Sounds","A chime when a game finishes downloading and a fanfare when you unlock an achievement. Press the buttons to hear them.",snd));
   }else if(tab==="downloads"){
-    b.appendChild(el("h2","","Downloads"));
+    hdr("Downloads","Where games go, how fast they download, and when.");grp("Folder");
     var pp=T(function(){return X.Paths();},"|").split("|");
     b.appendChild(srow("Download folder",pp[0],btn("Open","btn",function(){T(function(){return X.Open(pp[0]);});})));
-    schedRows(b);
+    grp("Speed and schedule");schedRows(b);
+    grp("Advanced");
     var fd=el("div");fd.style.cssText="display:flex;align-items:center";var fi2=el("input");fi2.setAttribute("type","text");fi2.value=S.set.feed;fi2.setAttribute("placeholder","https://\u2026/games.json");fd.appendChild(fi2);
     fd.appendChild(btn("Save","btn",function(){S.set.feed=trim(fi2.value);save();loadFeed();toast("Store feed saved");}));
     b.appendChild(srow("Store feed (optional)","A web address that returns a JSON list of games. They appear in the Store next to the ones you add.",fd));
@@ -5479,9 +5559,9 @@ function renderSettings(){
     kd.appendChild(btn("Test","btn",testKey));
     b.appendChild(srow("itch.io API key","Used to install games from itch.io. If installs say itch.io refused the request, create your own key at itch.io/user/settings/api-keys, paste it here and press Test. Xaly comes with a built-in key; paste your own here to use it instead.",kd));
   }else if(tab==="storage"){
-    renderStorageTab(b);
+    renderStorageTab(b0);
   }else if(tab==="cache"){
-    b.appendChild(el("h2","","Cache"));
+    hdr("Cache","Temporary files Xaly keeps to stay fast.");grp("");
     var cs=+T(function(){return X.CacheSize();},"0")||0;
     b.appendChild(srow("Cached data",fmtB(cs)+" in use. This is game icons and unfinished downloads. Clearing it is safe; your games, friends and settings are not touched.",btn("Clear cache","btn",function(){
       var fr=+T(function(){return X.ClearCache();},"0")||0;
@@ -5489,28 +5569,45 @@ function renderSettings(){
       toast("Cleared "+fmtB(fr));renderSettings();})));
     b.appendChild(srow("Restart application","Closes Xaly Launcher and opens it again. Useful after clearing the cache or changing the download folder.",btn("Restart","btn",function(){T(function(){return X.Restart();});})));
   }else{
-    b.appendChild(el("h2","","About"));
+    hdr("About","Version, updates and patch notes.");
     b.appendChild(srow("Uninstall Xaly Launcher","Removes the launcher, its shortcuts and start-up entry. You choose whether your games and accounts stay. You can also uninstall it from Windows Settings \u203A Apps.",btn("Uninstall\u2026","btn dng",openUninstall)));
     var dd=T(function(){return X.Paths();},"|").split("|");
+    var unr=b.lastChild;b0.removeChild(unr);grp("Updates");
     var ub=el("div");ub.style.cssText="display:flex;align-items:center";
     if(UPD.st==="dl"){ub.appendChild(el("span","code","Downloading update\u2026 "));var upp=el("span","code",UPD.pct>=0?UPD.pct+"%":"");upp.id="updp";ub.appendChild(upp);}
     else if(UPD.st==="avail")ub.appendChild(btn("Install "+UPD.rel.v,"pri",showUpdate));
     else ub.appendChild(btn(UPD.st==="checking"?"Checking\u2026":"Check for updates","btn",function(){checkUpdate(true);}));
     b.appendChild(srow("Install updates automatically","When a new version is out, Xaly installs it as soon as it starts.",sw(AC.autoUpd!==0,function(v){AC.autoUpd=v?1:0;saveAcc();})));
-    b.appendChild(srow("Send crash reports automatically","When something goes wrong, the error details are emailed to the developer so it can be fixed. Only the error, the Xaly and Windows versions and the screen you were on are sent: no names, emails or files.",sw(AC.crashRep!==0,function(v){AC.crashRep=v?1:0;saveAcc();})));
-    b.appendChild(srow("What\u2019s new",null,btn("Show patch notes","btn",function(){whatsNew(true);})));
-    b.appendChild(srow("Xaly Launcher","Version "+VER+" (Windows). "+(UPD.st==="avail"?"Version "+UPD.rel.v+" is available.":UPD.err?UPD.err:UPD.t?"Checked "+ago(UPD.t)+".":"Updates come from github.com/"+UPD_REPO+"."),ub));
-    b.appendChild(srow("Your data",dd[1],btn("Open","btn",function(){T(function(){return X.Open(dd[1]);});})));
-    var pn=el("h2","","Patch notes");pn.style.marginTop="30px";b.appendChild(pn);
+    grp("Help make Xaly better");b.appendChild(srow("Send crash reports automatically","When something goes wrong, the error details are emailed to the developer so it can be fixed. Only the error, the Xaly and Windows versions and the screen you were on are sent: no names, emails or files.",sw(AC.crashRep!==0,function(v){AC.crashRep=v?1:0;saveAcc();})));
+    grp("What\u2019s new");b.appendChild(srow("What\u2019s new",null,btn("Show patch notes","btn",function(){whatsNew(true);})));
+    grp("Version");b.appendChild(srow("Xaly Launcher","Version "+VER+" (Windows). "+(UPD.st==="avail"?"Version "+UPD.rel.v+" is available.":UPD.err?UPD.err:UPD.t?"Checked "+ago(UPD.t)+".":"Updates come from github.com/"+UPD_REPO+"."),ub));
+    grp("Your data");b.appendChild(srow("Your data",dd[1],btn("Open","btn",function(){T(function(){return X.Open(dd[1]);});})));
+    b=b0;var pn=el("h3","sgh","Patch notes");b.appendChild(pn);
     NOTES.forEach(function(n,i){var d=el("div","nv"),t=el("h3","","Preview "+n.v);if(i===0)t.appendChild(el("span","cur","CURRENT"));d.appendChild(t);d.appendChild(el("div","nd",n.d));var u=el("ul");n.t.forEach(function(x){u.appendChild(el("li","",x));});d.appendChild(u);b.appendChild(d);});
-    b.appendChild(srow("Quit Xaly Launcher","Closes it completely, even if it normally stays in the tray.",btn("Quit","btn dng",function(){T(function(){return X.Quit();});})));
+    grp("Leave");b.appendChild(unr);b.appendChild(srow("Quit Xaly Launcher","Closes it completely, even if it normally stays in the tray.",btn("Quit","btn dng",function(){T(function(){return X.Quit();});})));
   }
 }
 
+/* 1.8.3: switch to another account on this PC without going through the sign-in screen */
+function switchItems(){
+  var it=[{h:"Switch account"}];
+  AC.list.forEach(function(a){if(a===curAcc)return;it.push({t:a.name+(a.sb&&a.sb.uid?"  \u00B7  @"+(a.sb.user||""):a.email?"  \u00B7  "+a.email:""),fn:function(){switchTo(a);}});});
+  it.push({t:"+ Add or sign in to another account",fn:function(){switchTo(null);}});
+  return it;
+}
+function switchMenu(anchor){ctxMenu(anchor,switchItems());}
+function switchTo(a){
+  if(a===curAcc)return;
+  var was=curAcc;signOut();
+  if(S&&curAcc===was)return;   // signing out was refused (a game is running)
+  if(!a){if(sbOn())authGo(AC.list.length?"signin":"register");else renderLogin();return;}
+  if(!a.pw){startSession(a);toast("Switched to "+a.name);return;}
+  if(sbOn())authGo("pw",{a:a});else signIn(a);
+}
 /* ---------- wiring ---------- */
 $("tStore").onclick=function(){nav("store");};$("tLib").onclick=function(){nav("lib");};
 $("back").onclick=backNav;
-$("chip").onclick=function(e){stp(e);ctxMenu($("chip"),[{h:"Signed in as "+S.user.name},{t:"View my profile",fn:function(){openProfile("");}},{t:"Account settings",fn:function(){nav("settings","account");}},{t:"Downloads",fn:function(){nav("downloads");}},{sep:1},{t:"Sign out",cls:"dng",fn:signOut}]);};
+$("chip").onclick=function(e){stp(e);ctxMenu($("chip"),[{h:"Signed in as "+S.user.name},{t:"View my profile",fn:function(){openProfile("");}},{t:"Account settings",fn:function(){nav("settings","account");}},{t:"Downloads",fn:function(){nav("downloads");}},{sep:1}].concat(switchItems(),[{sep:1},{t:"Sign out",cls:"dng",fn:signOut}]));};
 $("ovx").onclick=function(){T(function(){return X.OverlayClose();});};
 /* 1.6.9: the Xaly logo opens a menu with every page, the settings sections and the main actions */
 function brandMenu(){
@@ -5525,7 +5622,9 @@ function brandMenu(){
     {t:"TV mode",fn:function(){enterTV();}},
     {sep:1},{h:"Settings"},
     {t:"Account & backup",fn:function(){nav("settings","account");P.tab="account";renderSettings();}},
-    {t:"General & notifications",fn:function(){nav("settings","general");P.tab="general";renderSettings();}},
+    {t:"General",fn:function(){nav("settings","general");P.tab="general";renderSettings();}},
+    {t:"Appearance",fn:function(){nav("settings","appearance");P.tab="appearance";renderSettings();}},
+    {t:"Notifications",fn:function(){nav("settings","notifications");P.tab="notifications";renderSettings();}},
     {t:"Downloads, speed & schedule",fn:function(){nav("settings","downloads");P.tab="downloads";renderSettings();}},
     {t:"Storage & moving games",fn:function(){nav("settings","storage");P.tab="storage";renderSettings();}},
     {t:"Friends & privacy",fn:function(){nav("settings","friends");P.tab="friends";renderSettings();}},
@@ -5537,6 +5636,7 @@ function brandMenu(){
     {t:"About Xaly",fn:function(){nav("settings","about");P.tab="about";renderSettings();}},
     {sep:1},
     {t:"Hide to tray",fn:function(){T(function(){return X.HideNow();});}},
+    {t:"Switch account\u2026",fn:function(){setTimeout(function(){switchMenu($("brand"));},0);}},
     {t:"Sign out",fn:signOut},
     {t:"Quit Xaly",cls:"dng",fn:function(){if(S)saveNow();T(function(){return X.Quit();});}}];
   var m=$("pmenu"),br=$("brand");

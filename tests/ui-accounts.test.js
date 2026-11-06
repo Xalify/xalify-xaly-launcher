@@ -106,6 +106,17 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   var n0=await p.evaluate(()=>FSB.log.length);
   await af({name:"Local Only",email:"local@gmail.com",pw:"secret7",pw2:"secret7"});await go();await w(300);
   ok(await p.evaluate(n=>!!S&&curAcc.name==="Local Only"&&!curAcc.sb&&FSB.log.length===n,n0),"and makes the account on this PC without going online");
+  // 9d. switch account: straight in without a password, Welcome back with one, and the menu lists the others
+  ok(await p.evaluate(()=>{var it=switchItems();return it.length===AC.list.length+1&&it.some(function(x){return /Bredy_G/.test(x.t||"");})&&!it.some(function(x){return x.t===curAcc.name;});}),"the switch menu lists every other account on this PC");
+  await p.evaluate(()=>{var a=AC.list.filter(function(x){return x.name==="Friend";})[0];a.pw="";switchTo(a);});await w(300);
+  ok(await p.evaluate(()=>!!S&&curAcc.name==="Friend"),"switching to an account without a password signs straight in");
+  await p.evaluate(()=>{switchTo(accByEmail("bredy@gmail.com"));});await w(300);
+  ok(await view()==="pw"&&await p.evaluate(()=>AUTH.a&&AUTH.a.email==="bredy@gmail.com"),"switching to an account with a password asks for it");
+  await af({pw:"newpass1"});await go();await w(500);
+  ok(await p.evaluate(()=>!!S&&curAcc.email==="bredy@gmail.com"),"and then signs in");
+  await p.evaluate(()=>{run.zz={t:Date.now()};S.games.push({id:"zz",name:"Busy Game",path:"C:\\z.exe",seconds:0,plays:0,last:0,added:1});switchTo(AC.list.filter(function(x){return x.name==="Friend";})[0]);});await w(200);
+  ok(await p.evaluate(()=>!!S&&curAcc.email==="bredy@gmail.com"),"you can't switch while a game is running");
+  await p.evaluate(()=>{delete run.zz;S.games.pop();});
   // 10. the switch
   await p.evaluate(()=>{signOut();ONLINE_ACCOUNTS=0;renderLogin();});
   ok(await p.evaluate(()=>!document.querySelector(".auc")&&!sbOn()),"with the switch off, the old PC-only screen is back");

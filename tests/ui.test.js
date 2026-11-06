@@ -24,8 +24,8 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     ["in-game overlay", "run.gt={t:now()-60000};S.fr=S.fr||{inc:[],out:[],seen:{}};openOverlay('')"], ["overlay closes", "closeOverlay();delete run.gt"],
     ["TV mode", "enterTV()"], ["leave TV mode", "exitTV()"]
   ];
-  ["account", "friends", "general", "downloads", "storage", "cache", "about"].forEach(t => visits.push(["settings: " + t, "nav('settings','" + t + "');P.tab='" + t + "';renderSettings()"]));
-  visits.push(["find games dialog", "nav('lib');findGames('')"], ["backup dialog", "closeForm();backupAcc()"], ["uninstall dialog", "closeForm();openUninstall()"], ["challenge form", "closeForm();S.friends.push({code:'111222333',name:'Bob',color:1,msgs:[]});chalForm(S.friends[0],gameBy('gt'))"]);
+  ["account", "friends", "general", "appearance", "notifications", "downloads", "storage", "cache", "about"].forEach(t => visits.push(["settings: " + t, "nav('settings','" + t + "');P.tab='" + t + "';renderSettings()"]));
+  visits.push(["settings search", "P.sq2='sound';renderSettings()"], ["settings search cleared", "P.sq2='';renderSettings()"], ["switch account menu", "switchMenu($('chip'))"], ["find games dialog", "nav('lib');findGames('')"], ["backup dialog", "closeForm();backupAcc()"], ["uninstall dialog", "closeForm();openUninstall()"], ["challenge form", "closeForm();S.friends.push({code:'111222333',name:'Bob',color:1,msgs:[]});chalForm(S.friends[0],gameBy('gt'))"]);
   for (const [name, js] of visits) {
     const before = errs.length;
     await p.evaluate(js).catch(e => errs.push(name + ": " + e.message));

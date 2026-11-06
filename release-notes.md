@@ -1,5 +1,5 @@
-- **New sign-in screen:** signing in and creating an account now happen on one page, with **Sign in** and **Create account** tabs. A Xaly panel full of game art sits beside them. No more pop-up forms.
-- **Smarter create account:** usernames are checked as you type, passwords show a strength bar, an eye button shows what you typed, and the "Online account" switch shows clearly whether the account lives online or only on this PC.
-- **Six-box email codes:** type the code and it moves along by itself and submits when it's full, or paste the whole code at once. "Send a new code" waits 30 seconds between emails.
-- **Clearer mistakes:** every problem is explained right under the field it's about.
-- **Cleaner "Who's playing?":** pick your account from a tidy list. Accounts with a password open a "Welcome back" screen showing your avatar.
+- **Settings redesigned:** a new sidebar with icons, grouped into You, App and Games. Settings sit in clear cards with small headings instead of one long list.
+- **Search settings:** type in the box at the top of the sidebar to find any setting. Matching settings show right there and work as normal.
+- **More sections:** General is split into **General**, **Appearance** (layout, accent colour, display engine) and **Notifications** (pop-ups and sounds).
+- **Switch account:** jump to another account on this PC from the **Switch account** button in Settings › Account, the account card at the bottom of the settings sidebar, the menu under your name, or the Xaly logo menu. Accounts without a password open straight away, and ones with a password ask for it first. You can't switch while a game is running.
+- **Profile card:** Settings › Account opens with your avatar, name, @username, email and online status at the top.

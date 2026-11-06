@@ -1,3 +1,3 @@
-- **Download in browser:** when Google Drive or MediaFire won't hand a game to Xaly (for example Drive's "too many downloads" limit, which only applies when you're not signed in to Google), the download shows a **Download in browser** button. Your browser, where you're signed in, gets the file, and Xaly installs it as soon as it finishes in your Downloads folder. No need to touch the file yourself.
-- **Pick file…** lets you install a game file you already downloaded.
-- Xaly now checks Google's own message before saying a Drive file hit its download limit, and shows that message when Drive refuses for another reason.
+- **Everyone sees the same Store.** Before, every PC slowly built its own list of itch.io games, so two people could see different games and different totals. Now a shared list of thousands of free Windows games is built in one place every 6 hours, and every launcher loads that same list.
+- Games in your library, wishlist or download queue always stay in your Store, even if they leave the shared list.
+- Settings › General shows how many games are in the shared list and when it was last refreshed.

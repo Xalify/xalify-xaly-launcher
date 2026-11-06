@@ -4,7 +4,7 @@ name: Check
 # Runs for every branch except main; results are pushed to the ci-logs branch.
 on:
   push:
-    branches-ignore: [main, ci-logs]
+    branches-ignore: [main, ci-logs, catalog]
   workflow_dispatch:
 
 permissions:

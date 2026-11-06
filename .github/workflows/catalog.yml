@@ -1,0 +1,38 @@
+name: Shared catalog
+
+# Crawls itch.io every 6 hours and publishes one store catalog that every launcher downloads,
+# so all players see the same games. Published to the "catalog" branch as catalog.json.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  push:
+    paths: ["tools/build-catalog.js", ".github/workflows/catalog.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Crawl itch.io
+        run: node tools/build-catalog.js
+      - name: Publish to the catalog branch
+        run: |
+          cd out
+          git init -q -b catalog
+          git config user.name "xaly-catalog"
+          git config user.email "actions@users.noreply.github.com"
+          git add catalog.json
+          git commit -q -m "Catalog $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" catalog

@@ -777,8 +777,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.11";
+var VER="1.6.0";
 var NOTES=[
+ {v:"1.6.0",d:"5 Nov 2026",t:["Everyone now sees the same Store: one shared list of thousands of free itch.io games, refreshed every 6 hours, instead of each PC building its own","Games in your library or wishlist always stay in your Store"]},
  {v:"1.5.11",d:"5 Nov 2026",t:["When Google Drive or MediaFire won\u2019t give a game to Xaly (for example Drive\u2019s download limit), press Download in browser: your browser gets the file and Xaly installs it as soon as it lands in your Downloads folder","You can also pick a game file you already downloaded","Fixed: Drive\u2019s download limit was sometimes reported when Google said something else. Xaly now shows Google\u2019s own message"]},
  {v:"1.5.10",d:"5 Nov 2026",t:["Fixed: downloads showed \u201cConnection lost\u201d for every kind of problem. They now say what actually went wrong, like Google Drive\u2019s daily download limit","Problems that won\u2019t fix themselves (a removed file, a download limit, a private link) no longer retry over and over: the download stops with a Retry button"]},
  {v:"1.5.9",d:"5 Nov 2026",t:["itch.io games whose download is a Google Drive or MediaFire link now install straight from Xaly, and show up in the Store like any other game","Xaly also finds Google Drive and MediaFire links in a game\u2019s description when there\u2019s no download button","MediaFire downloads are now supported, also in Add game and the paste-a-link box"]},
@@ -1628,9 +1629,55 @@ function pruneLive(){
   l.filter(function(x){return !w[x.id]&&!inLib(x.id);}).sort(function(a,b){return (a.seen||0)-(b.seen||0);}).slice(0,l.length-CAT_TARGET-1000).forEach(function(x){drop[x.id]=1;});
   CAT.items=l.filter(function(x){return !drop[x.id];});saveCat();
 }
+/* ---------- 1.6.0: one shared catalog for everyone ----------
+   A GitHub job crawls itch.io every 6 hours and publishes catalog.json. Every launcher loads that same list,
+   so all players see the same games. Games in your library or wishlist always stay. */
+var SHARED_CAT="https://raw.githubusercontent.com/Xalify/xalify-xaly-launcher/catalog/catalog.json";
+function loadShared(cb){
+  http(SHARED_CAT+"?t="+Math.floor(now()/600000),function(ok,t){
+    var d=null;if(ok){try{d=JSON.parse(t);}catch(e){}}
+    if(!d||!d.items||d.items.length<500){cb(false,0);return;}
+    cb(true,mergeShared(d));
+  });
+}
+function mergeShared(d){
+  loadCat();
+  var loc={},keep={},seed={},out=[],seen={},added=0,w=wishMap(),k;
+  CAT.items.forEach(function(x){var kk=urlKey(pageUrl(x)||x.url);if(kk)loc[kk]=x;});
+  (S.games||[]).forEach(function(g){if(g.storeId)keep[g.storeId]=1;});for(k in w)if(w[k])keep[k]=1;
+  DQ.forEach(function(j){if(j.it)keep[j.it.id]=1;});
+  S.store.items.forEach(function(x){var kk=urlKey(pageUrl(x)||x.url);if(kk)seed[kk]=1;});
+  d.items.forEach(function(s){
+    var kk=urlKey(s.url);if(!kk||seen[kk]||seed[kk]||!s.name||!s.image)return;seen[kk]=1;
+    var it=loc[kk];
+    if(!it){it={id:s.id,source:"itch.io",price:"Free",kind:"page",launch:"",auto:1,live:1};added++;}
+    var fan=s.fr&&s.fr!=="Indie"?FAN:"",td=(s.tagline||"")+fan;
+    it.fr=s.fr||it.fr||"Indie";it.genre=s.genre||it.genre||"";it.name=s.name;it.tagline=s.tagline||"";it.url=s.url;
+    if(!it.desc||it.desc.replace(FAN,"").length<=(s.tagline||"").length)it.desc=td;
+    if(s.image)it.image=s.image;it.devs=s.devs||it.devs||"";it.lf=s.lf||{};it.seen=now();it.shared=1;
+    out.push(it);
+  });
+  CAT.items.forEach(function(x){var kk=urlKey(pageUrl(x)||x.url);if(kk&&!seen[kk]&&keep[x.id]){x.lf={};out.push(x);seen[kk]=1;}});
+  var was=CAT.shared;
+  CAT.items=out;CAT.t=now();CAT.sh=d.t||0;CAT.err="";CAT.shared=1;saveCat();
+  return was?added:0;
+}
 function refreshLive(force,report){
   if(!S||liveBusy)return;loadCat();
-  if(!force&&CAT.t&&now()-CAT.t<LIVE_TTL){crawl();return;}
+  if(!force&&CAT.t&&now()-CAT.t<LIVE_TTL){if(!CAT.shared)crawl();return;}
+  var mine=S;liveBusy=1;if(P.page==="settings")renderSettings();
+  loadShared(function(ok,added){
+    liveBusy=0;if(S!==mine)return;
+    if(ok){
+      if(added)notify("ok","Store updated",added+" new free game"+(added===1?" was":"s were")+" added from itch.io.",null,"");
+      else if(report)toast("The store is up to date: "+fmtN(CAT.items.length)+" games");
+      softRender();if(P.page==="settings")renderSettings();return;
+    }
+    CAT.shared=0;refreshLocal(force,report);   // the shared list couldn't be loaded: crawl itch.io from this PC instead
+  });
+}
+function refreshLocal(force,report){
+  if(!S||liveBusy)return;loadCat();
   var q=LIVEF.slice(),mine=S,added=0,got=0,errs=0,lastErr="";liveBusy=1;if(P.page==="settings")renderSettings();
   (function next(){
     if(S!==mine){liveBusy=0;return;}
@@ -1654,7 +1701,7 @@ function refreshLive(force,report){
 function crawl(){   // keeps paging deeper into every list in the background until the store holds thousands of games
   clearTimeout(crawlT);
   crawlT=setTimeout(function(){
-    if(!S||liveBusy||CAT.items.length>=CAT_TARGET||CAT.err)return;
+    if(!S||liveBusy||CAT.shared||CAT.items.length>=CAT_TARGET||CAT.err)return;
     var best=null;LIVEF.forEach(function(f){if(CAT.end[f[0]]||liveMore[f[0]])return;if(!best||(CAT.lfp[f[0]]||1)<(CAT.lfp[best[0]]||1))best=f;});
     if(!best)return;
     loadMoreLive(best[0],function(c){if(c<=0)CAT.end[best[0]]=1;if(P.page==="store"&&!filtering()&&$("pStore").scrollTop<200)softRender();if(P.page==="settings"&&P.tab==="general")renderSettings();crawl();});
@@ -3890,7 +3937,7 @@ function renderSettings(){
     b.appendChild(srow("Layout","Sidebar is the new look. Classic brings back the top bar with Store and Library tabs and the bar along the bottom.",lay));
     var lu=el("div");lu.style.cssText="display:flex;align-items:center";
     lu.appendChild(btn(liveBusy?"Updating…":"Update now","btn",function(){if(!liveBusy){CAT.err="";refreshLive(true,true);toast("Checking itch.io for new games…");}}));
-    var cs=CAT.items.length+" games from itch.io. "+(CAT.t?"Last updated "+ago(CAT.t)+". ":"")+(CAT.err?"Last problem: "+CAT.err+". ":(CAT.items.length<CAT_TARGET?"Still adding more in the background. ":""))+"New free Windows games are added automatically every 6 hours.";
+    var cs=fmtN(CAT.items.length)+" games from itch.io. "+(CAT.shared?"Everyone with Xaly sees this same list, refreshed every 6 hours. ":"")+(CAT.t?"Last updated "+ago(CAT.sh||CAT.t)+". ":"")+(CAT.err?"Last problem: "+CAT.err+". ":(CAT.items.length<CAT_TARGET?"Still adding more in the background. ":""))+"New free Windows games are added automatically every 6 hours.";
     b.appendChild(srow("Store catalog",cs,lu));
     var gu=el("div");gu.style.cssText="display:flex;align-items:center";gu.appendChild(btn(guBusy?"Checking\u2026":"Check now","btn",function(){checkGameUpdates(true);}));gu.appendChild(sw(S.set.gameUpd!==0,function(v){S.set.gameUpd=v?1:0;save();}));gu.lastChild.style.marginLeft="14px";
     b.appendChild(srow("Game updates","Xaly remembers which build of each game you installed and shows an Update badge when the developer uploads a new one. "+(updCount()?updCount()+" update"+(updCount()===1?"":"s")+" waiting. ":"")+(S.guT?"Last checked "+ago(S.guT)+".":""),gu));
@@ -4025,6 +4072,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("drives",function(){return X.Drives().split("\n").length+" drive(s)";});
   c("freespace",function(){var v=+X.FreeSpace(X.Paths().split("|")[0]);return v>0?"ok "+Math.round(v/1073741824)+" GB":"bad "+v;});
   c("placeguard",function(){return X.PlaceStandalone("C:\\Windows\\notepad.exe","x");});
+  r.checks.sharedcat="waiting";http(SHARED_CAT,function(ok9,t9){var d9=null;try{d9=JSON.parse(t9);}catch(e){}r.checks.sharedcat=d9&&d9.items?d9.items.length+" games, built "+new Date(d9.t).toISOString():"ERR "+String(t9).substr(0,60);});
   c("finddl",function(){var f=X.FindDownload(String(new Date().getTime()-3600000)).split("|");return "busy="+f[0]+" dir="+f[1];});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
   c("relaylive",function(){

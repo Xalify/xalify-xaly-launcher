@@ -884,8 +884,9 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.7.6";
+var VER="1.7.7";
 var NOTES=[
+ {v:"1.7.7",d:"6 Nov 2026",t:["Fixed: the scrollbar lagged behind when the Friends panel opened or closed. Scrollbars now move smoothly with the page"]},
  {v:"1.7.6",d:"6 Nov 2026",t:["Give feedback works now: it opens a short form right inside the launcher, and your message goes straight to the developer"]},
  {v:"1.7.5",d:"6 Nov 2026",t:["New in-game overlay (Shift+Tab): your game blurred in the background, a live session timer, your next achievement with how far to go, all achievements for the game, screenshots with a gallery, per-game notes, challenges and friends"]},
  {v:"1.7.4",d:"6 Nov 2026",t:["Classic layout: the Downloads tab next to Library is gone. Use the Downloads button in the middle of the bottom bar instead"]},
@@ -3225,7 +3226,7 @@ function shareGame(it){
   },null);
 }
 function storeById(id){var a=allStore(),i;for(i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
-function setFP(o){$("fp").className=o?"open":"";$("fbtn").className=o?"on":"";$("main").className=o?"fopen":"";}
+function setFP(o){$("fp").className=o?"open":"";$("fbtn").className=o?"on":"";$("main").className=o?"fopen":"";if(typeof sbFollow==="function")sbFollow(450);}
 function sendRc(f){   // delivery and read receipts, one per conversation at a time
   if(!f.lastIn)return;var rd=chatOpen()&&P.chat===f.code&&S.set.readRc!==0;
   if(rd&&f.rdSent!==f.lastIn){f.rdSent=f.dlSent=f.lastIn;frSend(f,{t:"rc",s:"r",id:f.lastIn});}
@@ -3403,6 +3404,16 @@ function sbTick(){
   sbL=sbL.filter(function(c){if(document.body.contains(c))return true;if(c._sb&&c._sb.bar.parentNode)c._sb.bar.parentNode.removeChild(c._sb.bar);return false;});
 }
 setInterval(sbTick,300);
+/* 1.7.7: while something slides or resizes, move the slim scrollbars every frame so they never trail behind */
+var sbUntil=0,sbRaf=0;
+function sbFollow(ms){
+  sbUntil=Math.max(sbUntil,now()+(ms||450));if(sbRaf)return;
+  var raf=window.requestAnimationFrame||function(f){return setTimeout(f,16);};
+  (function loop(){sbL.forEach(function(c){sbUpd(c);});if(now()<sbUntil)sbRaf=raf(loop);else{sbRaf=0;sbTick();}})();
+}
+(function(){var on=function(){sbFollow(500);};
+  ["transitionrun","transitionstart","transitionend","animationstart"].forEach(function(ev){try{document.addEventListener(ev,on,true);}catch(e){}});
+  try{window.addEventListener("resize",on);}catch(e){}})();
 /* ---------- achievements: Xaly-made milestones for every game ---------- */
 var ACH=[
  ["first","First Launch","Start the game for the first time","\u25B6",["#5b6b94","#8a9ac4"],function(s){return [s.plays,1];}],

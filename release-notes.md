@@ -1,2 +1,1 @@
-- **Give feedback works now.** It opens a short form right inside the launcher: what's on your mind, what it's about, and your email if you'd like a reply. Your message goes straight to the developer. The launcher version and your Windows version are added automatically.
-- Press Esc or ✕ to close it, or **Open in browser** if you prefer.
+- **Fixed:** the scrollbar lagged behind when you opened or closed the Friends panel. Scrollbars now move smoothly with the page during any slide or resize.

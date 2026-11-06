@@ -15,7 +15,9 @@ const { chromium } = require("playwright"), fs = require("fs"), path = require("
   const fr = await fe.contentFrame();
   await fr.waitForSelector("textarea", { timeout: 30000 });
   console.log("form loaded inside the launcher panel");
-  await fr.locator("textarea:visible").first().fill("Test from the Xaly Launcher build server: the Give feedback button works end to end. You can delete this response.");
+  const ta = fr.locator("textarea:visible, [contenteditable=true]:visible, input[type=text]:visible").first(); await ta.click();
+  await p.keyboard.type("Test from the Xaly Launcher build server: the Give feedback button works end to end. You can delete this response.", { delay: 8 });
+  console.log("typed into:", await ta.evaluate(e => e.tagName + " value-length=" + ((e.value || e.innerText || "").length)));
   console.log("FORM TEXT:", (await fr.innerText("body")).replace(/\s+/g, " ").slice(0, 300));
   console.log("CLICKABLES:", JSON.stringify(await fr.evaluate(() => [].slice.call(document.querySelectorAll("button,[role=button],a,input[type=submit]")).map(e => e.tagName + ":" + (e.innerText || e.value || e.getAttribute("aria-label") || "").trim().slice(0, 30)).slice(0, 30))));
   const click = async re => {

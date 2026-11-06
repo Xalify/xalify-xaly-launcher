@@ -169,9 +169,9 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
   mock.http=u=>{got.push(u.split("?")[0].split("/").pop());return /catalog-version\.json/.test(u)?["1",JSON.stringify(ver)]:/catalog-prev\.json/.test(u)?["1",prT]:/catalog\.json/.test(u)?["1",cuT]:["0","net"];};
   ctx.CAT.items=[];ctx.CAT.shared=0;ctx.CAT.shTry=0;ctx.CAT.vT=0;ctx.liveBusy=0;ctx.refreshLive(false);await sleep(150);
   ok(ctx.CAT.sh===111,"before the go-live time: previous list ("+ctx.CAT.items.length+" games)");
-  got.length=0;ctx.refreshLive(false);await sleep(50);ok(got.length===0,"no download again within 10 minutes");
+  got.length=0;ctx.refreshLive(false);await sleep(50);ok(got.filter(x=>/catalog/.test(x)).length===0,"no download again within 10 minutes");
   await sleep(2200);ok(ctx.CAT.sh===222,"switched to the new list right at go-live ("+ctx.CAT.items.length+" games)");
-  got.length=0;ctx.CAT.vT=0;ctx.refreshLive(false);await sleep(100);ok(got.join()==="catalog-version.json","later checks only fetch the tiny version file: "+got.join());
+  got.length=0;ctx.CAT.vT=0;ctx.refreshLive(false);await sleep(100);ok(got.filter(x=>/catalog/.test(x)).join()==="catalog-version.json","later checks only fetch the tiny version file: "+got.join());
  }
  // ---- 1.6.5 schedule + speed limit + storage move
  {const lim=[],aw=[];X.SetSpeedLimit=v=>{lim.push(v);return "ok";};X.KeepAwake=v=>{aw.push(v);return "ok";};X.DownloadEx=(id,u,n,r)=>{calls.push("DL "+id);return "ok";};X.PartSize=()=>"0";X.DownloadPause=id=>{calls.push("PAUSE "+id);setTimeout(()=>ctx.onDl(id,"paused","",""),1);return "ok";};

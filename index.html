@@ -748,7 +748,7 @@ body.tvmode #modal{z-index:160}
 .pdbind .pg{margin-right:12px}.pdwait{border-color:#2ee6f0!important;color:#2ee6f0!important}
 .pdstep{display:flex;align-items:center}.pdstep .btn{width:34px;padding:0}.pdstep b{width:44px;text-align:right;margin:0 10px 0 4px;font-size:14px}
 .pdbar{display:inline-block;width:150px;height:6px;border-radius:3px;background:#262635;margin-left:12px;overflow:hidden}.pdbar i,.tvcb i{display:block;height:100%;background:linear-gradient(90deg,#14c8d8,#2ee6f0)}
-.pdlive{max-width:720px;display:flex;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#151826,#111421);border:1px solid #262a3b;border-radius:16px;padding:18px 20px;margin:4px 0 18px}
+.pdlive{max-width:760px;box-sizing:border-box;display:flex;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#151826,#111421);border:1px solid #262a3b;border-radius:16px;padding:18px 20px;margin:4px 0 18px}
 .pdnm{flex:1 1 100%;font-weight:700;color:#8a8aa5;margin-bottom:14px}.pdnm.on{color:#e6f9fb}.pdnm.on:before{content:"";display:inline-block;width:8px;height:8px;border-radius:4px;background:#2fd17a;margin-right:8px;vertical-align:1px}
 .pdsticks{display:flex;align-items:flex-end}
 .pdstk{position:relative;width:84px;height:84px;border-radius:42px;background:#0b0d16;border:1px solid #2a2f44;margin-right:18px}
@@ -6000,7 +6000,7 @@ function settingsTab(tab,b0){
     grp("Controller");
     b.appendChild(srow("Use a controller","Move around the launcher and TV mode with a controller. Turn it off if it gets in the way.",sw(!pc.off,function(v){pc.off=v?0:1;save();})));
     var sty=el("div","seg");[["auto","Automatic"],["xbox","Xbox"],["ps","PlayStation"],["sw","Switch 2 Pro"]].forEach(function(o){sty.appendChild(btn(o[1],"sgb"+((PSTY[pc.style]?pc.style:"auto")===o[0]?" on":""),function(){pc.style=o[0];save();renderSettings();}));});
-    b.appendChild(srow("Button style","The buttons the launcher shows you. Automatic matches the controller that’s plugged in"+(PAD.id?", now "+PSTY[padStyle()]:"")+".",sty));
+    b.appendChild(srow("Button style","The buttons the launcher shows you. Automatic matches the controller that’s plugged in"+(PAD.id&&!PSTY[pc.style]?", now "+PSTY[padStyle()]:"")+".",sty));
     var pv=el("div","pdpv");["s","e","w","n","lb","rb","lt","rt","view","menu"].forEach(function(k){pv.appendChild(padGlyph("","pg",k));});
     b.appendChild(srow("How buttons look",PSTY[padStyle()],pv));
     grp("Sticks and triggers");

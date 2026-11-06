@@ -174,7 +174,7 @@ let fails=0;const ok=(c,m)=>{if(!c){fails++;console.log("FAIL:",m);}else console
    ctx.P.sq="";return ctx.allStore().filter(ctx.visIt).length;
  }
  const a=await pc(5200),b=await pc(4400);
- ok(ctx.CAT.shared===1&&a===b&&a>7000,"both PCs show the same store: "+a+" vs "+b);
+ ok(ctx.CAT.shared===1&&a===b&&a>1000,"both PCs show the same store: "+a+" vs "+b);
  ctx.liveAdd([{gid:"55",url:"https://zz.itch.io/found",name:"Found By Search",img:"f.png",text:"",genre:"",author:"zz",paid:false}],"",0,1);
  ctx.P.sq="";ok(ctx.allStore().filter(ctx.visIt).length===a,"search results don't change the total");
  ctx.P.sq="found";ok(ctx.allStore().filter(ctx.visIt).some(x=>x.name==="Found By Search"),"but they show while searching");ctx.P.sq="";

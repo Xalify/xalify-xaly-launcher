@@ -255,7 +255,7 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .ibtn:hover{background:#2e2e40}.ibtn.on{color:#ff5d7a}.ibtn.sel{background:#34344a}
 #pmenu{position:absolute;display:none;z-index:35;background:#1b1b28;border:1px solid #2f2f42;border-radius:12px;padding:6px;min-width:220px;box-shadow:0 12px 34px rgba(0,0,0,.55)}
 .pmi{display:block;width:100%;text-align:left;background:transparent;padding:10px 12px;border-radius:8px;font-size:14px;white-space:nowrap}
-.pmi:hover{background:#2a2a3d}.pmi.dng{color:#ff8080}.pmi.chk:before{content:"\2713  "}
+.pmi:hover{background:#2a2a3d}.pmi.dng{color:#ff8080}.pmi.chk{display:block;width:100%;height:auto;line-height:normal;text-align:left;background:transparent;color:#fff;font-size:14px;font-weight:700}.pmi.chk:hover{background:#2a2a3d}.pmi.chk:before{content:"\2713  "}
 .pms{height:1px;background:#2a2a3a;margin:5px 4px}.pmh{padding:8px 12px 6px;color:#8d8da6;font-size:12px}
 #login{position:absolute;left:0;top:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 0%,#1d1740 0%,#0b0b10 62%);z-index:30;display:none;overflow-y:auto}
 #lbox{width:760px;max-width:94%;margin:0 auto;padding:64px 0 50px;text-align:center}
@@ -340,7 +340,7 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .rqn{margin-top:18px;color:#c9b27a;font-size:12.5px;line-height:1.55}
 
 /* ===== v0.9: store shelves, cards, carousel, reviews, overlay ===== */
-#pmenu{position:fixed;z-index:200;max-height:80%;overflow-y:auto}
+#pmenu{position:fixed;z-index:200}
 .xload{color:#8fdcea;font-size:13px;margin:-6px 0 16px}
 .spot2{position:relative;height:380px;border-radius:22px;overflow:hidden;margin-bottom:30px;background:#151521;box-shadow:0 18px 40px rgba(0,0,0,.45)}
 .s2img{position:absolute;top:0;right:0;bottom:0;width:68%;background-size:cover;background-position:center}
@@ -719,6 +719,11 @@ select::-ms-expand{display:none}
 .fath{width:54px;height:40px;border-radius:7px;background-size:cover;background-position:center;flex:0 0 auto;margin-right:8px;cursor:pointer}
 .fa .sm{flex:0 0 auto}
 .sdi .ir.low span:last-child{color:#ff8a95}
+
+/* ===== 1.5.6: no native scrollbars anywhere ===== */
+*{scrollbar-width:none!important;-ms-overflow-style:none!important}
+*::-webkit-scrollbar{width:0!important;height:0!important;display:none!important;background:transparent!important}
+html,body{overflow:hidden}
 </style>
 <style id="theme"></style>
 </head>
@@ -772,8 +777,9 @@ select::-ms-expand{display:none}
 <div id="ovl"><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovclk" id="ovclk"></div><div class="ovhint">Shift+Tab or Esc to go back to your game</div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="1.5.5";
+var VER="1.5.6";
 var NOTES=[
+ {v:"1.5.6",d:"5 Nov 2026",t:["Fixed: the old Windows scrollbars showed up in the library, menus and pop-ups. Every list now uses the slim Xaly scrollbar","Fixed: the ticked option in the View and Sort menus was squashed and cut off","Fixed: games that are a single .exe couldn\u2019t be uninstalled or moved. They now get their own folder, including ones you already have","Fixed: updating a game after moving it to another drive"]},
  {v:"1.5.5",d:"5 Nov 2026",t:["Move games to another drive: open a game and press Move. Play time, achievements and updates stay with it","Messages now arrive within a second through a live connection, instead of waiting for the next check","Fixed: your message stayed in the box after you sent it","Friend activity: see what friends played, installed and unlocked, with Get it and Play buttons, in the Friends panel and on the Store page","Game pages show the download size and your free space, and Xaly warns you before installing if the drive is too full"]},
  {v:"1.5.4",d:"5 Nov 2026",t:["New sounds: a chime when a game finishes downloading or updating, and a fanfare when you unlock an achievement. You hear them even while you\u2019re in a game","Turn sounds off or listen to them in Settings \u203A General"]},
  {v:"1.5.3",d:"5 Nov 2026",t:["New achievements for every game: First Launch, Night Shift, Marathon, Week Streak, Legend and more. Unlocking one pops up a little trophy","Each game\u2019s page shows its achievements with progress bars, and your profile shows your latest ones to friends. Achievements also give XP","Crash reports: if something goes wrong, the details are sent to the developer automatically so it can be fixed. You can turn this off in Settings \u203A About"]},
@@ -1039,6 +1045,7 @@ function startSession(a){
   $("login").style.display="none";setFP(false);
   applyAccent();applyLayout();
   if(S.set.dlDir)T(function(){return X.SetDownloads(S.set.dlDir);});
+  setTimeout(adoptLoose,1500);
   T(function(){return X.SetTray(S.set.tray?"1":"0");});
   S.set.startup=T(function(){return X.StartupGet();},"0")==="1"?1:0;
   P.chat=null;P.draft="";frErr="";frPollT=0;frBusy=0;frStreamSig="";frLive=0;T(function(){return X.RelayStreamStop();});frInit();
@@ -1155,7 +1162,8 @@ function ctxMenu(anchor,items){
     if(it.h){m.appendChild(el("div","pmh",it.h));return;}
     var b=el("button","pmi"+(it.cls?" "+it.cls:"")+(it.on?" chk":""),it.t);b.onclick=function(e){stp(e);hideMenu();it.fn();};m.appendChild(b);
   });
-  m.style.visibility="hidden";m.style.display="block";
+  m.style.visibility="hidden";m.style.maxHeight="none";m.style.overflowY="visible";m.style.display="block";
+  var vh0=document.documentElement.clientHeight;if(m.offsetHeight>vh0-16){m.style.maxHeight=(vh0-16)+"px";m.style.overflowY="auto";}
   var r=anchor.getBoundingClientRect(),w=m.offsetWidth,h=m.offsetHeight,vw=document.documentElement.clientWidth,vh=document.documentElement.clientHeight;
   var left=(r.left+r.width/2>vw/2)?r.right-w:r.left;left=Math.max(8,Math.min(left,vw-w-8));
   var top=r.bottom+6;if(top+h>vh-8)top=Math.max(8,r.top-h-6);
@@ -1824,10 +1832,11 @@ function gameDir(g){
 function uninstallGame(g){
   if(run[g.id]){toast("Close "+g.name+" first");return;}
   var d=gameDir(g);
-  openForm("Uninstall "+g.name+"? Its files will be deleted from this PC.",[],"Uninstall",function(){
+  if(!d&&g.storeId&&/\.exe$/i.test(g.path||"")){adoptLoose();d=gameDir(g);}
+  openForm(d?"Uninstall "+g.name+"? Its files will be deleted from this PC.":"Remove "+g.name+" from your library? It wasn\u2019t installed by Xaly, so its files stay where they are.",[],d?"Uninstall":"Remove",function(){
     if(d){var r=T(function(){return X.DeleteGame(d);});if(r!=="ok"){toast("Couldn’t delete the game files: "+r.replace("ERR:",""));return false;}}
     S.games.splice(S.games.indexOf(g),1);if(P.cur===g.id)P.cur=null;if(P.page==="game")P.page="lib";SC=null;save();render();
-    toast(g.name+" was uninstalled");
+    toast(d?g.name+" was uninstalled":g.name+" was removed from your library");
   },null);
 }
 /* ---------- store game page ---------- */
@@ -2091,8 +2100,21 @@ function finish(it,dest,kk){
   }else if(k==="installer"){
     T(function(){return X.Launch("",dest,"");});
     if(it.launch)doneNote(it,addToLib(it,it.launch));else notify("ok","Download finished",it.name+"\u2019s installer has started. When it finishes, use Add game in your library.",null,it.image);
-  }else doneNote(it,addToLib(it,dest));
+  }else{
+    var pl=T(function(){return X.PlaceStandalone(dest,it.name);},"ERR");
+    doneNote(it,addToLib(it,pl.indexOf("ERR")===0?dest:pl));
+  }
   render();
+}
+/* 1.5.6: games that are one loose .exe in the downloads folder move into their own folder, so Move and Uninstall work */
+function adoptLoose(){
+  if(!S)return;var ch=0;
+  S.games.forEach(function(g){
+    if(run[g.id]||gameDir(g)||!g.storeId||!/\.exe$/i.test(g.path||""))return;
+    var r=T(function(){return X.PlaceStandalone(g.path,g.name);},"ERR");
+    if(r.indexOf("ERR")!==0){g.path=r;sizeQ[g.id]=0;ch=1;}
+  });
+  if(ch){save();render();}
 }
 function paintDl(){
   if(P.page==="downloads")renderDownloads();
@@ -2880,7 +2902,7 @@ function syncNow(){
 }
 
 /* ---------- slim scrollbars (the native ones are hidden) ---------- */
-var SBSEL=".page,#fpb,.npl,.chl,.sbody,.smenu,.ovl,#modal,#recm",sbL=[];
+var SBSEL=".page,#fpb,.npl,.chl,.sbody,.smenu,.ovl,#modal,#recm,#llist,#ldet,#pmenu,.updt,.wns,#login,textarea,.scr",sbL=[];
 function sbAttach(c){
   if(c._sb||!c.parentNode)return;
   var bar=el("div","sbar"),th=el("div","sbth");bar.appendChild(th);c.parentNode.appendChild(bar);c._sb={bar:bar,th:th};sbL.push(c);
@@ -2900,8 +2922,13 @@ function sbUpd(c,active){
   if(!c.parentNode||s.bar.parentNode!==c.parentNode){if(s.bar.parentNode)s.bar.parentNode.removeChild(s.bar);return;}
   var ch=c.clientHeight,sh=c.scrollHeight;
   if(!c.offsetWidth||!ch||sh<=ch+2){s.bar.style.display="none";return;}
-  var bh=ch-8,h=Math.max(32,Math.round(bh*ch/sh)),t=Math.round((bh-h)*c.scrollTop/(sh-ch));
-  s.bar.style.display="block";s.bar.style.top=(c.offsetTop+4)+"px";s.bar.style.height=bh+"px";s.bar.style.left=(c.offsetLeft+c.offsetWidth-11)+"px";
+  var bh=ch-8,h=Math.max(24,Math.round(bh*ch/sh)),t=Math.round((bh-h)*c.scrollTop/(sh-ch));
+  s.bar.style.display="block";
+  var op=s.bar.offsetParent||document.body,r=c.getBoundingClientRect(),pr=op===document.body?{top:0,left:0}:op.getBoundingClientRect(),
+      ox=op===document.body?0:op.scrollLeft-(op.clientLeft||0),oy=op===document.body?0:op.scrollTop-(op.clientTop||0);
+  if(bh<20){s.bar.style.display="none";return;}
+  s.bar.style.top=Math.round(r.top-pr.top+oy+4)+"px";s.bar.style.height=bh+"px";s.bar.style.left=Math.round(r.left-pr.left+ox+c.offsetWidth-11)+"px";
+  if(c.id==="pmenu"||c.id==="modal"||c.id==="login")s.bar.style.zIndex="250";
   s.th.style.height=h+"px";s.th.style.top=t+"px";
   if(active){if(s.bar.className.indexOf("drag")<0)s.bar.className="sbar act";clearTimeout(s.t);s.t=setTimeout(function(){if(s.bar.className.indexOf("drag")<0)s.bar.className="sbar";},1000);}
 }
@@ -3352,6 +3379,7 @@ function driveList(){
   return out;
 }
 function moveGame(g){
+  if(!gameDir(g))adoptLoose();
   var dir=gameDir(g);if(!dir){toast("Only games installed by Xaly can be moved");return;}
   if(run[g.id]){toast("Close "+g.name+" before moving it");return;}
   if(jobOfGame(g)){toast("Wait for the update of "+g.name+" to finish first");return;}
@@ -3885,6 +3913,7 @@ function selfTest(){   // run by the build server: proves both directions of the
   c("ui",function(){return document.getElementsByTagName("button").length+" buttons, login "+($("login").style.display||"?");});
   c("drives",function(){return X.Drives().split("\n").length+" drive(s)";});
   c("freespace",function(){var v=+X.FreeSpace(X.Paths().split("|")[0]);return v>0?"ok "+Math.round(v/1073741824)+" GB":"bad "+v;});
+  c("placeguard",function(){return X.PlaceStandalone("C:\\Windows\\notepad.exe","x");});
   c("moveguard",function(){return X.MoveGame("selft","C:\\Windows","D:\\");});
   c("relaylive",function(){
     var tp="xaly-selftest-"+X.RandHex("6"),orm=window.onRelayMsg,ors=window.onRelayState,t0=new Date().getTime();

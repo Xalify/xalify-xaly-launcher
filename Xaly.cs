@@ -480,10 +480,30 @@ namespace Xaly
             try
             {
                 string root = Path.GetFullPath(f.DownloadsDir).TrimEnd('\\') + "\\";
-                if (!Path.GetFullPath(dest).StartsWith(root, StringComparison.OrdinalIgnoreCase)) return "ERR:Only games downloaded by Xaly can be updated.";
+                if (!Path.GetFullPath(dest).StartsWith(root, StringComparison.OrdinalIgnoreCase) && !UnderGameRoot(f, dest)) return "ERR:Only games downloaded by Xaly can be updated.";
                 File.Copy(src, dest, true);
                 try { File.Delete(src); } catch (Exception) { }
                 return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        // a single-.exe game gets its own folder under Games, so it can be moved and uninstalled like any other game
+        public string PlaceStandalone(string file, string game)
+        {
+            try
+            {
+                string full = Path.GetFullPath(file);
+                string root = Path.GetFullPath(f.DownloadsDir).TrimEnd('\\');
+                if (!string.Equals((Path.GetDirectoryName(full) ?? "").TrimEnd('\\'), root, StringComparison.OrdinalIgnoreCase)) return "ERR:Not a loose download.";
+                if (!File.Exists(full) || !full.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return "ERR:File not found.";
+                string games = Path.Combine(root, "Games"), nm = SafeName((game ?? "").Trim().TrimEnd('.'));
+                if (nm == "x") nm = Path.GetFileNameWithoutExtension(full);
+                string dir = Path.Combine(games, nm); int n = 2;
+                while (Directory.Exists(dir) && Directory.GetFileSystemEntries(dir).Length > 0) { dir = Path.Combine(games, nm + " (" + n + ")"); n++; }
+                Directory.CreateDirectory(dir);
+                string to = Path.Combine(dir, Path.GetFileName(full));
+                File.Move(full, to);
+                return to;
             }
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }

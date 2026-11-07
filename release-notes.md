@@ -1,2 +1,1 @@
-- Publish a fixed-name XalyLauncher.zip with each release
-- Build.bat: clearer message when the build fails
+- Centre controller button icons and lay out the live controller test like a controller

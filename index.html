@@ -159,10 +159,12 @@ button{border:0;font-family:inherit;color:inherit;cursor:pointer;outline:0}
 .sgrp .srow{background:transparent;border-radius:0;margin:0;max-width:none;border-top:1px solid #20202d;padding:16px 20px}.sgrp .srow:first-child{border-top:0}
 .sgrp .blr{padding:10px 20px;border-top:1px solid #20202d;margin:0}
 .srw{display:flex;align-items:center}.srw .btn{margin-left:8px}
-.shero{max-width:760px;display:flex;align-items:center;margin-top:18px;padding:20px;border-radius:16px;background:linear-gradient(120deg,rgba(46,230,240,.10),rgba(122,92,255,.08) 60%,rgba(21,21,31,.6));border:1px solid #25304a}
-.shero>.av{flex:0 0 auto}.sht2{flex:1 1 0%;min-width:0;margin-left:18px}.sht2 b{display:block;color:#fff;font-size:22px;font-weight:800}
-.shs{margin-top:4px;color:#9a9db3;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.shtag{display:inline-block;margin-right:8px;font-size:11px;font-weight:800;color:#2ee6f0;background:rgba(46,230,240,.12);border-radius:7px;padding:2px 8px}
-.shb{flex:0 0 auto;display:flex}.shb .btn{margin-left:8px}
+.shero{max-width:760px;display:flex;flex-wrap:wrap;row-gap:16px;align-items:center;margin-top:18px;padding:20px;border-radius:16px;background:linear-gradient(120deg,rgba(46,230,240,.10),rgba(122,92,255,.08) 60%,rgba(21,21,31,.6));border:1px solid #25304a}
+.shero>.av{flex:0 0 auto}.sht2{flex:1 1 220px;min-width:0;margin-left:18px}.sht2 b{display:block;color:#fff;font-size:22px;font-weight:800}
+.shs{margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:8px}.shtag{display:inline-block;font-size:11px;font-weight:800;color:#2ee6f0;background:rgba(46,230,240,.12);border-radius:7px;padding:3px 9px}.shtag.off{color:#b6bbd0;background:rgba(255,255,255,.07)}
+.shun{color:#dfe3f2;font-size:14px;font-weight:700}.shm{margin-top:7px;color:#8f93aa;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.sval{color:#e6e8f2;font-size:14px;font-weight:600;margin-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}.sval.acc{color:#2ee6f0}
+.shb{flex:0 0 auto;display:flex;align-items:center;margin-left:auto}.shb .btn{margin-left:8px}
 .sempty{max-width:760px;margin-top:24px;padding:30px;text-align:center;color:#8a8aa5;border:1px dashed #2a2a3c;border-radius:14px}
 /* 1.8.2 sign-in screen */
 #login.auon{background:#0a0a11}#lbox.aum{width:auto;max-width:none;margin:0;padding:0;text-align:left}
@@ -1052,7 +1054,7 @@ html,body{overflow:hidden}
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="2.0.4";
+var VER="2.0.5";
 var NOTES=[
  {v:"2.0.3",d:"7 Nov 2026",t:["Centre controller button icons and lay out the live controller test like a controller"]},
  {v:"2.0.2",d:"6 Nov 2026",t:["Publish a fixed-name XalyLauncher.zip with each release","Build.bat: clearer message when the build fails"]},
@@ -5905,16 +5907,21 @@ function settingsTab(tab,b0){
     var hero=el("div","shero");hero.appendChild(avatar(S.user.name,S.user.color,72,S.user.status==="invisible"?"offline":S.user.status,myAv()));
     var ht=el("div","sht2");ht.appendChild(el("b","",S.user.name));
     var on=sbOn()&&curAcc.sb&&curAcc.sb.uid,sub=el("div","shs");
-    if(on)sub.appendChild(el("span","shtag","Online"));
-    sub.appendChild(document.createTextNode((on?"@"+(curAcc.sb.user||"")+"  ·  ":"")+(curAcc.email||"No email")+"  ·  Member since "+new Date(S.user.joined||now()).toLocaleDateString()));
-    ht.appendChild(sub);hero.appendChild(ht);
+    if(on){sub.appendChild(el("span","shtag","Online account"));sub.appendChild(el("span","shun","@"+(curAcc.sb.user||"")));}
+    else sub.appendChild(el("span","shtag off","This PC only"));
+    ht.appendChild(sub);
+    var since=new Date(S.user.joined||now()).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    ht.appendChild(el("div","shm",(curAcc.email?curAcc.email+"  \u00B7  ":"")+"Member since "+since));hero.appendChild(ht);
     var hb=el("div","shb"),swb=btn("Switch account","btn",function(e){stp(e);switchMenu(swb);});hb.appendChild(swb);hb.appendChild(btn("Sign out","btn dng",signOut));hero.appendChild(hb);b.appendChild(hero);
     grp("Profile");
     var ni=el("input");ni.setAttribute("type","text");ni.value=S.user.name;ni.maxLength=24;
     var sv=btn("Save","btn",function(){var v=trim(ni.value);if(!v){toast("Your name can't be empty");return;}S.user.name=v;save();syncAcc();render();renderFriends();syncNow();toast("Name updated");});
     b.appendChild(srow("Display name","What your friends see.",(function(){var d=el("div","srw");d.appendChild(ni);d.appendChild(sv);return d;})()));
     var sc=el("div");AV.forEach(function(c,i){var s2=el("span","swatch"+(S.user.color===i?" on":""));s2.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s2.onclick=function(){S.user.color=i;save();syncAcc();render();renderFriends();syncNow();};sc.appendChild(s2);});
-    b.appendChild(srow("Avatar colour",null,sc));
+    var pr=el("div","srw");pr.appendChild(btn(myAv()?"Change picture":"Choose a picture","btn",function(){pickAvatar();renderSettings();}));
+    if(myAv())pr.appendChild(btn("Remove","btn",function(){S.prof.av="";S.prof.avs="";save();chip();renderFriends();pubStatus(true);renderSettings();toast("Picture removed");}));
+    b.appendChild(srow("Profile picture","Friends see it next to your name.",pr));
+    b.appendChild(srow("Avatar colour",myAv()?"Shown behind your initial if you remove your picture.":"The colour behind your initial.",sc));
     var ss=el("select");[["online","Online"],["away","Away"],["busy","Do not disturb"],["invisible","Invisible"]].forEach(function(o){var op=el("option","",o[1]);op.value=o[0];ss.appendChild(op);});
     ss.value=S.user.status;ss.style.width="180px";ss.onchange=function(){S.user.status=ss.value;save();render();renderFriends();syncNow();};
     b.appendChild(srow("Status","How you appear to friends.",ss));
@@ -5922,7 +5929,14 @@ function settingsTab(tab,b0){
     cp.appendChild(btn("Copy","btn",function(){try{copyText(S.user.code);toast("Friend code copied");}catch(e){toast("Couldn't copy. Your code is "+S.user.code);}}));
     b.appendChild(srow("Friend code","Give this to friends so they can add you"+(on?", or they can search for @"+(curAcc.sb.user||"")+".":"."),cp));
     grp("Sign-in");
-    var er=el("div","srw");er.appendChild(el("span","code",curAcc.email||"Not set"));
+    if(on){
+      var ur=el("div","srw");ur.appendChild(el("span","sval acc","@"+(curAcc.sb.user||"")));ur.appendChild(btn("Change","btn",sbChangeUser));
+      b.appendChild(srow("Username","Friends can find you by it.",ur));
+      b.appendChild(srow("Email","Sign in with it on any PC.",el("span","sval",curAcc.sb.email||curAcc.email||"")));
+      b.appendChild(srow("Password","Used with your email or username to sign in.",btn("Change password","btn",sbChangePw)));
+      b.appendChild(srow("Online account","Your friends list and username are online. Your library and play time stay on each PC.",btn("Disconnect","btn",sbDisconnect)));
+    }else{
+    var er=el("div","srw");er.appendChild(el("span","sval",curAcc.email||"Not set"));
     if(!(sbOn()&&curAcc.sb&&(curAcc.sb.uid||curAcc.sb.pending)))er.appendChild(btn(curAcc.email?"Change":"Add email","btn",function(){
       var f2=[{id:"e",label:"Email",value:curAcc.email||"",ph:"you@gmail.com"}];if(curAcc.pw)f2.push({id:"pw",label:"Your password",pass:1});else f2.push({id:"n1",label:"Choose a password (at least 6 characters)",pass:1});
       openForm(curAcc.email?"Change email":"Add an email",f2,"Save",function(v){
@@ -5935,9 +5949,11 @@ function settingsTab(tab,b0){
     b.appendChild(srow("Email",on?"The email of your online account.":"Sign in with your email address and password.",er));
     if(!on)b.appendChild(srow("Password",curAcc.pw?"This account asks for a password when you sign in.":"Optional. Asks for a password when you pick this account on the sign-in screen. It keeps casual users out; it does not encrypt your files.",btn(curAcc.pw?"Change password":"Set a password","btn",changePw)));
     sbAccountRow(b);
+    }
     grp("Backup");
     var bk=el("div","srw");bk.appendChild(btn("Back up…","btn",backupAcc));bk.appendChild(btn("Restore…","btn",restoreAcc));
     b.appendChild(srow("Account backup","Save your library, play time, achievements, friends and settings to one password-protected file, and restore it on another PC."+(S.lastBackup?" Last backup: "+ago(S.lastBackup)+".":" You haven’t made a backup yet."),bk));
+    if(on){grp("Delete account");b.appendChild(srow("Delete online account","Removes your online account and username for good. This PC keeps your library, play time and friends.",btn("Delete…","btn dng",sbDelete)));}
   }else if(tab==="friends"){
     hdr("Friends","Chat, friend requests and who can reach you.");grp("Online friends");
     b.appendChild(srow("Online friends","Send and accept friend requests, see who's online and what they're playing, chat, and recommend games.",sw(S.set.online!==0,function(v){S.set.online=v?1:0;if(v)frInit();save();renderFriends();if(v)syncNow();renderSettings();})));

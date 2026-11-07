@@ -1556,7 +1556,9 @@ namespace Xaly
             try
             {
                 // the player's own itch.io sign-in is used for their library and for games they bought; Xaly's key for everything else
-                bool mine = path != null && (path.StartsWith("me/") || path.Contains("download_key_id="));
+                // "dk/…" = a bought game's downloads asked for with Xaly's key (or the player's own API key from Settings › Downloads)
+                bool viaKey = path != null && path.StartsWith("dk/"); if (viaKey) path = path.Substring(3);
+                bool mine = !viaKey && path != null && (path.StartsWith("me/") || path.Contains("download_key_id="));
                 string key = mine ? ItchUserToken() : ItchKey();
                 if (mine && key.Length == 0) return "ERR:You're not signed in with itch.io.";
                 string url = ItchUrl(path, key);

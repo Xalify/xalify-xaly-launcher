@@ -275,6 +275,14 @@
 "Sign in to Xaly first.": [
 "Primero inicia sesión en Xaly.",
 "Entre no Xaly primeiro."
+],
+"itch.io only lets you download games you bought from its website. Click Download on the page that opened. Xaly installs it as soon as it’s in your Downloads folder.": [
+"itch.io solo permite descargar los juegos que compraste desde su sitio web. Haz clic en Download en la página que se abrió. Xaly lo instala en cuanto esté en tu carpeta Descargas.",
+"O itch.io só deixa baixar os jogos que você comprou pelo site dele. Clique em Download na página que abriu. O Xaly instala assim que ele estiver na sua pasta Downloads."
+],
+"Installing a game you bought on itch.io works now. itch.io only hands out bought games on its own website, so Xaly opens the game’s page in your browser: click Download there and Xaly installs it as soon as it’s in your Downloads folder. With your own itch.io API key in Settings › Downloads, Xaly downloads it by itself": [
+"Ya funciona instalar un juego que compraste en itch.io. itch.io solo entrega los juegos comprados en su propio sitio, así que Xaly abre la página del juego en tu navegador: haz clic en Download ahí y Xaly lo instala en cuanto esté en tu carpeta Descargas. Con tu propia clave de API de itch.io en Configuración › Descargas, Xaly lo descarga solo",
+"Instalar um jogo que você comprou no itch.io agora funciona. O itch.io só entrega jogos comprados no próprio site, então o Xaly abre a página do jogo no seu navegador: clique em Download lá e o Xaly instala assim que ele estiver na sua pasta Downloads. Com sua própria chave de API do itch.io em Configurações › Downloads, o Xaly baixa sozinho"
 ]
 },
 "t": [

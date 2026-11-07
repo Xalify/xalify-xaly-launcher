@@ -118,11 +118,16 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     out.tab = document.getElementById("pLib").textContent.indexOf("Paid Horror Game") > -1 && document.getElementById("pLib").textContent.indexOf("Bought") > -1;
     let res = null; resolveAny(S.owned[0], (e, r) => { res = e || r.url; }); await wait(200);
     out.res = res; out.used = paths.filter(x => /download_key_id/.test(x)).length;
+    // itch.io refuses downloads to the sign-in (and to Xaly's key): the game goes to the browser instead of failing
+    E.ItchApi = (id, path) => { paths.push(path); setTimeout(() => window.onHttp(id, "0", JSON.stringify({ errors: ["api key does not permit `game:view:uploads`"] }), "403"), 3); return "ok"; };
+    let code = null; resolveAny(S.owned[0], (e, r, c) => { code = c; }); await wait(150);
+    out.code = code; out.dk = paths.some(x => /^dk\/v2\/games\/9001\/uploads\?download_key_id=555$/.test(x));
     P.lt = "all"; delete E.ItchApi; E.ItchSignedIn = () => "0"; S.owned = []; return out;
   });
   ok(io.owned === "Paid Horror Game:555:true" && io.user === "Noah", "itch.io library imported, games only (" + io.owned + ")");
   ok(!io.storeHidden && io.tab, "owned games are in Library › itch.io, not on the Store's shelves");
   ok(io.res === "https://files.itch.zone/paid.zip" && io.used === 2, "a bought game installs with your own itch.io download key (" + io.res + ")");
+  ok(io.code === "browser" && io.dk, "when itch.io refuses, Xaly tries its API key and then the browser (" + io.code + ")");
   // 2.1.1: an itch.io sign-in belongs to the Xaly account that made it
   const per = await p.evaluate(async () => {
     const E = window.external, tok = {}; let cur = "";

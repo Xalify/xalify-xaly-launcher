@@ -42,7 +42,7 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     const press = async i => { __gp.buttons[i] = { pressed: true, value: 1 }; await wait(90); __gp.buttons[i] = { pressed: false, value: 0 }; await wait(90); };
     PAD.native = 0; padReset(); S.set.pad.style = "auto"; await wait(80);
     out.style = padStyle(); out.selGlyph = padName("a");
-    enterTV(); await wait(50); out.hint = document.querySelector("#tvhint .tvbt").textContent;
+    enterTV(); await wait(50); out.hint = (function (g) { return g.title || g.textContent; })(document.querySelector("#tvhint .tvbt"));
     await press(9); out.menu = !!TV.menu;                                   // Options opens the TV menu
     await press(13); await press(13); await press(0); out.cfg = !!TV.cfg;      // down, down, select: Controller settings
     out.rows = document.querySelectorAll("#tvsheet .tvcr").length;

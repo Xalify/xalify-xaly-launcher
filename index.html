@@ -738,13 +738,13 @@ body.tvmode #modal{z-index:160}
 .tvlogo{display:block;max-width:440px;max-height:130px;object-fit:contain;object-position:left center;margin:0 0 14px;filter:drop-shadow(0 6px 22px rgba(0,0,0,.6))}
 .tvm{color:#c6cbe0;font-size:18px;margin-bottom:12px}
 #tvhero p{color:#aeb4c8;font-size:17px;line-height:1.5;margin:0}
-.pg{font-style:normal;display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;border-radius:12px;background:#2b3245;color:#fff;font-size:12px;font-weight:800;padding:0 3px;box-sizing:border-box;vertical-align:middle;transition:transform .08s,box-shadow .08s}
+.pg{font-style:normal;display:inline-block;display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;line-height:24px;text-align:center;border-radius:12px;background:#2b3245;color:#fff;font-size:12px;font-weight:800;padding:0 3px;box-sizing:border-box;vertical-align:middle;transition:transform .08s,box-shadow .08s}
 .pg.pgw,.tvbt.pgw{border-radius:7px;padding:0 7px;min-width:34px}
 .glxa{background:#1fbf75!important}.glxb{background:#e5484d!important}.glxx{background:#0a84ff!important}.glxy{background:#f5b942!important;color:#1d1503!important}
-.glpa,.glpb,.glpx,.glpy{background:#1c2234!important;border:1px solid #39415a;font-size:15px}.glpa{color:#8fb0ff!important}.glpb{color:#ff7a82!important}.glpx{color:#ff9ad6!important}.glpy{color:#45dbb5!important}
-.glns{background:#3b404d!important;color:#fff!important}.glgr{background:#2b3245}
+.glpa,.glpb,.glpx,.glpy{background:#1c2234!important;box-shadow:inset 0 0 0 1px #39415a;padding:0!important}.pgs{display:block;width:58%;height:58%;overflow:visible}.glpa{color:#8fb0ff!important}.glpb{color:#ff7a82!important}.glpx{color:#ff9ad6!important}.glpy{color:#45dbb5!important}
+.glns{background:#3b404d!important;color:#fff!important}.glxv,.glxm{background:#2b3245;color:#fff}.glxv .pgs,.glxm .pgs{width:52%;height:52%}.glgr{background:#2b3245}
 .pg.pdon{box-shadow:0 0 0 2px #2ee6f0,0 0 14px rgba(46,230,240,.6);transform:scale(1.12)}
-.pdpv .pg,.pdbtns .pg{margin:0 0 0 6px}
+.pdpv{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end}.pdpv .pg{margin:3px 0 3px 6px}
 .pdbind .pg{margin-right:12px}.pdwait{border-color:#2ee6f0!important;color:#2ee6f0!important}
 .pdstep{display:flex;align-items:center}.pdstep .btn{width:34px;padding:0}.pdstep b{width:44px;text-align:right;margin:0 10px 0 4px;font-size:14px}
 .pdbar{display:inline-block;width:150px;height:6px;border-radius:3px;background:#262635;margin-left:12px;overflow:hidden}.pdbar i,.tvcb i{display:block;height:100%;background:linear-gradient(90deg,#14c8d8,#2ee6f0)}
@@ -757,7 +757,7 @@ body.tvmode #modal{z-index:160}
 .pddot{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:8px;background:#5d6580;left:50%;top:50%}.pddot.out{background:#2ee6f0;box-shadow:0 0 10px #2ee6f0}
 .pdtrg{position:relative;width:16px;height:84px;border-radius:8px;background:#0b0d16;border:1px solid #2a2f44;margin-right:16px;overflow:visible;display:flex;align-items:flex-end}
 .pdtrg i{display:block;width:100%;border-radius:8px;background:#5d6580}.pdtrg i.on{background:#2ee6f0}
-.pdbtns{display:flex;flex-wrap:wrap;margin-left:auto;max-width:330px;justify-content:flex-end}.pdbtns .pg{margin-bottom:8px}
+.pdbtns{display:flex;align-items:center;margin-left:auto}.pddia{position:relative;width:96px;height:96px;margin-right:22px}.pddia .pg{position:absolute;width:30px;min-width:30px;height:30px;border-radius:15px;margin:0}.pddia .pdn{left:33px;top:0}.pddia .pdw{left:0;top:33px}.pddia .pde{right:0;top:33px}.pddia .pds{left:33px;bottom:0}.pdgrid{display:flex;flex-wrap:wrap;width:140px}.pdgrid .pg{width:66px;margin:4px 0;height:28px}.pdgrid .pg:nth-child(odd){margin-right:8px}
 .tvcfg{width:680px}.tvcfg.re{animation:none}.tvcl{max-height:62vh;overflow-y:auto;padding:4px 10px 4px 0;margin-top:14px;position:relative}
 .tvch{font-size:13px;font-weight:800;letter-spacing:.12em;color:#6b7390;margin:18px 0 2px;text-transform:uppercase}
 .tvbtn.tvcr{display:flex;align-items:center;padding:11px 18px;margin-top:8px;font-size:17px}.tvcr b{flex:1}
@@ -765,7 +765,7 @@ body.tvmode #modal{z-index:160}
 .tvcb{display:inline-block;width:120px;height:6px;border-radius:3px;background:#262635;margin-right:12px;overflow:hidden}.tvcap{font-style:normal;color:#2ee6f0;animation:pdbl 1s infinite}
 @keyframes pdbl{50%{opacity:.4}}
 .tvact{display:flex;margin-top:18px}.tvchip{display:flex;align-items:center;margin-right:22px;font-size:17px;font-weight:600;color:#e6e9f4}
-.tvbt{font-style:normal;display:inline-block;min-width:30px;height:30px;line-height:30px;text-align:center;border-radius:15px;background:#2b3245;font-size:14px;font-weight:800;margin-right:9px;padding:0 4px;box-sizing:border-box}
+.tvbt{font-style:normal;display:inline-block;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;min-width:30px;height:30px;line-height:30px;text-align:center;border-radius:15px;background:#2b3245;font-size:14px;font-weight:800;margin-right:9px;padding:0 4px;box-sizing:border-box}
 .tvbt.a{background:#1fbf75}.tvbt.b{background:#e5484d}.tvbt.y{background:#f5b942;color:#1d1503}.tvbt.x{background:#0a84ff}.tvbt.w{border-radius:7px;min-width:36px;margin-right:6px}
 #tvview{position:absolute;left:0;right:0;top:54%;bottom:76px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 82%,transparent 100%);mask-image:linear-gradient(180deg,#000 82%,transparent 100%)}
 #tvrows{position:absolute;left:56px;right:0;top:0;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
@@ -5324,7 +5324,7 @@ var PACT=[["a","Select","Open, play and press buttons.","s"],["b","Back","Close 
   ["lb","Previous tab","Switch tabs in TV mode.","lb"],["rb","Next tab","Switch tabs in TV mode.","rb"],["start","Menu","Opens TV mode, or its menu when you’re in it.","menu"],["back","View","Also opens TV mode, or its menu.","view"]];
 var PSTY={xbox:"Xbox",ps:"PlayStation",sw:"Switch 2 Pro Controller"};
 var PGLY={
-  xbox:{s:["A","glxa"],e:["B","glxb"],w:["X","glxx"],n:["Y","glxy"],lb:["LB"],rb:["RB"],lt:["LT"],rt:["RT"],ls:["LS"],rs:["RS"],view:["⧉"],menu:["☰"]},
+  xbox:{s:["A","glxa"],e:["B","glxb"],w:["X","glxx"],n:["Y","glxy"],lb:["LB"],rb:["RB"],lt:["LT"],rt:["RT"],ls:["LS"],rs:["RS"],view:["⧉","glxv"],menu:["☰","glxm"]},
   ps:{s:["✕","glpa"],e:["○","glpb"],w:["□","glpx"],n:["△","glpy"],lb:["L1"],rb:["R1"],lt:["L2"],rt:["R2"],ls:["L3"],rs:["R3"],view:["Create"],menu:["Options"]},
   sw:{s:["B","glns"],e:["A","glns"],w:["Y","glns"],n:["X","glns"],lb:["L"],rb:["R"],lt:["ZL"],rt:["ZR"],ls:["LS"],rs:["RS"],view:["−"],menu:["+"]}};
 var PADMAP=[];
@@ -5336,7 +5336,10 @@ function padStyle(){var s=S?padCfg().style||"auto":"auto";if(PSTY[s])return s;
   return /054c|playstation|dualsense|dualshock|wireless controller/i.test(PAD.id)?"ps":/057e|nintendo|switch|pro controller/i.test(PAD.id)?"sw":"xbox";}
 function padLabel(b){return ((PGLY[padStyle()]||PGLY.xbox)[b]||["?"])[0];}
 function padName(act){return padLabel(padBtnOf(act));}
-function padGlyph(act,cls,b){b=b||padBtnOf(act);var g=(PGLY[padStyle()]||PGLY.xbox)[b]||["?"];return el("i",(cls||"pg")+" "+(g[1]||"glgr")+(g[0].length>1?" pgw":""),g[0]);}
+var PSVG={glpa:'<path d="M5 5L19 19M19 5L5 19" stroke-width="3" stroke-linecap="round"/>',glpb:'<circle cx="12" cy="12" r="8" stroke-width="2.6"/>',glpx:'<rect x="5" y="5" width="14" height="14" rx="1" stroke-width="2.6"/>',glpy:'<path d="M12 4.5L20.5 19H3.5Z" stroke-width="2.6" stroke-linejoin="round"/>',glxv:'<rect x="3" y="3" width="12" height="12" rx="2" stroke-width="2.4"/><rect x="9" y="9" width="12" height="12" rx="2" stroke-width="2.4"/>',glxm:'<path d="M4 6H20M4 12H20M4 18H20" stroke-width="2.6" stroke-linecap="round"/>'};
+function padGlyph(act,cls,b){b=b||padBtnOf(act);var g=(PGLY[padStyle()]||PGLY.xbox)[b]||["?"],sv=PSVG[g[1]],e=el("i",(cls||"pg")+" "+(g[1]||"glgr")+(g[0].length>1?" pgw":""),sv?"":g[0]);
+  if(sv){e.title=g[0];try{e.innerHTML='<svg class="pgs" viewBox="0 0 24 24" fill="none" stroke="currentColor">'+sv+'</svg>';}catch(x){e.textContent=g[0];}}
+  return e;}
 function padRemap(){var m=PDIR.slice();PACT.forEach(function(a){m.push([PBTN[padBtnOf(a[0])],a[0]]);});PADMAP=m;}
 // put an action on a button; whatever was on that button moves to the action's old one, so nothing is ever left without a button
 function padBind(act,b){var c=padCfg(),old=padBtnOf(act);PACT.forEach(function(a){if(a[0]!==act&&padBtnOf(a[0])===b)c.map[a[0]]=old;});c.map[act]=b;save();padRemap();}
@@ -5851,7 +5854,9 @@ function padLiveCard(){
   function stick(lbl){var w=el("div","pdstk"),ring=el("i","pdring"),dot=el("i","pddot");w.appendChild(ring);w.appendChild(dot);w.appendChild(el("small","",lbl));st.appendChild(w);return {ring:ring,dot:dot};}
   function trig(b){var w=el("div","pdtrg"),f=el("i");w.appendChild(f);var l=el("small","",padLabel(b));w.appendChild(l);st.appendChild(w);return f;}
   var L=stick("Left stick"),Rr=stick("Right stick"),tl=trig("lt"),tr=trig("rt"),btns=el("div","pdbtns"),gl={};
-  ["s","e","w","n","lb","rb","ls","rs","view","menu"].forEach(function(k){gl[k]=padGlyph("","pg",k);btns.appendChild(gl[k]);});
+  var dia=el("div","pddia"),grd=el("div","pdgrid");btns.appendChild(dia);btns.appendChild(grd);
+  ["n","w","e","s"].forEach(function(k){gl[k]=padGlyph("","pg",k);gl[k].className+=" pd"+k;dia.appendChild(gl[k]);});
+  ["lb","rb","ls","rs","view","menu"].forEach(function(k){gl[k]=padGlyph("","pg",k);grd.appendChild(gl[k]);});
   cd.appendChild(nm);cd.appendChild(st);cd.appendChild(btns);
   var lastTxt="";
   function up(){

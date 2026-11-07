@@ -61,7 +61,6 @@ jobs:
             $nl = if ($m.Value.EndsWith("`r`n")) { "`r`n" } else { "`n" }
             $html = $html.Substring(0, $m.Index + $m.Length) + $entry + $nl + $html.Substring($m.Index + $m.Length)
             [IO.File]::WriteAllText("$PWD/index.html", $html, $utf8)
-            [IO.File]::WriteAllText("$PWD/release-notes.md", (($notes | ForEach-Object { "- $_" }) -join "`n") + "`n", $utf8)
             git config user.name "xaly-release"
             git config user.email "xaly-release@users.noreply.github.com"
             git commit -am "Release $nv" -q
@@ -100,7 +99,12 @@ jobs:
           $h = (Get-FileHash "XalyLauncher-$v.zip" -Algorithm SHA256).Hash.ToLower()
           # same file under a fixed name, so a website can always link to .../releases/latest/download/XalyLauncher.zip
           Copy-Item "XalyLauncher-$v.zip" "XalyLauncher.zip"
-          $notes = if (Test-Path release-notes.md) { Get-Content release-notes.md -Raw } else { "Xaly Launcher $v" }
+          # the release page (which the launcher's update window shows) uses this version's patch notes from index.html
+          $html = [IO.File]::ReadAllText("$PWD/index.html")
+          $m = [regex]::Match($html, '\{v:"' + [regex]::Escape($v) + '",d:"[^"]*",t:\[(.*)\]\}')
+          if (-not $m.Success) { throw "index.html has no patch notes for $v" }
+          $items = [regex]::Matches($m.Groups[1].Value, '"((?:[^"\\]|\\.)*)"') | ForEach-Object { "- " + [regex]::Unescape($_.Groups[1].Value) }
+          $notes = $items -join "`n"
           [IO.File]::WriteAllText("$PWD/notes.md", $notes.Trim() + "`n`nSHA256: $h`n")
 
       - name: Publish

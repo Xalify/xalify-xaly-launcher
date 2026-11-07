@@ -1,1 +1,0 @@
-- Centre controller button icons and lay out the live controller test like a controller

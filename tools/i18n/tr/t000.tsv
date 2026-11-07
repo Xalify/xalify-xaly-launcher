@@ -1,0 +1,140 @@
+0	(normalmente {0})	(normalmente {0})
+1	-	-
+2	-	-
+3	-	-
+4	-	-
+5	Un grupo puede tener hasta {0} personas	Um grupo pode ter até {0} pessoas
+6	Un grupo puede tener hasta {0} personas, contándote a ti	Um grupo pode ter até {0} pessoas, contando com você
+7	Hay una versión nueva de {0} en {1}. Tus partidas guardadas en la carpeta del juego se conservan.	Há uma nova versão de {0} no {1}. Seus saves na pasta do jogo são mantidos.
+8	Logro desbloqueado: {0}	Conquista desbloqueada: {0}
+9	Agregar personas a {0}	Adicionar pessoas a {0}
+10	Agregar {0} {1|juego|juegos}	Adicionar {0} {1|jogo|jogos}
+11	Todos los juegos · {0}	Todos os jogos · {0}
+12	Automático · {0}	Automático · {0}
+13	Bloquear a {0}	Bloquear {0}
+14	¿Bloquear a {0}?	Bloquear {0}?
+15	Para mañana ({0})	Até amanhã ({0})
+16	Desafío enviado a {0}	Desafio enviado para {0}
+17	Desafiar a {0}	Desafiar {0}
+18	Desafíos{0}	Desafios{0}
+19	Buscando actualizaciones de {0} {1|juego|juegos}…	Verificando atualizações de {0} {1|jogo|jogos}…
+20	Limpiar{0}	Limpar{0}
+21	Se liberaron {0}	{0} liberados
+22	Cierra {0} antes de moverlo	Feche {0} antes de mover
+23	Cierra {0} antes de cerrar sesión	Feche {0} antes de sair
+24	Cierra {0} antes de actualizar	Feche {0} antes de atualizar
+25	Cierra {0} antes de actualizarlo	Feche {0} antes de atualizá-lo
+26	Primero cierra {0}	Feche {0} primeiro
+27	Código {0}	Código {0}
+28	Códigos, estrategias, dónde te quedaste… guardado para {0}.	Códigos, estratégias, onde você parou… salvo para {0}.
+29	Se copió {0}	{0} copiado
+30	No se pudo cambiar el inicio: {0}	Não foi possível alterar a inicialização: {0}
+31	No se pudo copiar. Tu código es {0}	Não foi possível copiar. Seu código é {0}
+32	No se pudieron obtener tus juegos de itch.io: {0}	Não foi possível obter seus jogos do itch.io: {0}
+33	No se pudo conectar con GitHub: {0}	Não foi possível acessar o GitHub: {0}
+34	No se pudo leer itch.io: {0}	Não foi possível ler o itch.io: {0}
+35	No se pudo establecer una conexión segura con {0}	Não foi possível criar uma conexão segura com {0}
+36	No se pudo configurar el sistema de amigos en línea en esta PC: {0}	Não foi possível configurar os amigos online neste PC: {0}
+37	No se pudo iniciar {0}: {1}	Não foi possível iniciar {0}: {1}
+38	No se pudo usar esa unidad: {0}	Não foi possível usar essa unidade: {0}
+39	No se pudo usar esa carpeta: {0}	Não foi possível usar essa pasta: {0}
+40	No se pudo limpiar: {0}	Não foi possível limpar: {0}
+41	No se pudieron borrar los archivos del juego: {0}	Não foi possível apagar os arquivos do jogo: {0}
+42	No se pudo instalar {0}	Não foi possível instalar {0}
+43	No se pudo mover {0}	Não foi possível mover {0}
+44	No se pudo conectar con {0}. El mensaje solo se eliminó para ti.	Não foi possível alcançar {0}. A mensagem só foi apagada para você.
+45	No se pudo leer esa imagen: {0}	Não foi possível ler essa imagem: {0}
+46	No se pudo guardar la captura: {0}	Não foi possível salvar a captura: {0}
+47	No se pudo guardar: {0}	Não foi possível salvar: {0}
+48	No se pudo iniciar la actualización: {0}	Não foi possível iniciar a atualização: {0}
+49	No se pudo iniciar: {0}	Não foi possível iniciar: {0}
+50	No se pudo desinstalar: {0}	Não foi possível desinstalar: {0}
+51	No se pudo actualizar {0}	Não foi possível atualizar {0}
+52	-	-
+53	DESCARGANDO{0}	BAIXANDO{0}
+54	¿Eliminar toda tu conversación con {0}?	Apagar toda a sua conversa com {0}?
+55	¿Borrar {0}{1} de esta PC? ({2})	Apagar {0}{1} deste PC? ({2})
+56	Se descargó un .zip en {0}: Xaly lo descomprime	.zip baixado em {0}: o Xaly descompacta
+57	Descargando {0}…	Baixando {0}…
+58	Descargando… {0}	Baixando… {0}
+59	Las descargas tienen un límite de {0}	Os downloads estão limitados a {0}
+60	Ahora las descargas se hacen {0}	Agora os downloads acontecem {0}
+61	Ahora las descargas irán a {0}	Agora os downloads vão para {0}
+62	Descargas{0}	Downloads{0}
+63	-	-
+64	-	-
+65	Termina {0}	Termina {0}
+66	DESTACADO  •  {0}{1}	DESTAQUE  •  {0}{1}
+67	Falló: {0}	Falhou: {0}
+68	Reparar “{0}” no inicia	Corrigir “{0}” não abre
+69	Se {1|encontró|encontraron} {0} {1|juego|juegos} de la Tienda en esta PC{2}. Desmarca lo que no se vea bien.	{1|Foi encontrado|Foram encontrados} {0} {1|jogo|jogos} da Loja neste PC{2}. Desmarque o que não parecer certo.
+70	Se {1|encontró|encontraron} {0} {1|juego|juegos} en tu biblioteca de itch.io	{1|Foi encontrado|Foram encontrados} {0} {1|jogo|jogos} na sua biblioteca do itch.io
+71	Se encontró {0} en tu PC	{0} encontrado no seu PC
+72	Se encontró {0}, comprobando que esté completo…	{0} encontrado, conferindo se está completo…
+73	Libre en {0}	Livre em {0}
+74	Se liberaron {0}	{0} liberados
+75	Gratis{0}{1}	Grátis{0}{1}
+76	Solicitudes de amistad — {0}	Pedidos de amizade — {0}
+77	Amigo {0}	Amigo {0}
+78	Amigos{0}	Amigos{0}
+79	Juegos instalados por Xaly ({0})	Jogos instalados pelo Xaly ({0})
+80	Los juegos se instalarán en {0}. Cámbialo en Configuración › Descargas.	Os jogos serão instalados em {0}. Altere em Configurações › Downloads.
+81	Los juegos que instales aparecen aquí. Presiona {0} para ir a la Tienda.	Os jogos que você instalar aparecem aqui. Aperte {0} para ir à Loja.
+82	Consigue {0}	Pegue {0}
+83	Consigue {0} en {1}	Pegue {0} em {1}
+84	Dáselo a tus amigos para que puedan agregarte{0}	Passe para seus amigos para que eles possam adicionar você{0}
+85	Grupos{0}	Grupos{0}
+86	HTTP {0}	HTTP {0}
+87	Cuánto presionas {0} o {1} antes de que cuente, cuando uno de ellos tiene asignada una acción.	Quanto você aperta {0} ou {1} antes de contar, quando um deles tem uma ação atribuída.
+88	En {0}: {1}	Em {0}: {1}
+89	Instalar actualización {0}	Instalar atualização {0}
+90	Instalar {0}	Instalar {0}
+91	Instalado. Si {0} sigue sin iniciar, reinicia tu PC.	Instalado. Se {0} ainda não abrir, reinicie o PC.
+92	Instalado. {0}	Instalado. {0}
+93	Instalando Xaly {0}…	Instalando o Xaly {0}…
+94	También desaparece del chat de {0} en cuanto su Xaly Launcher esté en línea (en unas 12 horas). Si ya lo leyó, puede que lo recuerde.	Também some do chat de {0} assim que o Xaly Launcher da pessoa ficar online (em cerca de 12 horas). Se ela já leu, pode ser que lembre.
+95	Necesita unos {0} mientras se instala.	Precisa de cerca de {0} durante a instalação.
+96	Se detuvo con el error {0}. Prueba Más › Reparar “no inicia” en su página.	Parou com o erro {0}. Tente Mais › Corrigir “não abre” na página dele.
+97	Ahora está en {0}.{1}	Agora está em {0}.{1}
+98	JUGADO POR ÚLTIMA VEZ  {0}	JOGADO POR ÚLTIMO  {0}
+99	Última vez en línea {0}	Online pela última vez {0}
+100	Jugado por última vez {0}	Jogado pela última vez {0}
+101	Último problema: {0}.	Último problema: {0}.
+102	Visto por última vez {0}	Visto pela última vez {0}
+103	Última actualización {0}.	Última atualização {0}.
+104	¿Salir de {0}?	Sair de {0}?
+105	Nivel {0}  ·	Nível {0}  ·
+106	Biblioteca{0}	Biblioteca{0}
+107	Cargando las imágenes de los juegos desde itch.io… Faltan {0}. Los juegos aparecen en cuanto llegan sus imágenes.	Carregando as imagens dos jogos do itch.io… Faltam {0}. Os jogos aparecem assim que as imagens chegam.
+108	Bloqueado: {0}	Bloqueada: {0}
+109	Sesión más larga hasta ahora: {0}. ¡Sigue así!	Sessão mais longa até agora: {0}. Continue!
+110	MOVIENDO… {0}	MOVENDO… {0}
+111	Miembro desde {0}	Membro desde {0}
+112	Mensaje para {0}	Mensagem para {0}
+113	Moderno usa Microsoft Edge WebView2: más rápido y fluido. Heredado usa el viejo motor de Internet Explorer, por si algo se ve mal.{0}	Moderno usa o Microsoft Edge WebView2: mais rápido e mais fluido. Legado usa o antigo motor do Internet Explorer, caso algo pareça errado.{0}
+114	Mayormente {0}	Na maioria {0}
+115	Traslado cancelado. {0} se quedó donde estaba.	Mudança cancelada. {0} ficou onde estava.
+116	Mover {0}	Mover {0}
+117	Se movió {0}	{0} movido
+118	Moviendo {0}	Movendo {0}
+119	Moviendo… {0}	Movendo… {0}
+120	Las nuevas descargas e instalaciones irán a {0}	Os novos downloads e instalações vão para {0}
+121	Apodo para {0}	Apelido para {0}
+122	No hay resultados para “{0}”	Nenhum resultado para “{0}”
+123	Ninguna opción coincide con “{0}”.	Nenhuma configuração corresponde a “{0}”.
+124	Nadie usa todavía el nombre de usuario “{0}”	Ninguém usa o nome de usuário “{0}” ainda
+125	Ninguno de tus amigos ha jugado {0} con Xaly todavía.	Nenhum dos seus amigos jogou {0} com o Xaly ainda.
+126	No hay suficiente espacio: {0} libres	Não há espaço suficiente: {0} livres
+127	No hay suficiente espacio en {0}	Não há espaço suficiente em {0}
+128	Desconectados — {0}	Offline — {0}
+129	En línea como {0}. Inicia sesión con ella en cualquier PC. Tu biblioteca y tu tiempo de juego se quedan en cada PC.	Online como {0}. Entre com ela em qualquer PC. Sua biblioteca e seu tempo de jogo ficam em cada PC.
+130	En línea ahora · {0}	Online agora · {0}
+131	En línea · @{0}	Online · @{0}
+132	En línea — {0}	Online — {0}
+133	Abrir {0} ›	Abrir {0} ›
+134	Se abrió {0} en tu navegador	{0} aberto no seu navegador
+135	Abriendo {0} en tu navegador. Xaly lo instala en cuanto termine.	Abrindo {0} no seu navegador. O Xaly instala assim que terminar.
+136	En pausa por tu horario. Continúa a las {0}	Pausado pelo seu horário. Continua às {0}
+137	Elige de 2 a {0} amigos	Escolha de 2 a {0} amigos
+138	Juega {0} seguidas	Jogue {0} seguidas
+139	Juega {0} {1|día|días} más seguidos	Jogue mais {0} {1|dia|dias} seguidos

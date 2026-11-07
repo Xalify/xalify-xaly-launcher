@@ -1,0 +1,678 @@
+{
+"x": {
+"Exit": [
+"Salir",
+"Sair"
+],
+"FREE OF": [
+"LIBRES DE",
+"LIVRES DE"
+],
+"Go back to Xaly and try again.": [
+"Vuelve a Xaly e inténtalo de nuevo.",
+"Volte ao Xaly e tente de novo."
+],
+"Language": [
+"Idioma",
+"Idioma"
+],
+"New free Windows games are added automatically every 6 hours.": [
+"Cada 6 horas se agregan automáticamente juegos gratis nuevos para Windows.",
+"A cada 6 horas, novos jogos grátis para Windows são adicionados automaticamente."
+],
+"Nothing was shared with Xaly. You can close this tab.": [
+"No se compartió nada con Xaly. Puedes cerrar esta pestaña.",
+"Nada foi compartilhado com o Xaly. Você pode fechar esta aba."
+],
+"Open Xaly Launcher": [
+"Abrir Xaly Launcher",
+"Abrir o Xaly Launcher"
+],
+"Signing you in to Xaly…": [
+"Iniciando tu sesión en Xaly…",
+"Conectando você ao Xaly…"
+],
+"Something went wrong": [
+"Algo salió mal",
+"Algo deu errado"
+],
+"Still running in the tray. Click the icon to open it, or right-click to exit.": [
+"Sigue abierto en la bandeja. Haz clic en el ícono para abrirlo o clic derecho para salir.",
+"Continua aberto na bandeja. Clique no ícone para abrir ou clique com o botão direito para sair."
+],
+"Stop": [
+"Detener",
+"Parar"
+],
+"Xaly stopped waiting. Go back to Xaly and try again.": [
+"Xaly dejó de esperar. Vuelve a Xaly e inténtalo de nuevo.",
+"O Xaly parou de esperar. Volte ao Xaly e tente de novo."
+],
+"Xaly’s menus and messages. Game names and descriptions stay as their developers wrote them.": [
+"Los menús y mensajes de Xaly. Los nombres y las descripciones de los juegos se quedan como los escribieron sus desarrolladores.",
+"Os menus e as mensagens do Xaly. Os nomes e as descrições dos jogos ficam como os desenvolvedores escreveram."
+],
+"You can close this tab and go back to Xaly.": [
+"Puedes cerrar esta pestaña y volver a Xaly.",
+"Você pode fechar esta aba e voltar ao Xaly."
+],
+"You didn’t sign in": [
+"No iniciaste sesión",
+"Você não entrou"
+],
+"Your account was made on this PC. Put it online later in Settings › Account.": [
+"Tu cuenta se creó en esta PC. Ponla en línea más tarde en Configuración › Cuenta.",
+"Sua conta foi criada neste PC. Coloque ela online depois em Configurações › Conta."
+],
+"You’re signed in": [
+"Ya iniciaste sesión",
+"Você entrou"
+],
+"itch.io didn’t sign you in": [
+"itch.io no inició tu sesión",
+"O itch.io não conectou você"
+],
+"Back to game": [
+"Volver al juego",
+"Voltar ao jogo"
+],
+"this session": [
+"esta sesión",
+"nesta sessão"
+],
+"Save this moment": [
+"Guardar este momento",
+"Salvar este momento"
+],
+"Ranks": [
+"Clasificación",
+"Ranking"
+],
+"Search friends": [
+"Buscar amigos",
+"Buscar amigos"
+],
+"letters, numbers or _": [
+"letras, números o _",
+"letras, números ou _"
+],
+"Save": [
+"Guardar",
+"Salvar"
+],
+"Write": [
+"Escritura",
+"Gravação"
+],
+"Download": [
+"Descarga",
+"Download"
+],
+"GAMES": [
+"JUEGOS",
+"JOGOS"
+],
+"CACHE": [
+"CACHÉ",
+"CACHE"
+],
+"APP DATA": [
+"DATOS DE LA APP",
+"DADOS DO APP"
+],
+"OTHER": [
+"OTROS",
+"OUTROS"
+],
+"FREE": [
+"LIBRE",
+"LIVRE"
+],
+"CURRENT": [
+"ACTUAL",
+"ATUAL"
+],
+"Shift": [
+"Shift",
+"Shift"
+],
+"Previous patch notes are in English.": [
+"Las notas de versiones anteriores están en inglés.",
+"As notas das versões anteriores estão em inglês."
+],
+"just now": [
+"justo ahora",
+"agora mesmo"
+],
+"Size on Disk": [
+"Tamaño en disco",
+"Tamanho no disco"
+],
+"Action-Adventure": [
+"Acción y aventura",
+"Ação e aventura"
+],
+"RPG": [
+"RPG",
+"RPG"
+],
+"Card Game": [
+"Juego de cartas",
+"Jogo de cartas"
+],
+"Role Playing": [
+"Rol",
+"RPG"
+],
+"Sports": [
+"Deportes",
+"Esportes"
+],
+"Educational": [
+"Educativo",
+"Educativo"
+],
+"Interactive Fiction": [
+"Ficción interactiva",
+"Ficção interativa"
+],
+"Sandbox": [
+"Sandbox",
+"Sandbox"
+],
+"Rhythm": [
+"Ritmo",
+"Ritmo"
+],
+"Strategy": [
+"Estrategia",
+"Estratégia"
+],
+"Recently played": [
+"Recientes",
+"Recentes"
+],
+"Sign in with itch.io is almost ready. Try again in a little while.": [
+"Iniciar sesión con itch.io está casi listo. Vuelve a intentarlo en un rato.",
+"Entrar com o itch.io está quase pronto. Tente de novo daqui a pouco."
+],
+"Xaly speaks Spanish and Portuguese: pick Español (Latinoamérica) or Português (Brasil) in Settings › Appearance › Language. If Windows is set to one of them, Xaly starts in it": [
+"Xaly habla español y portugués: elige Español (Latinoamérica) o Português (Brasil) en Configuración › Apariencia › Idioma. Si Windows está en uno de ellos, Xaly empieza en ese idioma",
+"O Xaly fala espanhol e português: escolha Español (Latinoamérica) ou Português (Brasil) em Configurações › Aparência › Idioma. Se o Windows estiver em um deles, o Xaly já começa nele"
+],
+"Light theme, and 8 accent colours for buttons and highlights, in Settings › Appearance. TV mode and the overlay stay dark": [
+"Tema claro y 8 colores de acento para botones y resaltados, en Configuración › Apariencia. El modo TV y el overlay se quedan oscuros",
+"Tema claro e 8 cores de destaque para botões e realces, em Configurações › Aparência. O modo TV e a sobreposição continuam escuros"
+],
+"Accessibility: bigger text (4 sizes) and Reduce motion, which turns off sliding cards, pop-up animations and TV mode’s moving background. It’s on by itself if Windows has animations turned off": [
+"Accesibilidad: texto más grande (4 tamaños) y Reducir el movimiento, que desactiva las tarjetas que se deslizan, las animaciones de las ventanas emergentes y el fondo en movimiento del modo TV. Se activa solo si Windows tiene las animaciones desactivadas",
+"Acessibilidade: texto maior (4 tamanhos) e Reduzir movimento, que desativa os cartões deslizando, as animações dos pop-ups e o fundo em movimento do modo TV. Já vem ligado se o Windows estiver com as animações desativadas"
+],
+"TV mode has a Search tab with an on-screen keyboard, so you can find any game with just a controller": [
+"El modo TV tiene una pestaña Buscar con teclado en pantalla, para encontrar cualquier juego solo con el control",
+"O modo TV tem uma aba Buscar com teclado na tela, para achar qualquer jogo só com o controle"
+],
+"Group chats for 3 to 8 friends, end-to-end encrypted like one-to-one chats. Start one with + New group in the Friends panel": [
+"Chats grupales de 3 a 8 amigos, cifrados de extremo a extremo como los chats individuales. Crea uno con + Nuevo grupo en el panel de Amigos",
+"Chats em grupo de 3 a 8 amigos, criptografados de ponta a ponta como os chats individuais. Crie um com + Novo grupo no painel Amigos"
+],
+"Sign in with itch.io in Settings › Account to see every game you’ve bought or claimed on itch.io, paid ones too, in Library › itch.io, and install them in Xaly": [
+"Inicia sesión con itch.io en Configuración › Cuenta para ver en Biblioteca › itch.io todos los juegos que compraste o reclamaste en itch.io, incluidos los de pago, e instalarlos en Xaly",
+"Entre com o itch.io em Configurações › Conta para ver em Biblioteca › itch.io todos os jogos que você comprou ou resgatou no itch.io, inclusive os pagos, e instalar no Xaly"
+],
+"What’s new in Xaly": [
+"Novedades en Xaly",
+"Novidades no Xaly"
+],
+"Report a bug, request a feature, or share a thought": [
+"Reporta un error, pide una función o comparte una idea",
+"Informe um bug, peça um recurso ou compartilhe uma ideia"
+],
+"Erase": [
+"Borrar",
+"Apagar"
+],
+"Type": [
+"Escribir",
+"Digitar"
+],
+"Done": [
+"Listo",
+"Pronto"
+],
+"Space": [
+"Espacio",
+"Espaço"
+],
+"Clear": [
+"Borrar todo",
+"Limpar"
+],
+"Search": [
+"Buscar",
+"Buscar"
+]
+},
+"t": [
+[
+"{0} / {1} XP to level {2}",
+"{0} / {1} XP para el nivel {2}",
+"{0} / {1} XP para o nível {2}"
+],
+[
+"{0} / {1} achievements",
+"{0} / {1} logros",
+"{0} / {1} conquistas"
+],
+[
+"{0}/{1} achievements",
+"{0}/{1} logros",
+"{0}/{1} conquistas"
+],
+[
+"{0} FREE OF {1}",
+"{0} LIBRES DE {1}",
+"{0} LIVRES DE {1}"
+],
+[
+"{0} free of {1}",
+"{0} libres de {1}",
+"{0} livres de {1}"
+],
+[
+"{0} KB/s with a 512 KB/s cap",
+"{0} KB/s con un límite de 512 KB/s",
+"{0} KB/s com limite de 512 KB/s"
+],
+[
+"{0} accepted your friend request",
+"{0} aceptó tu solicitud de amistad",
+"{0} aceitou seu pedido de amizade"
+],
+[
+"{0} added you to a group",
+"{0} te agregó a un grupo",
+"{0} adicionou você a um grupo"
+],
+[
+"{0} already has {1} in {2}. Pick another goal.",
+"{0} ya tiene {1} en {2}. Elige otra meta.",
+"{0} já tem {1} em {2}. Escolha outra meta."
+],
+[
+"{0} beat {1}, you haven’t yet",
+"{0} superó {1}, tú todavía no",
+"{0} passou de {1}, você ainda não"
+],
+[
+"{0} challenged you",
+"{0} te desafió",
+"{0} desafiou você"
+],
+[
+"{0} completed your challenge",
+"{0} completó tu desafío",
+"{0} concluiu seu desafio"
+],
+[
+"{0} did it!",
+"¡{0} lo logró!",
+"{0} conseguiu!"
+],
+[
+"{0} finished downloading and is installed.",
+"{0} terminó de descargarse y ya está instalado.",
+"{0} terminou de baixar e já está instalado."
+],
+[
+"{0} free Windows games from itch.io, updated automatically. One click installs them.",
+"{0} juegos gratis para Windows de itch.io, actualizados automáticamente. Se instalan con un clic.",
+"{0} jogos grátis para Windows do itch.io, atualizados automaticamente. Um clique instala."
+],
+[
+"{0} game updates available",
+"{0} actualizaciones de juegos disponibles",
+"{0} atualizações de jogos disponíveis"
+],
+[
+"{0} games from itch.io. {1}{2}{3}New free Windows games are added automatically every 6 hours.",
+"{0} juegos de itch.io. {1}{2}{3}Cada 6 horas se agregan automáticamente juegos gratis nuevos para Windows.",
+"{0} jogos do itch.io. {1}{2}{3}A cada 6 horas, novos jogos grátis para Windows são adicionados automaticamente."
+],
+[
+"{0} games from your itch.io library are in Library › itch.io, paid ones too. Xaly can only see which games you own and your public profile.",
+"{0} juegos de tu biblioteca de itch.io están en Biblioteca › itch.io, incluidos los de pago. Xaly solo puede ver qué juegos tienes y tu perfil público.",
+"{0} jogos da sua biblioteca do itch.io estão em Biblioteca › itch.io, inclusive os pagos. O Xaly só consegue ver quais jogos você tem e seu perfil público."
+],
+[
+"{0} games · {1} played",
+"{0} juegos · {1} jugados",
+"{0} jogos · {1} jogados"
+],
+[
+"{0} game{1} added to your library",
+"{1|Se agregó|Se agregaron} {0} {1|juego|juegos} a tu biblioteca",
+"{0} {1|jogo adicionado|jogos adicionados} à sua biblioteca"
+],
+[
+"{0} has played {1} more than you",
+"{0} jugó {1} más que tú",
+"{0} jogou {1} a mais que você"
+],
+[
+"{0} hrs on record",
+"{0} h registradas",
+"{0} h registradas"
+],
+[
+"{0} hours past 2 weeks",
+"{0} horas en las últimas 2 semanas",
+"{0} horas nas últimas 2 semanas"
+],
+[
+"{0} in queue",
+"{0} en cola",
+"{0} na fila"
+],
+[
+"{0} in use. This is game icons and unfinished downloads. Clearing it is safe; your games, friends and settings are not touched.",
+"{0} en uso. Son íconos de juegos y descargas sin terminar. Borrarla es seguro; tus juegos, amigos y configuración no se tocan.",
+"{0} em uso. São ícones de jogos e downloads inacabados. Limpar é seguro; seus jogos, amigos e configurações não são mexidos."
+],
+[
+"{0} is a {1} download and needs about {2} while it installs. Only {3} is free on {4}. Free up some space, or pick another download folder in Settings › Downloads.",
+"{0} es una descarga de {1} y necesita unos {2} mientras se instala. Solo hay {3} libres en {4}. Libera espacio o elige otra carpeta de descargas en Configuración › Descargas.",
+"{0} é um download de {1} e precisa de cerca de {2} durante a instalação. Só há {3} livres em {4}. Libere espaço ou escolha outra pasta de downloads em Configurações › Downloads."
+],
+[
+"{0} is already in your downloads",
+"{0} ya está en tus descargas",
+"{0} já está nos seus downloads"
+],
+[
+"{0} is already in your library",
+"{0} ya está en tu biblioteca",
+"{0} já está na sua biblioteca"
+],
+[
+"{0} is being moved. Wait for it to finish.",
+"{0} se está moviendo. Espera a que termine.",
+"{0} está sendo movido. Espere terminar."
+],
+[
+"{0} is blocked",
+"{0} está bloqueado",
+"{0} está bloqueado"
+],
+[
+"{0} is now on {1}",
+"{0} ahora está en {1}",
+"{0} agora está em {1}"
+],
+[
+"{0} is now up to date.",
+"{0} ya está actualizado.",
+"{0} já está atualizado."
+],
+[
+"{0} is online",
+"{0} está en línea",
+"{0} está online"
+],
+[
+"{0} is unblocked. They can send you a friend request again.",
+"{0} está desbloqueado. Puede volver a enviarte una solicitud de amistad.",
+"{0} foi desbloqueado. A pessoa pode enviar um pedido de amizade de novo."
+],
+[
+"{0} isn’t on this PC",
+"{0} no está en esta PC",
+"{0} não está neste PC"
+],
+[
+"{0} min. ago",
+"hace {0} min",
+"há {0} min"
+],
+[
+"{0} hr. ago",
+"hace {0} h",
+"há {0} h"
+],
+[
+"{0} d. ago",
+"hace {0} d",
+"há {0} d"
+],
+[
+"{0} mo. ago",
+"hace {0} meses",
+"há {0} meses"
+],
+[
+"{0} yr. ago",
+"hace {0} años",
+"há {0} anos"
+],
+[
+"{0} min ago",
+"hace {0} min",
+"há {0} min"
+],
+[
+"{0} hour ago",
+"hace {0} hora",
+"há {0} hora"
+],
+[
+"{0} hours ago",
+"hace {0} horas",
+"há {0} horas"
+],
+[
+"{0} day ago",
+"hace {0} día",
+"há {0} dia"
+],
+[
+"{0} days ago",
+"hace {0} días",
+"há {0} dias"
+],
+[
+"{0} needs a Microsoft runtime",
+"{0} necesita un componente de Microsoft",
+"{0} precisa de um componente da Microsoft"
+],
+[
+"{0} needs about {1} while it installs.",
+"{0} necesita unos {1} mientras se instala.",
+"{0} precisa de cerca de {1} durante a instalação."
+],
+[
+"{0} new free game{1} added from itch.io.",
+"{1|Se agregó|Se agregaron} {0} {1|juego gratis nuevo|juegos gratis nuevos} de itch.io.",
+"{0} {1|novo jogo grátis adicionado|novos jogos grátis adicionados} do itch.io."
+],
+[
+"{0} of play to go",
+"Faltan {0} de juego",
+"Faltam {0} de jogo"
+],
+[
+"{0} of {1} unlocked",
+"{0} de {1} desbloqueados",
+"{0} de {1} desbloqueadas"
+],
+[
+"{0} passed on your challenge",
+"{0} rechazó tu desafío",
+"{0} recusou seu desafio"
+],
+[
+"{0} ratings on itch.io",
+"{0} calificaciones en itch.io",
+"{0} avaliações no itch.io"
+],
+[
+"{0} removed you from {1}",
+"{0} te quitó de {1}",
+"{0} removeu você de {1}"
+],
+[
+"{0} sent you a friend request",
+"{0} te envió una solicitud de amistad",
+"{0} enviou um pedido de amizade"
+],
+[
+"{0} uses something from Microsoft that isn’t on this PC yet, so it wouldn’t start. Xaly can install it for you:",
+"{0} usa algo de Microsoft que todavía no está en esta PC, así que no iniciaba. Xaly puede instalarlo por ti:",
+"{0} usa algo da Microsoft que ainda não está neste PC, por isso não abria. O Xaly pode instalar para você:"
+],
+[
+"{0} waiting for you",
+"{0} esperándote",
+"{0} esperando por você"
+],
+[
+"{0} was removed from your library",
+"Se quitó {0} de tu biblioteca",
+"{0} foi removido da sua biblioteca"
+],
+[
+"{0} was unpacked, but no game .exe was found. Use Add game to pick it.",
+"Se descomprimió {0}, pero no se encontró el .exe del juego. Usa Agregar juego para elegirlo.",
+"{0} foi descompactado, mas nenhum .exe do jogo foi encontrado. Use Adicionar jogo para escolher."
+],
+[
+"{0} will download at {1} (your download schedule). Open Downloads to start it now.",
+"{0} se descargará a las {1} (tu horario de descargas). Abre Descargas para empezar ahora.",
+"{0} será baixado às {1} (seu horário de downloads). Abra Downloads para começar agora."
+],
+[
+"{0} · not ticked, it may hold saves",
+"{0} · sin marcar, puede tener partidas guardadas",
+"{0} · desmarcado, pode ter saves"
+],
+[
+"{0} · {1} people",
+"{0} · {1} personas",
+"{0} · {1} pessoas"
+],
+[
+"{0}% downloaded",
+"{0}% descargado",
+"{0}% baixado"
+],
+[
+"{0}. It starts the game through Xaly, so play time is counted.",
+"{0}. Inicia el juego a través de Xaly, así que el tiempo de juego se cuenta.",
+"{0}. Ele abre o jogo pelo Xaly, então o tempo de jogo é contado."
+],
+[
+"{0}. Keep it somewhere safe, like a USB stick or cloud storage. You’ll need its password to restore it.",
+"{0}. Guárdala en un lugar seguro, como una memoria USB o la nube. Necesitarás su contraseña para restaurarla.",
+"{0}. Guarde em um lugar seguro, como um pendrive ou a nuvem. Você vai precisar da senha para restaurar."
+],
+[
+"{0}’s installer has started. When it finishes, use Add game in your library.",
+"Se inició el instalador de {0}. Cuando termine, usa Agregar juego en tu biblioteca.",
+"O instalador de {0} começou. Quando terminar, use Adicionar jogo na sua biblioteca."
+],
+[
+"{0}’s profile will appear once they open Xaly 1.3 or newer.",
+"El perfil de {0} aparecerá cuando abra Xaly 1.3 o más reciente.",
+"O perfil de {0} vai aparecer quando a pessoa abrir o Xaly 1.3 ou mais recente."
+],
+[
+"{0} h {1} min played",
+"{0} h {1} min jugados",
+"{0} h {1} min jogados"
+],
+[
+"{0} min played",
+"{0} min jugados",
+"{0} min jogados"
+],
+[
+"{0} more launches",
+"{0} inicios más",
+"mais {0} inicializações"
+],
+[
+"{0} games",
+"{0} juegos",
+"{0} jogos"
+],
+[
+"{0} unlocked",
+"{0} desbloqueados",
+"{0} desbloqueadas"
+],
+[
+"{0} hrs on record{1}",
+"{0} h registradas{1}",
+"{0} h registradas{1}"
+],
+[
+"{0}{1} deleted from this PC",
+"{0}{1} se borró de esta PC",
+"{0}{1} foi apagado deste PC"
+],
+[
+"{0}{1} selected • {2} will be freed",
+"{0}{1} seleccionados • se liberarán {2}",
+"{0}{1} selecionados • {2} serão liberados"
+],
+[
+"{0}{1}  ·  click to manage",
+"{0}{1}  ·  haz clic para administrar",
+"{0}{1}  ·  clique para gerenciar"
+],
+[
+"{0} games on itch.io",
+"{0} juegos en itch.io",
+"{0} jogos no itch.io"
+],
+[
+"{0} people",
+"{0} personas",
+"{0} pessoas"
+],
+[
+"{0} online",
+"{0} en línea",
+"{0} online"
+],
+[
+"{0} ({1}) · {2} free",
+"{0} ({1}) · {2} libres",
+"{0} ({1}) · {2} livres"
+],
+[
+"{0} (you)",
+"{0} (tú)",
+"{0} (você)"
+],
+[
+"{0} added to your library with {1} cover art{2}.",
+"{0} se agregó a tu biblioteca con la portada de {1}{2}.",
+"{0} foi adicionado à sua biblioteca com a capa do {1}{2}."
+],
+[
+"{0} was added to your download queue{1}",
+"{0} se agregó a tu cola de descargas{1}",
+"{0} foi adicionado à sua fila de downloads{1}"
+],
+[
+"{0} {1}  ·  {2} ratings",
+"{0} {1}  ·  {2} calificaciones",
+"{0} {1}  ·  {2} avaliações"
+],
+[
+"{0}   {1}  ·  {2} ratings on itch.io",
+"{0}   {1}  ·  {2} calificaciones en itch.io",
+"{0}   {1}  ·  {2} avaliações no itch.io"
+]
+]
+}

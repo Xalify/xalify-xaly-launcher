@@ -123,6 +123,29 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   ok(io.owned === "Paid Horror Game:555:true" && io.user === "Noah", "itch.io library imported, games only (" + io.owned + ")");
   ok(!io.storeHidden && io.tab, "owned games are in Library › itch.io, not on the Store's shelves");
   ok(io.res === "https://files.itch.zone/paid.zip" && io.used === 2, "a bought game installs with your own itch.io download key (" + io.res + ")");
+  // 2.0.9: languages, theme, text size, reduced motion, TV keyboard
+  const lg = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms)), o = {};
+    AC.look = AC.look || {}; AC.look.lang = "es"; trStart(); nav("settings", "general"); P.tab = "appearance"; renderSettings(); await wait(50);
+    o.es = document.getElementById("sbody").textContent.indexOf("Apariencia") > -1 && document.getElementById("sbody").textContent.indexOf("Appearance") < 0;
+    o.tpl = tr("Add 3 games") + " | " + tr("Add 1 game") + " | " + tr("Online — 4") + " | " + tr("3 hours ago");
+    o.sym = tr("★  Saved") + " | " + tr("GAMES") + " | " + tr("Recomp  ·  Horror");
+    o.game = tr("Hollow Knight Silksong");
+    setLang("pt"); await wait(50); o.pt = document.getElementById("sbody").textContent.indexOf("Aparência") > -1;
+    setLang("en"); await wait(50); o.en = document.getElementById("sbody").textContent.indexOf("Appearance") > -1 && document.getElementById("sbody").textContent.indexOf("Aparência") < 0;
+    AC.look.theme = "light"; AC.look.acc = "purple"; AC.look.text = 1.22; AC.look.rm = 1; applyLook(); await wait(30);
+    o.light = getComputedStyle(document.body).backgroundColor; o.zoom = document.body.style.zoom; o.rm = document.documentElement.className;
+    o.acc = getComputedStyle(document.querySelector(".pri") || document.body).backgroundImage.indexOf("linear-gradient") > -1;
+    AC.look = { theme: "dark", acc: "cyan", text: 1, rm: 0 }; applyLook();
+    enterTV(); tvTab("search"); tvInput("a"); o.kb = !!TV.kb; ["right", "a", "y", "b"].forEach(k => tvInput(k)); o.q = JSON.stringify(TV.q); tvInput("start"); o.kbClosed = !TV.kb; exitTV();
+    return o;
+  });
+  ok(lg.es && lg.pt && lg.en, "switching language translates the screen and English comes back (" + [lg.es, lg.pt, lg.en] + ")");
+  ok(lg.tpl === "Agregar 3 juegos | Agregar 1 juego | En línea — 4 | hace 3 horas", "templates with numbers and plurals: " + lg.tpl);
+  ok(lg.sym === "★  Guardado | JUEGOS | Recomp  ·  Terror", "text with symbols, capitals and separators: " + lg.sym);
+  ok(lg.game === "Hollow Knight Silksong", "game names are left alone");
+  ok(/rgb\((2[3-5]\d), (2[3-5]\d), (2[3-5]\d)\)/.test(lg.light) && lg.zoom === "1.22" && /\brm\b/.test(lg.rm) && lg.acc, "light theme, text size, reduced motion and accent apply (" + lg.light + ", " + lg.zoom + ", " + lg.rm + ")");
+  ok(lg.kb && lg.q === '"w"' && lg.kbClosed, "TV keyboard types with the controller: " + lg.q);
   // 2.0.4: the smallest window (1000x660) keeps the Library bar and Settings rows on screen
   await p.setViewportSize({ width: 1000, height: 660 });
   const small = await p.evaluate(async () => {

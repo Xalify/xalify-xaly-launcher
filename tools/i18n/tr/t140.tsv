@@ -1,0 +1,125 @@
+140	Juega {0} también	Jogue {0} também
+141	Jugando {0}	Jogando {0}
+142	Presiona {0} para escribir con el teclado en pantalla. Busca en tu biblioteca y en todo itch.io.	Aperte {0} para digitar com o teclado na tela. Busque na sua biblioteca e em todo o itch.io.
+143	Vista previa de {0}	Prévia de {0}
+144	En cola n.º {0}	Na fila, nº {0}
+145	¿Salir de {0}?	Sair de {0}?
+146	Confirmaciones de lectura {0}	Confirmações de leitura {0}
+147	Leído {0}	Lida {0}
+148	Recomendar {0}	Recomendar {0}
+149	Recomendado {0}{1}	Recomendado {0}{1}
+150	¿Quitar a {0} del grupo?	Remover {0} do grupo?
+151	¿Eliminar a {0} de tus amigos?	Remover {0} dos seus amigos?
+152	¿Quitar {0} de tu biblioteca? No lo instaló Xaly, así que sus archivos se quedan donde están.	Remover {0} da sua biblioteca? Ele não foi instalado pelo Xaly, então os arquivos ficam onde estão.
+153	¿Quitar “{0}” y todo lo que contiene?	Remover “{0}” e tudo o que há dentro?
+154	¿Reemplazar {0} en esta PC con la copia de seguridad?	Substituir {0} neste PC pelo backup?
+155	Se reinicia el lunes · {0}	Recomeça na segunda · {0}
+156	Restaurar {0} desde {1}	Restaurar {0} de {1}
+157	Resultados para “{0}”	Resultados para “{0}”
+158	Reseñas{0}	Avaliações{0}
+159	Guarda tu biblioteca, tiempo de juego, logros, amigos y configuración en un solo archivo protegido con contraseña, y restáuralo en otra PC.{0}	Salve sua biblioteca, tempo de jogo, conquistas, amigos e configurações em um único arquivo protegido por senha e restaure em outro PC.{0}
+160	Horario: {0}{1}	Horário: {0}{1}
+161	Programado. Empieza a las {0}	Agendado. Começa às {0}
+162	Buscando “{0}” en itch.io…	Buscando “{0}” no itch.io…
+163	Ver más juegos de {0} en itch.io	Ver mais jogos de {0} no itch.io
+164	Enviar un código nuevo ({0} s)	Enviar um novo código ({0} s)
+165	Solicitudes enviadas — {0}	Pedidos enviados — {0}
+166	Enviado a {0}	Enviado para {0}
+167	Mostrar los {0} comentarios	Mostrar os {0} comentários
+168	Mostrar más (faltan {0})	Mostrar mais (faltam {0})
+169	Sesión iniciada como {0}	Conectado como {0}
+170	Sesión iniciada{0}	Conectado{0}
+171	Tamaño: {0}   ·   ahora en {1}. Elige a dónde debe ir. Tu tiempo de juego, logros y actualizaciones se quedan con él.	Tamanho: {0}   ·   agora em {1}. Escolha para onde ele deve ir. Seu tempo de jogo, conquistas e atualizações vão junto.
+172	Algunos no se instalaron. {0}	Alguns não foram instalados. {0}
+173	Cambiaste a {0}	Você trocou para {0}
+174	Los botones que te muestra el launcher. Automático usa los del control que esté conectado{0}.	Os botões que o launcher mostra. Automático segue o controle que está conectado{0}.
+175	El servicio de comentarios dijo: {0}. Tu mensaje se guardó en feedback.txt, y también puedes enviarlo con tu propia app de correo.	O serviço de feedback disse: {0}. Sua mensagem foi salva em feedback.txt, e você também pode enviá-la com seu próprio app de e-mail.
+176	El servicio de cuentas en línea respondió con el error {0}.	O serviço de contas online respondeu com o erro {0}.
+177	La tienda está actualizada: {0} juegos	A loja está atualizada: {0} jogos
+178	No hay suficiente espacio en {0}. Elige otra unidad.	Não há espaço suficiente em {0}. Escolha outra unidade.
+179	Esta unidad está llena al {0}% y solo tiene {1} libres.{2}	Esta unidade está {0}% cheia e só tem {1} livres.{2}
+180	Este juego se descarga desde {0}, desde donde Xaly todavía no puede descargar.	Este jogo é baixado de {0}, de onde o Xaly ainda não consegue baixar.
+181	Este grupo está lleno ({0} personas)	Este grupo está cheio ({0} pessoas)
+182	Este aparece desde {0}. Sus páginas no dan enlaces directos a los archivos, así que todavía no hay instalación con un clic. Si tienes el enlace de descarga directa (que termina en .zip, .exe o .msi), pégalo aquí y el launcher lo descargará e instalará.	Este vem de {0}. As páginas de lá não dão links diretos para os arquivos, então ainda não há instalação com um clique. Se você tiver o link de download direto (terminando em .zip, .exe ou .msi), cole aqui e o launcher vai baixar e instalar.
+183	A {0}	Para {0}
+184	¿Desinstalar {0}? Sus archivos se borrarán de esta PC.	Desinstalar {0}? Os arquivos dele serão apagados deste PC.
+185	Desbloqueado {0}	Desbloqueada {0}
+186	Falló la descompresión: {0}	Falha ao descompactar: {0}
+187	Descomprimiendo {0}…	Descompactando {0}…
+188	Hasta {0} más	Até mais {0}
+189	Actualizar a Xaly {0}	Atualizar para o Xaly {0}
+190	Actualización: {0}	Atualização: {0}
+191	Actualizado {0}. Los números de tu amigo vienen de su Xaly Launcher.	Atualizado {0}. Os números do seu amigo vêm do Xaly Launcher dele.
+192	Actualizando Xaly a {0}	Atualizando o Xaly para {0}
+193	Actualizando… {0}	Atualizando… {0}
+194	Versión {0}	Versão {0}
+195	Versión {0} (Windows). {1}	Versão {0} (Windows). {1}
+196	Primero espera a que termine la actualización de {0}	Espere a atualização de {0} terminar primeiro
+197	Espera a que {0} termine de moverse	Espere {0} terminar de ser movido
+198	Esperando la descarga en tu navegador. Xaly lo instala en cuanto llegue a {0}.	Aguardando o download no seu navegador. O Xaly instala assim que chegar em {0}.
+199	Esperando a que confirmes {0}. Te enviamos un código por correo.	Aguardando você confirmar {0}. Enviamos um código por e-mail.
+200	Enviamos un código de 6 dígitos a {0}. Escríbelo aquí. Puede tardar un minuto en llegar, así que revisa también el spam.{1}	Enviamos um código de 6 dígitos para {0}. Digite aqui. Pode levar um minuto para chegar, então confira também o spam.{1}
+201	Enviamos un código de 6 dígitos a {0}. Puede tardar un minuto en llegar, así que revisa también el spam.	Enviamos um código de 6 dígitos para {0}. Pode levar um minuto para chegar, então confira também o spam.
+202	¡Hola de nuevo, {0}! Tu cuenta se restauró.	Que bom ver você de novo, {0}! Sua conta foi restaurada.
+203	Hola de nuevo, {0}{1}	Que bom ver você de novo, {0}{1}
+204	Novedades en {0}	Novidades no {0}
+205	¿Dónde debería ir {0}?	Para onde {0} deve ir?
+206	Xaly Launcher {0}	Xaly Launcher {0}
+207	-	-
+208	Xaly revisó {0} y encontró lo que falta. Puede instalarlo por ti:	O Xaly verificou {0} e encontrou o que está faltando. Ele pode instalar para você:
+209	Xaly recuerda qué compilación de cada juego instalaste y muestra una etiqueta de Actualización cuando el desarrollador sube una nueva. {0}{1}	O Xaly lembra qual compilação de cada jogo você instalou e mostra um selo de Atualização quando o desenvolvedor envia uma nova. {0}{1}
+210	Xaly {0}	Xaly {0}
+211	Xaly {0} está listo para instalarse. Tienes la {1}.	O Xaly {0} está pronto para instalar. Você tem a {1}.
+212	-	-
+213	Ya tienes {0} en {1}, así que cuenta como cumplido.	Você já tem {0} em {1}, então conta como cumprido.
+214	{0} y tú ahora son amigos	Você e {0} agora são amigos
+215	Superaste {0}, {1} todavía no	Você passou de {0}, {1} ainda não
+216	Desafiaste a {0}	Você desafiou {0}
+217	Tienes {0} → {1}{2}	Você tem {0} → {1}{2}
+218	Tu código es {0}	Seu código é {0}
+219	Tu horario de descargas ({0}) terminó. Siguen a las {1}.	Seu horário de downloads ({0}) terminou. Eles continuam às {1}.
+220	Van parejos: mismos logros{0}	Vocês estão empatados: mesmas conquistas{0}
+221	Tienes la versión más reciente ({0})	Você tem a versão mais recente ({0})
+222	Jugaste {0} más que {1}	Você jogou {0} a mais que {1}
+223	-	-
+224	de {0}	de {0}
+225	-	-
+226	-	-
+227	-	-
+228	-	-
+229	-	-
+230	La clave de itch.io funciona (sesión iniciada como {0})	A chave do itch.io funciona (conectado como {0})
+231	itch.io rechazó la solicitud ({0}; {1}). Revisa tu clave de API en Configuración › Descargas.	O itch.io recusou o pedido ({0}; {1}). Verifique sua chave de API em Configurações › Downloads.
+232	itch.io rechazó la clave: {0}	O itch.io rejeitou a chave: {0}
+233	itch.io no quiso dar un enlace de descarga para tu copia: {0}	O itch.io não quis dar um link de download para a sua cópia: {0}
+234	itch.io no quiso dar un enlace de descarga: {0}	O itch.io não quis dar um link de download: {0}
+235	itch.io no quiso mostrar las descargas de este juego para tu cuenta ({0}). Vuelve a iniciar sesión con itch.io en Configuración › Cuenta.	O itch.io não quis listar os downloads deste jogo para a sua conta ({0}). Entre com o itch.io de novo em Configurações › Conta.
+236	jugado por última vez el {0}	jogado pela última vez em {0}
+237	-	-
+238	-	-
+239	-	-
+240	de {0}	de {0}
+241	-	-
+242	-	-
+243	en {0}	em {0}
+244	-	-
+245	-	-
+246	-	-
+247	-	-
+248	-	-
+249	-	-
+250	-	-
+251	-	-
+252	-	-
+253	-	-
+254	-	-
+255	{0} en cola	{0} na fila
+256	·   jugado por última vez {0}	·   jogado pela última vez {0}
+257	·  faltan {0}	·  faltam {0}
+258	· actualizado {0}	· atualizado {0}
+259	· {0} en línea	· {0} online
+260	★ {0} · {1} calificaciones	★ {0} · {1} avaliações
+261	✓ @{0} está disponible	✓ @{0} está disponível
+262	✕ @{0} ya está en uso	✕ @{0} já está em uso
+263	🏆 ¡Ganaste con {0} h jugadas!	🏆 Você ganhou com {0} h jogadas!
+264	🏆 {0} ganó con {1} h. Quedaste en el puesto {2} de {3}.	🏆 {0} ganhou com {1} h. Você ficou em {2} de {3}.

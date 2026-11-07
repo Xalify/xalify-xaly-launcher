@@ -720,6 +720,13 @@ namespace Xaly
         public string PadConfig(string stick, string trig) { f.PadConfig(stick, trig); return "ok"; }
         public string PadRaw() { return f.PadRaw(); }
         public string PadMask() { return f.PadMask(); }
+        // 2.0.9: the tray menu, the tray balloon and the itch.io sign-in page follow the launcher's language
+        public string SetTrayText(string open, string exit, string still)
+        {
+            try { f.BeginInvoke(new MethodInvoker(delegate { f.SetTrayText(open, exit, still); })); } catch (Exception) { }
+            return "ok";
+        }
+        public string SetPageText(string json) { itchPageText = json ?? ""; return "ok"; }
 
         // ---- move a game folder to another drive (<drive>:\Xaly Games\<game>), with progress and cancel
         public string FreeSpace(string path)
@@ -1506,19 +1513,22 @@ namespace Xaly
                 }
             }
         }
+        static string itchPageText = "";
         static string ItchPage(string err)
         {
+            string L = itchPageText.StartsWith("{") ? itchPageText.Replace("</", "<\\/") : "{}";
             return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><title>Xaly</title></head>"
                 + "<body style=\"margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b0f1a;color:#fff;text-align:center;padding-top:16vh\">"
-                + "<h1 id=\"t\" style=\"font-size:30px\">Signing you in to Xaly\u2026</h1><p id=\"p\" style=\"color:#9aa0b8;font-size:16px\"></p>"
-                + "<script>(function(){var t=document.getElementById('t'),p=document.getElementById('p'),h={};"
+                + "<h1 id=\"t\" style=\"font-size:30px\"></h1><p id=\"p\" style=\"color:#9aa0b8;font-size:16px\"></p>"
+                + "<script>(function(){var L=" + L + ",T=function(k,d){return L[k]||d;},t=document.getElementById('t'),p=document.getElementById('p'),h={};"
+                + "t.textContent=T('wait','Signing you in to Xaly\u2026');"
                 + "location.hash.replace(/^#/,'').split('&').forEach(function(kv){var i=kv.indexOf('=');if(i>0)h[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});"
                 + "history.replaceState(null,'','/itch');"
-                + (err == "deny" ? "t.textContent='You didn\u2019t sign in';p.textContent='Nothing was shared with Xaly. You can close this tab.';return;" : "")
-                + "if(!h.access_token){t.textContent='itch.io didn\u2019t sign you in';p.textContent='Go back to Xaly and try again.';return;}"
+                + (err == "deny" ? "t.textContent=T('deny','You didn\u2019t sign in');p.textContent=T('denyp','Nothing was shared with Xaly. You can close this tab.');return;" : "")
+                + "if(!h.access_token){t.textContent=T('none','itch.io didn\u2019t sign you in');p.textContent=T('nonep','Go back to Xaly and try again.');return;}"
                 + "var x=new XMLHttpRequest();x.open('GET','/token?access_token='+encodeURIComponent(h.access_token)+'&state='+encodeURIComponent(h.state||''));"
-                + "x.onload=function(){if(x.responseText==='ok'){t.textContent='You\u2019re signed in';p.textContent='You can close this tab and go back to Xaly.';}else{t.textContent='Something went wrong';p.textContent=x.responseText;}};"
-                + "x.onerror=function(){t.textContent='Something went wrong';p.textContent='Xaly stopped waiting. Go back to Xaly and try again.';};x.send();})();</script></body></html>";
+                + "x.onload=function(){if(x.responseText==='ok'){t.textContent=T('ok','You\u2019re signed in');p.textContent=T('okp','You can close this tab and go back to Xaly.');}else{t.textContent=T('bad','Something went wrong');p.textContent=x.responseText;}};"
+                + "x.onerror=function(){t.textContent=T('bad','Something went wrong');p.textContent=T('gone','Xaly stopped waiting. Go back to Xaly and try again.');};x.send();})();</script></body></html>";
         }
 
         public string ItchApi(string id, string path)
@@ -2543,6 +2553,14 @@ namespace Xaly
             if (bits != padLast) { padLast = bits; Js("onPad", bits.ToString()); }
         }
         // which of the four XInput slots have a controller plugged in (bit 0 = slot 1), for connect / disconnect notices
+        ToolStripItem trayOpen, trayExit;
+        string trayStill = "Still running in the tray. Click the icon to open it, or right-click to exit.";
+        public void SetTrayText(string open, string exit, string still)
+        {
+            if (!string.IsNullOrEmpty(open) && trayOpen != null) trayOpen.Text = open;
+            if (!string.IsNullOrEmpty(exit) && trayExit != null) trayExit.Text = exit;
+            if (!string.IsNullOrEmpty(still)) trayStill = still;
+        }
         public string PadMask()
         {
             int m = 0;
@@ -2691,8 +2709,8 @@ namespace Xaly
             tray.Text = "Xaly Launcher";
             tray.Visible = true;
             ContextMenuStrip menu = new ContextMenuStrip();
-            menu.Items.Add("Open Xaly Launcher", null, delegate(object s, EventArgs e) { ShowMain(); });
-            menu.Items.Add("Exit", null, delegate(object s, EventArgs e) { RealExit(); });
+            trayOpen = menu.Items.Add("Open Xaly Launcher", null, delegate(object s, EventArgs e) { ShowMain(); });
+            trayExit = menu.Items.Add("Exit", null, delegate(object s, EventArgs e) { RealExit(); });
             tray.ContextMenuStrip = menu;
             tray.MouseClick += delegate(object s, MouseEventArgs e) { if (e.Button == MouseButtons.Left) ShowMain(); };
             tray.BalloonTipClicked += delegate(object s, EventArgs e) { ShowMain(); Js("onNotifyClick", noteTag); };
@@ -2897,7 +2915,7 @@ namespace Xaly
             if (!tipShown)
             {
                 tipShown = true;
-                try { tray.ShowBalloonTip(2500, "Xaly Launcher", "Still running in the tray. Click the icon to open it, or right-click to exit.", ToolTipIcon.Info); } catch (Exception) { }
+                try { tray.ShowBalloonTip(2500, "Xaly Launcher", trayStill, ToolTipIcon.Info); } catch (Exception) { }
             }
         }
 

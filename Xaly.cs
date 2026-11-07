@@ -1546,8 +1546,11 @@ namespace Xaly
                 rq.AllowAutoRedirect = false;
                 rq.Timeout = 30000;
                 if (url.StartsWith("https://api.itch.io/")) rq.Headers["Authorization"] = mine ? "Bearer " + key : key;   // a player's own sign-in must be sent as a Bearer token
+                // Timeout doesn't apply to requests made this way, so give up ourselves after 30 seconds
+                System.Threading.Timer guard = new System.Threading.Timer(delegate(object st) { try { rq.Abort(); } catch (Exception) { } }, null, 30000, Timeout.Infinite);
                 rq.BeginGetResponse(delegate(IAsyncResult ar)
                 {
+                    try { guard.Dispose(); } catch (Exception) { }
                     string okFlag = "0", body = "", status = "0";
                     try
                     {

@@ -255,6 +255,14 @@
 "Fixed: signing in with itch.io didn’t stay signed in and didn’t show your itch.io games. If it still can’t get them, Library › itch.io now says what itch.io answered": [
 "Corregido: al iniciar sesión con itch.io no se mantenía la sesión ni aparecían tus juegos de itch.io. Si aún no puede obtenerlos, Biblioteca › itch.io ahora muestra lo que respondió itch.io",
 "Corrigido: entrar com o itch.io não mantinha a sessão nem mostrava seus jogos do itch.io. Se ainda não conseguir obtê-los, Biblioteca › itch.io agora mostra o que o itch.io respondeu"
+],
+"Library › itch.io now shows everything you own on itch.io that you can run, tools and apps too, not only games": [
+"Biblioteca › itch.io ahora muestra todo lo que tienes en itch.io y se puede ejecutar, también herramientas y apps, no solo juegos",
+"Biblioteca › itch.io agora mostra tudo o que você tem no itch.io e que dá para abrir, também ferramentas e apps, não só jogos"
+],
+"Fixed: Library › itch.io could stay on “Getting your itch.io games…” for a long time": [
+"Corregido: Biblioteca › itch.io podía quedarse mucho tiempo en “Obteniendo tus juegos de itch.io…”",
+"Corrigido: Biblioteca › itch.io podia ficar muito tempo em “Buscando seus jogos do itch.io…”"
 ]
 },
 "t": [
@@ -682,6 +690,11 @@
 "Couldn't get your itch.io games: {0}",
 "No se pudieron obtener tus juegos de itch.io: {0}",
 "Não foi possível obter seus jogos do itch.io: {0}"
+],
+[
+"Getting your itch.io games… ({0})",
+"Obteniendo tus juegos de itch.io… ({0})",
+"Buscando seus jogos do itch.io… ({0})"
 ]
 ]
 }

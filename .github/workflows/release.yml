@@ -8,6 +8,7 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+    paths-ignore: ['tools/build-catalog.js', '.github/workflows/catalog.yml']   # store-list builder changes don't need a new launcher
 
 permissions:
   contents: write

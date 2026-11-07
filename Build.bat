@@ -9,7 +9,7 @@ if not exist "%CSC%" (
   pause
   exit /b 1
 )
-set REFS=/r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Core.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll
+set REFS=/r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Core.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll /r:System.Security.dll
 set WV=
 if not exist "webview2\Microsoft.Web.WebView2.WinForms.dll" (
   echo Getting the WebView2 display engine files (one time only^)...

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Xaly Launcher</title>
-<style>
+<style id="base">
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;background:#0b0b10;color:#f3f3f7;font:14px "Segoe UI Variable Text","Segoe UI",Arial,sans-serif;-ms-user-select:none;user-select:none}
 input,textarea,select{-ms-user-select:text;user-select:text;font:14px "Segoe UI",Arial,sans-serif;color:#f3f3f7;background:#1b1b26;border:1px solid #2b2b3a;border-radius:9px;padding:10px 12px;outline:0;width:100%}
@@ -81,7 +81,7 @@ button{border:0;font-family:inherit;color:inherit;cursor:pointer;outline:0}
 /* detail / game */
 .banner{height:330px;border-radius:14px;position:relative;overflow:hidden;background-size:cover;background-position:center}
 .banner .fade{position:absolute;left:0;right:0;bottom:0;height:170px;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,0))}
-.banner .bt{position:absolute;left:34px;right:34px;bottom:26px;font-size:40px;font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+.banner{color:#fff}.banner .bt{position:absolute;left:34px;right:34px;bottom:26px;font-size:40px;font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.55)}
 .bar{display:flex;align-items:center;margin:24px 0 16px}.st{margin-right:34px}.st small{display:block;color:#9a9ab0;font-size:12px}.st b{font-size:15px}
 .dsc{max-width:740px;line-height:1.65;color:#cfcfdb;margin:6px 0 20px;font-size:15px}
 .note{background:#2c2515;border-left:4px solid #e0a82e;border-radius:7px;padding:12px 16px;margin:0 0 16px;max-width:740px;line-height:1.55}
@@ -377,8 +377,8 @@ svg.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;st
 .lhd .sp{flex:1 1 0%}
 .lpill{display:inline-block;height:40px;line-height:38px;border-radius:20px;background:#181822;border:1px solid #2c2c3e;color:#e8e8f2;padding:0 16px;margin-left:10px;font-size:14px;font-weight:600;vertical-align:middle}
 .lpill:hover{background:#23233a}.lpill svg{margin-right:6px}
-.lhd input.pill{width:240px;flex:0 1 240px;min-width:110px;height:40px;margin-left:10px}.lhd .lpill,.lhd .pri,.lhd .ltab{white-space:nowrap;flex-shrink:0}
-@media (max-width:1240px){.lhd .lhx{display:none}.lhd .lfi svg{margin-right:0}.lhd .lpill{padding:0 12px}.lhd .ltab{margin-right:16px}.lhd .pri{padding-left:16px;padding-right:16px}}
+.lhd input.pill{width:240px;flex:0 1 240px;min-width:96px;height:40px;margin-left:10px}.lhd .lpill,.lhd .pri,.lhd .ltab{white-space:nowrap;flex-shrink:0}
+@media (max-width:1240px){.lhd .lhx{display:none}.lhd .lfi svg{margin-right:0}.lhd .lpill{padding:0 10px}.lhd .ltab{margin-right:12px}.lhd .pri{padding-left:16px;padding-right:16px}}
 #pLib.lst{overflow:hidden}
 #lsplit{position:absolute;left:38px;right:38px;top:86px;bottom:0}
 #llist{position:absolute;left:0;top:0;bottom:0;width:300px;overflow-y:auto;padding-right:10px;-ms-overflow-style:-ms-autohiding-scrollbar}
@@ -725,6 +725,26 @@ select::-ms-expand{display:none}
 .gupd b{font-size:14.5px;margin-right:12px;white-space:nowrap;color:#8fc8ff}.gupd span{flex:1 1 0%;color:#b8c6d8;font-size:13px;margin-right:14px}
 #tv{position:fixed;left:0;top:0;right:0;bottom:0;z-index:140;display:none;background:#04060b;overflow:hidden;color:#fff;font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif}
 #tv.on{display:block;animation:fade2 .35s both}
+.msg.itm b{display:block;font-size:20px;color:#fff;margin-bottom:8px}.msg.itm div{max-width:460px;margin:0 auto;line-height:1.5}
+.ith{display:flex;align-items:center;justify-content:space-between;color:#9aa0b8;font-size:13px;margin:4px 0 16px}.ithg{margin-right:-16px}.ithg .gc{display:inline-block;vertical-align:top;width:210px;margin:0 16px 18px 0}
+.gav{position:relative;flex:0 0 auto}.gav .av{position:absolute;border:2px solid #10141d}.gav .av.g0{left:0;top:0}.gav .av.g1{right:0;bottom:0}
+.fr .gav{margin-right:12px}.ichm .gav{margin-right:10px}.chempty .gav{margin:0 auto 10px}
+.gh.ghg{display:flex;align-items:center;justify-content:space-between}.ghb{background:none;border:0;color:#2ee6f0;font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0;text-transform:none;letter-spacing:0}
+.im.grp{display:flex;align-items:flex-end}.im.grp .imo{display:none}.gma{flex:0 0 28px;width:28px!important;height:28px!important;margin-right:7px}.gma.sp{display:inline-block}.gfrom{font-size:11.5px;font-weight:700;color:#2ee6f0;margin-bottom:2px}
+.ichd.gsys{font-style:italic}
+.fchk{max-height:260px;overflow-y:auto;margin:4px 0 6px}.fck{display:flex!important;align-items:center;padding:7px 8px;border-radius:10px;cursor:pointer;margin:0!important;font-weight:600;color:#dfe2ee}.fck:hover{background:rgba(255,255,255,.05)}.fck.on{background:rgba(46,230,240,.1)}
+.fck input{margin:0 10px 0 2px;width:16px;height:16px}.fck span{font-size:14px;color:#e6e8f2}.fck .av{margin-right:10px}
+.gml{max-height:340px;overflow-y:auto;margin:6px 0 4px}.gmr{display:flex;align-items:center;padding:8px 2px}.gmr .av{margin-right:12px}.gmn{flex:1;min-width:0}.gmn b{display:block;color:#fff;font-size:14px}.gmn span{color:#9aa0b8;font-size:12px}
+#tvkb{position:absolute;left:50%;bottom:58px;width:820px;margin-left:-410px;z-index:6;background:rgba(14,18,30,.97);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:22px 24px 16px;box-shadow:0 30px 80px rgba(0,0,0,.7);display:none}
+#tvkb.on{display:block;animation:fade2 .2s both}
+#tvview{transition:transform .3s}#tv.kbo #tvview{transform:translateY(-250px)}#tvhero{transition:opacity .2s}#tv.kbo #tvhero{opacity:0}
+.tvkq{display:flex;align-items:center;height:50px;border-radius:14px;background:rgba(255,255,255,.07);padding:0 20px;margin-bottom:16px;font-size:24px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap}
+.tvkq .ph{color:#7d8299}.tvkc{display:inline-block;width:2px;height:28px;background:#2ee6f0;margin-left:3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.tvkr{display:flex;margin-bottom:7px}.tvkk{flex:1 1 0;height:46px;margin-right:8px;border-radius:12px;border:0;background:rgba(255,255,255,.08);color:#e9ebf5;font-size:21px;font-weight:600;font-family:inherit;cursor:pointer}
+.tvkk:last-child{margin-right:0}.tvkk.w2{flex-grow:2;font-size:17px}.tvkk.w4{flex-grow:4;font-size:17px}.tvkk.main{background:rgba(46,230,240,.16);color:#2ee6f0}
+.tvkk.f{background:#fff;color:#0b0f1a;transform:scale(1.06);box-shadow:0 8px 24px rgba(0,0,0,.45)}.tvkk.main.f{background:#2ee6f0;color:#0b0f1a}
+.tvkh{display:flex;justify-content:center;margin-top:12px}.tvkh .tvchip{margin:0 10px}
 body.tvmode #modal{z-index:160}
 #tvbg{position:absolute;left:0;top:0;right:0;height:82%;overflow:hidden}
 .tvbl{position:absolute;left:-3%;top:-3%;right:-3%;bottom:-3%;background-size:cover;background-position:center 25%;opacity:0;transition:opacity .9s ease;animation:tvkb 26s ease-in-out infinite alternate}
@@ -1007,6 +1027,10 @@ html,body{overflow:hidden}
 .fbld{position:absolute;left:0;right:0;top:120px;text-align:center;color:#8a90a8;font-size:13.5px;pointer-events:none}
 </style>
 <style id="theme"></style>
+<style id="rmcss">
+html.rm *,html.rm *:before,html.rm *:after{animation-duration:.001s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important;scroll-behavior:auto!important}
+html.rm .tvbl,html.rm #tv .tvbg{animation:none!important;transform:none!important}
+</style>
 </head>
 <body>
 <div id="splash"><div class="ring"></div><div class="lg"><img src="data:image/png;base64,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"></div><div class="nm">XALY</div></div>
@@ -1379,6 +1403,7 @@ function startSession(a){
   if(S.set.dlDir)T(function(){return X.SetDownloads(S.set.dlDir);});
   applySpeed();awakeOn=false;
   setTimeout(adoptLoose,1500);
+  setTimeout(function(){if(S&&itchOn()&&now()-(S.ownedT||0)>12*3600000)itchRefresh(false);},4000);
   T(function(){return X.SetTray(S.set.tray?"1":"0");});
   S.set.startup=T(function(){return X.StartupGet();},"0")==="1"?1:0;
   frReadyT=now();setTimeout(function(){sendGs(false);},30000);
@@ -1947,7 +1972,7 @@ function ctxMenu(anchor,items){
 }
 function game(){var i;for(i=0;i<S.games.length;i++)if(S.games[i].id===P.cur)return S.games[i];return null;}
 function gameBy(id){var i;for(i=0;i<S.games.length;i++)if(S.games[i].id===id)return S.games[i];return null;}
-function allStore(){return (S.feedItems||[]).concat(S.store.items,CAT.items);}
+function allStore(){return (S.feedItems||[]).concat(S.store.items,CAT.items,S.owned||[]);}
 function storeBy(id){var a=allStore(),i;for(i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
 function coverOf(g){if(g.image)return g.image;if(g.storeId){var s=storeBy(g.storeId);if(s&&s.image)return s.image;}return "";}
 function pageUrl(it){return it.page||((it.kind||"page")==="page"?it.url:"");}
@@ -1992,6 +2017,14 @@ function openForm(title,fields,ok,cb,del){
   var b=$("mbox"),ins={},k;b.innerHTML="";b.appendChild(el("h3","",title));
   fields.forEach(function(f){
     b.appendChild(el("label","",f.label));var i;
+    if(f.checks){   // a list of tick boxes; its value is the ticked ids joined with commas
+      var bx=el("div","fchk"),picked={};(f.value||"").split(",").forEach(function(x){if(x)picked[x]=1;});
+      i={value:"",focus:function(){}};
+      f.checks.forEach(function(o){var lb=el("label","fck"+(picked[o[0]]?" on":"")),cb2=el("input");cb2.setAttribute("type","checkbox");cb2.checked=!!picked[o[0]];
+        cb2.onclick=function(){if(cb2.checked)picked[o[0]]=1;else delete picked[o[0]];lb.className="fck"+(cb2.checked?" on":"");var ks=[],x;for(x in picked)ks.push(x);i.value=ks.join(",");};
+        lb.appendChild(cb2);if(o[2])lb.appendChild(o[2]);lb.appendChild(el("span","",o[1]));bx.appendChild(lb);});
+      var ks0=[],x0;for(x0 in picked)ks0.push(x0);i.value=ks0.join(",");ins[f.id]=i;b.appendChild(bx);return;
+    }
     if(f.opts){i=el("select");f.opts.forEach(function(o){var op=el("option","",o[1]);op.value=o[0];i.appendChild(op);});}
     else if(f.area){i=el("textarea");i.rows=3;}
     else{i=el("input");i.setAttribute("type",f.pass?"password":"text");}
@@ -2039,6 +2072,7 @@ function directFor(it){
 function visIt(it){
   if(directFor(it))return false;
   if(it.srch&&!it.shared&&!P.sq&&!(S.wish&&S.wish[it.id])&&!inLib(it.id))return false;
+  if(it.owned&&!P.sq)return false;   // your itch.io games: in Library › itch.io and in search, not on the Store's shelves
   if(it.steam||(S.gone&&S.gone[it.id]))return false;
   if(kindOf(it)==="page"&&!it.remote&&!isItch(it)&&!isGh(it))return false;   // no direct Windows download
   if(it.auto&&(it.paid||(!it.image&&!it.hero)))return false;                 // store games must be free and have art
@@ -2072,11 +2106,12 @@ function pickUpload(list){
   return best;
 }
 function kindFor(e,nm){return e==="zip"?"archive":(e==="exe"&&!/setup|install/i.test(nm))?"standalone":"installer";}
-function itchList(gid,cb){   // newest API first, old API as a fallback
-  itchApi("v2/games/"+gid+"/uploads",function(ok,t,st){
+function itchList(gid,cb,kid){   // newest API first, old API as a fallback; kid = your itch.io download key for a game you bought
+  itchApi("v2/games/"+gid+"/uploads"+(kid?"?download_key_id="+kid:""),function(ok,t,st){
     var j=null;try{j=JSON.parse(t);}catch(e){}
     if(ok&&j&&j.uploads){cb(null,j.uploads,2);return;}
     var e2=itchErr(t,"HTTP "+(st||"error"));
+    if(kid){cb("itch.io wouldn't list this game's downloads for your account ("+e2+"). Try signing in with itch.io again in Settings \u203A Account.");return;}
     itchApi("v1/game/"+gid+"/uploads",function(ok1,t1,st1){
       var j1=null;try{j1=JSON.parse(t1);}catch(e){}
       if(ok1&&j1&&j1.uploads){cb(null,j1.uploads,1);return;}
@@ -2085,7 +2120,9 @@ function itchList(gid,cb){   // newest API first, old API as a fallback
     });
   });
 }
-function itchLink(uid,ver,cb){
+function itchLink(uid,ver,cb,kid){
+  if(kid){itchApi("v2/uploads/"+uid+"/download?download_key_id="+kid,function(ok,t){var d=null;try{d=JSON.parse(t);}catch(e){}
+    if(ok&&d&&d.url){cb(null,d.url);return;}cb("itch.io wouldn't give a download link for your copy: "+itchErr(t,"sign in with itch.io again"));});return;}
   function v1(){
     itchApi("v1/upload/"+uid+"/download",function(ok,t){var d=null;try{d=JSON.parse(t);}catch(e){}
       if(ok&&d&&d.url){cb(null,d.url);return;}cb("itch.io wouldn't give a download link: "+itchErr(t,"you may need to buy this game first"));});
@@ -2112,11 +2149,12 @@ function resolveGh(it,dry,cb){
 }
 function resolveAny(it,cb,dry){
   if(isGh(it)){resolveGh(it,dry,cb);return;}
-  itchGameId(it,function(gid,why){
+  var idOf=it.gid?function(c){c(it.gid,"");}:function(c){itchGameId(it,c);},kid=it.okid||"";
+  idOf(function(gid,why){
     if(!gid){cb(/404/.test(why)?"This game's page is gone from itch.io.":"Couldn't find this game's id on itch.io.",null,/404/.test(why)?"nogame":"net");return;}
     itchList(gid,function(err,ups,ver){
       if(err){cb(err,null,"api");return;}
-      var best=pickUpload(ups);
+      var best=pickUpload(ups);if(best)best._kid=kid;
       if(!best){extResolve(it,gid,ups,ver,cb,dry);return;}
       var nm=(best.filename||"game.zip").replace(/[\\\/:*?"<>|]/g,"_");
       var up={src:"itch",gid:gid,uid:best.id,fn:best.filename||"",sz:best.size||0,bid:best.build_id||"",at:best.updated_at||""};
@@ -2124,8 +2162,8 @@ function resolveAny(it,cb,dry){
       itchLink(best.id,ver,function(e2,url){
         if(e2){cb(e2,null,"api");return;}
         cb(null,{url:url,name:nm,kind:kindFor(best._e,nm),up:up});
-      });
-    });
+      },kid);
+    },kid);
   });
 }
 /* ---------- 1.5.9: games whose itch.io download is a Google Drive or MediaFire link ---------- */
@@ -2589,7 +2627,7 @@ function gcard(it){
   a.appendChild(wishBtn(it));
   if(inLib(it.id))a.appendChild(el("span","gcin","✓ Installed"));
   var b=el("div","gcb");b.appendChild(el("div","gcs",fr+(it.genre?"  ·  "+it.genre:"")));b.appendChild(el("div","gcn",it.name));
-  var ft=el("div","gcf");ft.appendChild(el("span","gcp","Free"));
+  var ft=el("div","gcf");ft.appendChild(el("span","gcp",it.owned?(it.paid?"Bought":"Claimed"):"Free"));
   if(it.rt&&it.rt.n)ft.appendChild(el("span","gcr","★ "+it.rt.v.toFixed(1)));
   b.appendChild(ft);c.appendChild(b);
   c.onclick=function(){openDetail(it);};return c;
@@ -3546,11 +3584,51 @@ function libList(){
     return a.name.toLowerCase()<b.name.toLowerCase()?-1:1;});
 }
 function setView(v){S.set.view=v;save();renderLib();}
+/* ===== 2.0.9: Sign in with itch.io: your itch.io library (games you bought or claimed) in Xaly ===== */
+var ITCH_CLIENT="";   // the OAuth app's Client ID from itch.io/user/settings/oauth-apps (public, not a secret)
+var itchSync=0;
+function itchOn(){return T(function(){return X.ItchSignedIn();},"0")==="1";}
+function itchSignIn(){
+  var r=T(function(){return X.ItchSignIn(ITCH_CLIENT);},"ERR:Update Xaly to sign in with itch.io.");
+  if(r.indexOf("ERR")===0){toast(r.replace("ERR:",""));return;}
+  toast("Finish signing in on itch.io in your browser");
+}
+window.onItchSignIn=function(){if(!S)return;toast("Signed in with itch.io. Getting your games\u2026");itchRefresh(true);};
+function itchSignOut(){openForm("Sign out of itch.io?",[],"Sign out",function(){T(function(){return X.ItchSignOut();});S.owned=[];S.itchUser="";save();if(P.page==="settings")renderSettings();if(P.page==="lib")renderLib();toast("Signed out of itch.io. Games you installed stay installed.");},null);}
+function itchRefresh(loud){
+  if(!S||itchSync||!itchOn())return;itchSync=1;var got=[],pg=1,s0=S;
+  itchApi("me/profile",function(ok,t){var j=null;try{j=JSON.parse(t);}catch(e){}if(ok&&j&&j.user){S.itchUser=String(j.user.display_name||j.user.username||"").substr(0,60);save();}});
+  (function next(){
+    itchApi("me/owned?page="+pg,function(ok,t,st){
+      if(S!==s0){itchSync=0;return;}
+      var j=null;try{j=JSON.parse(t);}catch(e){}
+      if(!ok||!j){itchSync=0;if(st===401||st===403){T(function(){return X.ItchSignOut();});toast("Your itch.io sign-in expired. Sign in again in Settings \u203A Account.");}else if(loud)toast("Couldn't get your itch.io games: "+itchErr(t,"HTTP "+(st||"no answer")));render();return;}
+      var keys=j.owned_keys||[];
+      keys.forEach(function(k){var g=k.game||{};if(!g.id||(g.classification&&g.classification!=="game"))return;
+        got.push({id:"io"+g.id,gid:+g.id,okid:+k.id,owned:1,kind:"page",source:"itch.io",price:(+g.min_price||0)>0?"Bought on itch.io":"In your itch.io library",name:String(g.title||"Untitled").substr(0,90),url:String(g.url||""),image:String(g.cover_url||g.still_cover_url||""),
+          tagline:String(g.short_text||"").substr(0,160),devs:g.user?String(g.user.display_name||g.user.username||""):"",paid:(+g.min_price||0)>0,win:!!(g.p_windows||(g.traits||[]).indexOf("p_windows")>=0),t:Date.parse(k.created_at||"")||0});});
+      if(keys.length&&pg<40){pg++;next();return;}
+      itchSync=0;var seen={};S.owned=got.filter(function(x){if(seen[x.gid])return false;seen[x.gid]=1;return true;}).sort(function(a,b){return b.t-a.t;});S.ownedT=now();save();
+      if(loud)toast(S.owned.length?"Found "+S.owned.length+" game"+(S.owned.length===1?"":"s")+" in your itch.io library":"Your itch.io library has no games yet");
+      if(P.page==="lib"||P.page==="settings")render();
+    });
+  })();
+}
+function renderItchLib(pg){
+  if(!itchOn()){var m=el("div","msg itm");m.appendChild(el("b","","Your itch.io games, in Xaly"));
+    m.appendChild(el("div","","Sign in with itch.io to see every game you\u2019ve bought or claimed there, paid ones too, and install them here."));
+    var b=btn("Sign in with itch.io","pri",itchSignIn);b.style.cssText="display:block;margin:16px auto 0";m.appendChild(b);pg.appendChild(m);return;}
+  var q=P.lq.toLowerCase(),l=(S.owned||[]).filter(function(x){return x.name.toLowerCase().indexOf(q)>=0;});
+  var hd=el("div","ith");hd.appendChild(el("span","",(S.itchUser?S.itchUser+" \u00B7 ":"")+(S.owned||[]).length+" games on itch.io"+(S.ownedT?" \u00B7 updated "+ago(S.ownedT):"")));
+  hd.appendChild(btn(itchSync?"Updating\u2026":"Refresh","btn sm",function(){itchRefresh(true);renderLib();}));pg.appendChild(hd);
+  if(!l.length){pg.appendChild(el("div","msg",itchSync?"Getting your itch.io games\u2026":(S.owned||[]).length?"No games match your search.":"No games in your itch.io library yet. Games you buy or claim on itch.io show up here."));return;}
+  var w=el("div","ithg");l.forEach(function(it){var c=gcard(it);if(!it.win)c.title="This game may not have a Windows version";w.appendChild(c);});pg.appendChild(w);
+}
 function renderLib(){
   var pg=$("pLib"),isList=S.set.view==="list",old=$("llist"),lt=old?old.scrollTop:0,top=pg.scrollTop;
   pg.innerHTML="";pg.className=isList?"page lst":"page";
   var h=el("div","lhd");
-  [["all","Games"],["fav","Favorites"]].forEach(function(t){h.appendChild(btn(t[1],"ltab"+(P.lt===t[0]?" on":""),function(){P.lt=t[0];renderLib();}));});
+  [["all","Games"],["fav","Favorites"],["itch","itch.io"]].forEach(function(t){h.appendChild(btn(t[1],"ltab"+(P.lt===t[0]?" on":""),function(){P.lt=t[0];renderLib();}));});
   h.appendChild(el("div","sp"));
   var inp=el("input","pill");inp.setAttribute("type","text");inp.setAttribute("placeholder","Search library");inp.value=P.lq;
   inp.onkeyup=function(){P.lq=inp.value;renderLib();var n=$("pLib").getElementsByTagName("input")[0];if(n){n.focus();n.value=P.lq;}};
@@ -3563,6 +3641,7 @@ function renderLib(){
   h.appendChild(fb);
   var fg=btn("","lpill",function(){findGames("");});fg.innerHTML='Find games<span class="lhx"> on PC</span>';fg.style.marginLeft="12px";fg.title="Add itch.io games you downloaded yourself, with their cover art";h.appendChild(fg);
   var ab=btn("+  Add game","pri",function(){gameForm(null);});ab.style.marginLeft="10px";h.appendChild(ab);pg.appendChild(h);
+  if(P.lt==="itch"){renderItchLib(pg);return;}
   var list=libList();
   if(!S.games.length){var m=el("div","msg","Your library is empty.\nGet a game from the Store, or let Xaly find the games already on this PC.");m.style.whiteSpace="pre-line";pg.appendChild(m);
     var fb2=btn("Find games on this PC","pri",function(){findGames("");});fb2.style.cssText="display:block;margin:14px auto 0";pg.appendChild(fb2);return;}
@@ -3763,6 +3842,98 @@ function frSend(f,o,cb){
   o.f=S.user.code;var s=seal(f.key,o);if(!s){if(cb)cb(false);return;}
   relay(frPairTopic(f),"",s,function(ok,t,st){if(!ok)frNet(st);if(cb)cb(ok);});
 }
+/* ===== 2.0.9: group chats (3 to 8 people). Each group has its own random key and relay topic.
+   The person who made the group shares the key with each member over their private friend channel,
+   so everything stays end-to-end encrypted, like one-to-one chats. Only the group's creator adds or removes people;
+   when someone leaves or is removed the creator makes a new key, so they can't read what comes next. */
+var GMAX=8;
+function groups(){return S.groups||(S.groups=[]);}
+function grpBy(id){var l=groups(),i;for(i=0;i<l.length;i++)if(l[i].id===id)return l[i];return null;}
+function grpTopic(g){if(!g.topic||g.tk!==g.key){g.tk=g.key;g.topic="xaly-g-"+T(function(){return X.Topic(g.key,"group");},"");}return g.topic;}
+function gmOf(g,c){var r=null;g.mem.forEach(function(x){if(x.code===c)r=x;});return r||{code:c};}
+function gmName(m){if(m.code===S.user.code)return "You";var f=findF(m.code);return f?fname2(f):cleanName(m.name)||fmtCode(m.code);}
+function grpName(g){return g.name||g.mem.filter(function(m){return m.code!==S.user.code;}).map(gmName).slice(0,3).join(", ")||"Group";}
+function grpAvatar(g,size){var w=el("div","gav");w.style.width=w.style.height=size+"px";
+  g.mem.filter(function(m){return m.code!==S.user.code;}).slice(0,2).forEach(function(m,i){var f=findF(m.code),a=avatar(gmName(m),f?f.color:cleanCol(m.color),Math.round(size*0.66),"",f?f.av:"");a.className+=" g"+i;w.appendChild(a);});return w;}
+function grpCard(g){return {gid:g.id,key:g.key,name:g.name,own:g.own,mem:g.mem.map(function(m){return {code:m.code,name:m.code===S.user.code?S.user.name:m.name,color:m.code===S.user.code?S.user.color:m.color};})};}
+function grpShare(g,codes){codes.forEach(function(c){var f=findF(c);if(f)frSend(f,{t:"ginv",g:grpCard(g)});});}
+function newGroup(pre){
+  if(!frOn()){toast("Turn on online friends in Settings › Friends first");return;}
+  if(S.friends.length<2){toast("You need at least 2 friends to start a group");return;}
+  openForm("New group",[{id:"name",label:"Group name (optional)",ph:"Like \u201CFNF crew\u201D"},{id:"who",label:"Pick 2 to "+(GMAX-1)+" friends",value:pre||"",checks:S.friends.map(function(f){return [f.code,fname2(f),avatar(fname2(f),f.color,30,"",f.av)];})}],"Create group",function(v){
+    var codes=v.who?v.who.split(","):[];
+    if(codes.length<2){toast("Pick at least 2 friends");return false;}
+    if(codes.length>GMAX-1){toast("A group can have up to "+GMAX+" people, you included");return false;}
+    var g={id:T(function(){return X.RandHex("8");},"")||rid(),key:T(function(){return X.RandHex("32");},""),name:cleanName(v.name).substr(0,40),own:S.user.code,mem:[{code:S.user.code}],msgs:[],unread:0,t:now()};
+    if(g.key.length!==64){toast("Couldn't set up the group");return false;}
+    codes.forEach(function(c){var f=findF(c);if(f)g.mem.push({code:c,name:f.name,color:f.color});});
+    groups().push(g);grpShare(g,codes);grpPost(g,{t:"gsys",x:"made the group"});
+    save();P.chat="g:"+g.id;renderFriends(true);frStream();
+  },null);
+}
+function grpSend(g,text){
+  text=trim(text);if(!text)return;if(text.length>1000)text=text.substr(0,1000);if(chatI)chatI.value="";P.draft="";
+  var e={x:text,ts:now(),me:1,pend:1,mid:"m"+now().toString(36)+Math.floor(Math.random()*1e6).toString(36),st:"sending"};g.msgs.push(e);if(g.msgs.length>300)g.msgs.splice(0,g.msgs.length-300);
+  renderFriends(true);
+  grpPost(g,{t:"gm",x:text,mid:e.mid},function(ok){delete e.pend;e.st=ok?"sent":"fail";if(!ok)e.fail=1;save();renderFriends();});
+}
+function grpPost(g,o,cb){if(o.t==="gsys"){g.msgs.push({me:1,x:o.x,ts:now(),sys:1});}o.f=S.user.code;o.n=S.user.name;o.c=S.user.color;var s=seal(g.key,o);if(!s){if(cb)cb(false);return;}relay(grpTopic(g),"",s,function(ok,t,st){if(!ok)frNet(st);if(cb)cb(ok);});}
+function grpRekey(g,why){   // creator only: a fresh key for everyone still in the group
+  g.key=T(function(){return X.RandHex("32");},"");grpTopic(g);
+  grpShare(g,g.mem.map(function(m){return m.code;}).filter(function(c){return c!==S.user.code;}));
+  if(why)grpPost(g,{t:"gsys",x:why});save();frStream();
+}
+function grpLeave(g){
+  openForm("Leave "+grpName(g)+"?",[],"Leave group",function(){
+    grpPost(g,{t:"gleave"});var i=groups().indexOf(g);if(i>=0)groups().splice(i,1);if(P.chat==="g:"+g.id)P.chat=null;save();renderFriends();frStream();toast("You left the group");
+  },null);
+}
+function grpAdd(g){
+  var out=S.friends.filter(function(f){return !g.mem.some(function(m){return m.code===f.code;});});
+  if(!out.length){toast("All your friends are already in this group");return;}
+  if(g.mem.length>=GMAX){toast("This group is full ("+GMAX+" people)");return;}
+  openForm("Add people to "+grpName(g),[{id:"who",label:"Up to "+(GMAX-g.mem.length)+" more",checks:out.map(function(f){return [f.code,fname2(f),avatar(fname2(f),f.color,30,"",f.av)];})}],"Add",function(v){
+    var codes=v.who?v.who.split(","):[];if(!codes.length)return false;
+    if(g.mem.length+codes.length>GMAX){toast("A group can have up to "+GMAX+" people");return false;}
+    codes.forEach(function(c){var f=findF(c);if(f)g.mem.push({code:c,name:f.name,color:f.color});});
+    grpShare(g,g.mem.map(function(m){return m.code;}).filter(function(c){return c!==S.user.code;}));
+    grpPost(g,{t:"gsys",x:"added "+codes.map(function(c){return gmName(gmOf(g,c));}).join(", ")});save();renderFriends(true);
+  },null);
+}
+function grpRemove(g,m){
+  openForm("Remove "+gmName(m)+" from the group?",[],"Remove",function(){
+    var f=findF(m.code);if(f)frSend(f,{t:"gkick",gid:g.id});
+    g.mem=g.mem.filter(function(x){return x.code!==m.code;});grpRekey(g,"removed "+gmName(m));renderFriends(true);
+  },null);
+}
+function grpRename(g){openForm("Rename group",[{id:"name",label:"Group name",value:g.name||""}],"Save",function(v){g.name=cleanName(v.name).substr(0,40);grpPost(g,{t:"gname",name:g.name});save();renderFriends();},null);}
+function grpInvite(f,o){   // a friend shared a group with us (new group, new members, or a new key)
+  var c=o.g||{};if(!/^[0-9a-f]{64}$/.test(c.key||"")||!c.gid||!Array.isArray(c.mem))return false;
+  if(!c.mem.some(function(m){return m.code===S.user.code;}))return false;
+  var g=grpBy(String(c.gid).substr(0,40)),fresh=!g;
+  if(g&&g.own!==f.code)return false;   // only the creator can change a group
+  if(!g){g={id:String(c.gid).substr(0,40),own:f.code,msgs:[],unread:0,t:now()};groups().push(g);}
+  g.key=c.key;g.name=cleanName(c.name||"").substr(0,40);g.own=f.code;
+  g.mem=c.mem.slice(0,GMAX).map(function(m){return {code:String(m.code||"").substr(0,9),name:cleanName(m.name),color:cleanCol(m.color)};}).filter(function(m){return /^\d{9}$/.test(m.code);});
+  grpTopic(g);
+  if(fresh)notify("ok",fname2(f)+" added you to a group",grpName(g),null,"");
+  return true;
+}
+function grpGot(g,o,ts,id){
+  if(!o||!/^\d{9}$/.test(o.f||"")||o.f===S.user.code)return false;
+  var m=null;g.mem.forEach(function(x){if(x.code===o.f)m=x;});if(!m)return false;   // not in the group (anymore)
+  if(o.n)m.name=cleanName(o.n);if(o.c!==undefined)m.color=cleanCol(o.c);
+  if(o.t==="gm"||o.t==="gsys"){
+    var e={id:id,from:o.f,x:String(o.x||"").substr(0,1000),ts:ts||now(),mid:String(o.mid||"").substr(0,40),sys:o.t==="gsys"?1:0};
+    g.msgs.push(e);if(g.msgs.length>300)g.msgs.splice(0,g.msgs.length-300);
+    var here=chatOpen()&&P.chat==="g:"+g.id;
+    if(!here&&!e.sys){g.unread=(g.unread||0)+1;var f=findF(o.f);if(S.set.nMsg!==0&&!isBlocked(o.f)){if(S.set.nMsgSnd!==0)playSnd("message");if(!popup(grpName(g),gmName(m)+": "+e.x,"group:"+g.id,"#5b8cff"))toast(grpName(g)+" · "+gmName(m)+": "+e.x.substr(0,80));}}
+    return true;
+  }
+  if(o.t==="gleave"){g.mem=g.mem.filter(function(x){return x.code!==o.f;});g.msgs.push({from:o.f,x:"left the group",ts:ts||now(),sys:1});if(g.own===S.user.code)grpRekey(g);return true;}
+  if(o.t==="gname"&&o.f===g.own){g.name=cleanName(o.name||"").substr(0,40);g.msgs.push({from:o.f,x:"renamed the group",ts:ts||now(),sys:1});return true;}
+  return false;
+}
 /* requests */
 function addFriend(code,nick){
   if(!frOn()){toast("Turn on online friends in Settings › Friends first");return false;}
@@ -3823,7 +3994,7 @@ function pubStatus(force){
 /* polling */
 /* live relay: messages, requests and status arrive through one open connection */
 var frLive=0,frStreamSig="";
-function frTopics(){var tp=[frTopicReq(S.user.code)];S.friends.forEach(function(f){tp.push(frPairTopic(f));if(f.sk){if(!f.stopic)f.stopic=frStTopic(f.sk);tp.push(f.stopic);}});return tp.slice(0,150);}
+function frTopics(){var tp=[frTopicReq(S.user.code)];groups().forEach(function(g){tp.push(grpTopic(g));});S.friends.forEach(function(f){tp.push(frPairTopic(f));if(f.sk){if(!f.stopic)f.stopic=frStTopic(f.sk);tp.push(f.stopic);}});return tp.slice(0,150);}
 function frStream(){
   if(!frOn()){if(frStreamSig){frStreamSig="";T(function(){return X.RelayStreamStop();});}return;}
   var sig=frTopics().join(",");if(sig===frStreamSig)return;
@@ -3843,8 +4014,7 @@ window.onRelayMsg=function(line){
 };
 function frPoll(){
   if(!frOn()||frBusy)return;
-  var tp=[frTopicReq(S.user.code)];
-  S.friends.forEach(function(f){tp.push(frPairTopic(f));if(f.sk){if(!f.stopic)f.stopic=frStTopic(f.sk);tp.push(f.stopic);}});
+  var tp=frTopics();
   var ns=Math.floor(now()/1000),since=S.fr.since?String(Math.max(S.fr.since-180,ns-43200)):"12h";
   frBusy=1;frPollT=now();
   relay(tp.slice(0,150).join(","),since,"",function(ok,text,st){
@@ -3887,6 +4057,7 @@ function frHandle(m){
     if(o.t==="no"){i=findIn(S.fr.out,o.code);if(i>=0){S.fr.out.splice(i,1);return true;}}
     return false;
   }
+  var gl=groups();for(i=0;i<gl.length;i++)if(tp===grpTopic(gl[i])){o=unseal(gl[i].key,msg);return o?grpGot(gl[i],o,ts,m.id):false;}
   for(i=0;i<S.friends.length;i++){
     f=S.friends[i];
     if(tp===f.topic){o=unseal(f.key,msg);if(!o||o.f===S.user.code)return false;return frPair(f,o,ts,m.id);}
@@ -3909,6 +4080,8 @@ function frHandle(m){
   return false;
 }
 function frPair(f,o,ts,id){
+  if(o.t==="ginv")return grpInvite(f,o);
+  if(o.t==="gkick"){var kg=grpBy(String(o.gid||""));if(kg&&kg.own===f.code){groups().splice(groups().indexOf(kg),1);if(P.chat==="g:"+kg.id)P.chat=null;toast(fname2(f)+" removed you from "+grpName(kg));return true;}return false;}
   if(o.t==="hi"){
     var first=!f.sk;f.sk=String(o.sk||"");f.stopic=f.sk?frStTopic(f.sk):"";if(o.name)f.name=cleanName(o.name);f.color=cleanCol(o.color);
     if(o.ask)frSend(f,{t:"hi",sk:S.fr.sk,name:S.user.name,color:S.user.color});
@@ -4020,7 +4193,7 @@ function sendRc(f){   // delivery and read receipts, one per conversation at a t
   if(rd&&f.rdSent!==f.lastIn){f.rdSent=f.dlSent=f.lastIn;frSend(f,{t:"rc",s:"r",id:f.lastIn});}
   else if(!rd&&f.dlSent!==f.lastIn){f.dlSent=f.lastIn;frSend(f,{t:"rc",s:"d",id:f.lastIn});}
 }
-function chatOpen(){return !!S&&$("fp").className==="open"&&!!P.chat&&!!findF(P.chat);}
+function chatOpen(){return !!S&&$("fp").className==="open"&&!!P.chat&&(/^g:/.test(P.chat)?!!grpBy(P.chat.substr(2)):!!findF(P.chat));}
 function p2(n){return (n<10?"0":"")+n;}
 function hhmm(d){var h=d.getHours(),ap=h<12?"AM":"PM";h=h%12||12;return h+":"+p2(d.getMinutes())+" "+ap;}
 function dayLabel(d){var t=new Date(),y=new Date(now()-86400000);if(d.toDateString()===t.toDateString())return "Today";if(d.toDateString()===y.toDateString())return "Yesterday";return d.toDateString().substr(4);}
@@ -4031,7 +4204,7 @@ function renderFriends(toBottom){
   var sel=el("select");[["online","Online"],["away","Away"],["busy","Do not disturb"],["invisible","Invisible"]].forEach(function(o){var op=el("option","",o[1]);op.value=o[0];sel.appendChild(op);});
   sel.value=S.user.status;sel.onchange=function(){S.user.status=sel.value;save();chip();renderFriends();syncNow();};
   mn.appendChild(sel);if(S.fr&&S.fr.pub)mn.appendChild(el("span","mcode","Code "+fmtCode(S.user.code)));me.appendChild(mn);
-  var b=$("fpb"),cf=P.chat?findF(P.chat):null;
+  var b=$("fpb"),cg=P.chat&&/^g:/.test(P.chat)?grpBy(P.chat.substr(2)):null,cf=cg||(P.chat?findF(P.chat):null);
   $("ftF").className=P.ftab?"":"on";$("ftA").className=P.ftab==="act"?"on":"";$("ftC").className=P.ftab==="ch"?"on":"";$("ftR").className=P.ftab==="rk"?"on":"";
   var cn=chalOpenN();$("ftC").innerHTML="Challenges"+(cn?"<i class=\"tbn\">"+cn+"</i>":"");
   if(!cf&&P.ftab==="rk"&&frOn()){chatL=null;chatI=null;$("fpa").style.display="none";b.className="";b.innerHTML="";renderRanks(b);updBadge();return;}
@@ -4041,6 +4214,7 @@ function renderFriends(toBottom){
     fl.forEach(function(x){b.appendChild(feedRow(x));});updBadge();return;}
   if(!cf){chatL=null;chatI=null;}
   $("fpa").style.display=cf?"none":"";b.className=cf?"chat":"";
+  if(cg){renderGroupChat(cg,b,toBottom);updBadge();return;}
   if(cf){renderChat(cf,b,toBottom);updBadge();return;}
   b.innerHTML="";
   var q=trim($("fq").value).toLowerCase();
@@ -4069,6 +4243,12 @@ function renderFriends(toBottom){
     r.oncontextmenu=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();stp(e);friendRowMenu(f,r);return false;};
     return r;
   }
+  var gl=groups().filter(function(g){return !q||grpName(g).toLowerCase().indexOf(q)>=0;}).sort(function(a,c){var la=a.msgs.length?a.msgs[a.msgs.length-1].ts:a.t,lc=c.msgs.length?c.msgs[c.msgs.length-1].ts:c.t;return lc-la;});
+  if(gl.length||S.friends.length>=2){var gh=el("div","gh ghg");gh.appendChild(el("span","","Groups"+(gl.length?" — "+gl.length:"")));gh.appendChild(btn("+ New group","ghb",function(){newGroup();}));b.appendChild(gh);}
+  gl.forEach(function(g){var r=el("div","fr"),n=el("div","fn"),lm=g.msgs[g.msgs.length-1];r.appendChild(grpAvatar(g,44));
+    n.appendChild(el("b","",grpName(g)));n.appendChild(el("span","",lm?(lm.me?"You":gmName(gmOf(g,lm.from)))+(lm.sys?" ":": ")+lm.x:g.mem.length+" people"));r.appendChild(n);
+    if(g.unread)r.appendChild(el("span","unr",g.unread>9?"9+":String(g.unread)));
+    r.onclick=function(){P.chat="g:"+g.id;g.unread=0;P.draft="";save();renderFriends(true);};b.appendChild(r);});
   if(on.length){b.appendChild(el("div","gh","Online — "+on.length));on.forEach(function(f){b.appendChild(row(f));});}
   if(off.length){b.appendChild(el("div","gh","Offline — "+off.length));off.forEach(function(f){b.appendChild(row(f));});}
   if(S.fr.out.length){
@@ -4145,9 +4325,55 @@ function renderChat(f,b,toBottom){
   L.scrollTop=wasBottom?999999:top;setTimeout(function(){if(chatL===L&&wasBottom)L.scrollTop=999999;},0);
   if(focused||toBottom)setTimeout(function(){try{inp.focus();}catch(e){}},0);
 }
+function renderGroupChat(g,b,toBottom){
+  var keep=chatL&&chatL.parentNode===b,wasBottom=!keep||toBottom||(chatL.scrollTop+chatL.clientHeight>=chatL.scrollHeight-30),top=keep?chatL.scrollTop:0,focused=keep&&chatI&&document.activeElement===chatI;
+  if(chatI)P.draft=chatI.value;b.innerHTML="";g.unread=0;
+  var h=el("div","ich");h.appendChild(btn("‹","ichb",function(){P.chat=null;P.draft="";renderFriends();}));
+  var mid=el("div","ichm");mid.appendChild(grpAvatar(g,40));mid.appendChild(el("b","",grpName(g)));
+  var on=g.mem.filter(function(m){var f=findF(m.code);return m.code!==S.user.code&&f&&pstate(f)!=="offline";}).length;
+  mid.appendChild(el("span","",g.mem.length+" people"+(on?" · "+on+" online":"")));h.appendChild(mid);
+  var own=g.own===S.user.code,mb=btn("⋯","ichb",null);
+  mb.onclick=function(e){stp(e);var items=[{t:"Members",fn:function(){grpMembers(g);}}];
+    if(own){items.push({t:"Add people",fn:function(){grpAdd(g);}});items.push({t:"Rename group",fn:function(){grpRename(g);}});}
+    items.push({t:"Delete conversation (just for me)",fn:function(){g.msgs=[];save();renderFriends();}});
+    items.push({sep:1});items.push({t:"Leave group",cls:"dng",fn:function(){grpLeave(g);}});ctxMenu(mb,items);};
+  h.appendChild(mb);b.appendChild(h);
+  var L=el("div","chl ios"),prevT=0;
+  if(!g.msgs.length){var e0=el("div","chempty");e0.appendChild(grpAvatar(g,64));e0.appendChild(el("b","",grpName(g)));e0.appendChild(el("div","","Group messages are end-to-end encrypted. Say hi!"));L.appendChild(e0);}
+  g.msgs.forEach(function(m,k){
+    var d=new Date(m.ts),nx=g.msgs[k+1],pv=g.msgs[k-1];
+    if(!prevT||m.ts-prevT>15*60000||new Date(prevT).toDateString()!==d.toDateString()){L.appendChild(el("div","ichd",dayLabel(d)+"  "+hhmm(d)));pv=null;}
+    prevT=m.ts;
+    if(m.sys){L.appendChild(el("div","ichd gsys",(m.me?"You":gmName(gmOf(g,m.from)))+" "+m.x));return;}
+    var same=function(a,c){return a&&c&&!a.sys&&!c.sys&&!!a.me===!!c.me&&a.from===c.from;},first=!same(pv,m),lastG=!same(nx,m)||(nx.ts-m.ts>15*60000);
+    var w=el("div","im"+(m.me?" mine":"")+(first?" first":"")+(lastG?" last":"")+(m.me?"":" grp"));
+    if(!m.me){var f=findF(m.from),mm=null;g.mem.forEach(function(x){if(x.code===m.from)mm=x;});
+      var who=mm||{code:m.from,name:"",color:0};
+      if(lastG){var av=avatar(gmName(who),f?f.color:cleanCol(who.color),28,"",f?f.av:"");av.className+=" gma";w.appendChild(av);}else w.appendChild(el("i","gma sp"));}
+    var bub=el("div","ib");if(!m.me&&first)bub.appendChild(el("div","gfrom",gmName(gmOf(g,m.from))));
+    bub.appendChild(el("div","ctx",m.x));bub.title=hhmm(d);w.appendChild(bub);L.appendChild(w);
+    if(m.me&&(m.fail||m.st==="fail")){var rc=el("div","irc bad","Not delivered · tap to retry");rc.onclick=function(){var t=m.x;g.msgs.splice(g.msgs.indexOf(m),1);grpSend(g,t);};L.appendChild(rc);}
+  });
+  b.appendChild(L);
+  var r=el("div","ichi"),inp=el("input"),sb=btn("↑","isend",function(){grpSend(g,inp.value);});
+  inp.setAttribute("type","text");inp.setAttribute("placeholder","Message "+grpName(g));inp.maxLength=1000;inp.value=P.draft||"";sb.disabled=!trim(inp.value);
+  inp.onkeyup=function(e){e=e||window.event;P.draft=inp.value;sb.disabled=!trim(inp.value);if(e.keyCode===13)grpSend(g,inp.value);};
+  r.appendChild(inp);r.appendChild(sb);b.appendChild(r);chatL=L;chatI=inp;
+  L.scrollTop=wasBottom?999999:top;setTimeout(function(){if(chatL===L&&wasBottom)L.scrollTop=999999;},0);
+  if(focused||toBottom)setTimeout(function(){try{inp.focus();}catch(e){}},0);
+}
+function grpMembers(g){
+  var b=$("mbox");b.innerHTML="";b.appendChild(el("h3","",grpName(g)+" · "+g.mem.length+" people"));
+  var l=el("div","gml");g.mem.forEach(function(m){var f=findF(m.code),r=el("div","gmr");r.appendChild(avatar(gmName(m),f?f.color:cleanCol(m.color),36,f?pstate(f):"",f?f.av:""));
+    var n=el("div","gmn");n.appendChild(el("b","",m.code===S.user.code?S.user.name+" (you)":gmName(m)));n.appendChild(el("span","",m.code===g.own?"Made the group":f?"Friend":"Friend of a friend"));r.appendChild(n);
+    if(g.own===S.user.code&&m.code!==S.user.code)r.appendChild(btn("Remove","btn sm dng",function(){closeForm();grpRemove(g,m);}));
+    else if(!f&&m.code!==S.user.code)r.appendChild(btn("Add friend","btn sm",function(){closeForm();addFriend(m.code,"");}));
+    l.appendChild(r);});b.appendChild(l);
+  var row=el("div","mrow");if(g.own===S.user.code&&g.mem.length<GMAX)row.appendChild(btn("Add people","btn",function(){closeForm();grpAdd(g);}));row.appendChild(btn("Close","pri",closeForm));b.appendChild(row);$("modal").className="open";
+}
 function updBadge(){
   var n=0,a=0,bd=$("badge");
-  if(S){S.friends.forEach(function(f){if(pstate(f)!=="offline")n++;a+=f.unread||0;});if(S.fr&&S.fr.inc)a+=S.fr.inc.length;}
+  if(S){S.friends.forEach(function(f){if(pstate(f)!=="offline")n++;a+=f.unread||0;});groups().forEach(function(g){a+=g.unread||0;});if(S.fr&&S.fr.inc)a+=S.fr.inc.length;}
   bd.textContent=a?(a>9?"9+":a):n;bd.className=a?"al":"";
 }
 function syncNow(){
@@ -4891,7 +5117,7 @@ var frReadyT=0;
 function popup(title,msg,tag,accent){
   var focused=document.hasFocus?document.hasFocus():true;
   if(focused&&!ovOn)return false;
-  T(function(){return X.Popup(title,msg,tag||"",accent||"#2ee6f0");});return true;
+  T(function(){return X.Popup(title,msg,tag||"",accent||lookCol("#2ee6f0",false,"",true));});return true;
 }
 function friendAlert(f,kind,game){
   if(!S||now()-frReadyT<20000)return;
@@ -5152,7 +5378,8 @@ function toggleNotes(open){
 window.onNotifyClick=function(tag){if(!S)return;if(tag&&gameBy(tag)){P.cur=tag;nav("game");return;}
   if(tag==="chal"){setFP(true);P.ftab="ch";P.chat=null;renderFriends();return;}
   if(tag==="lb"){setFP(true);P.ftab="rk";P.chat=null;renderFriends();return;}
-  if(/^friend:/.test(tag||"")){var f=findF(tag.substr(7));setFP(true);P.ftab="";if(f){P.chat=f.code;}renderFriends(true);}};
+  if(/^friend:/.test(tag||"")){var f=findF(tag.substr(7));setFP(true);P.ftab="";if(f){P.chat=f.code;}renderFriends(true);}
+  if(/^group:/.test(tag||"")){var gg=grpBy(tag.substr(6));setFP(true);P.ftab="";if(gg){P.chat="g:"+gg.id;gg.unread=0;}renderFriends(true);}};
 /* ---------- 1.7.9: games that won't start because a Microsoft runtime is missing ---------- */
 var RTN={vc14:"Visual C++ 2015–2022",vc12:"Visual C++ 2013",vc11:"Visual C++ 2012",vc10:"Visual C++ 2010",dx:"DirectX 9 extras (d3dx9, XInput, XAudio)"};
 var RT_COMMON=["vc14-x64","vc14-x86","dx"],RTJ=null;
@@ -5435,15 +5662,15 @@ function padPress(k){
 }
 /* ---------- TV mode (1.8.9 redesign): tabs, a living backdrop, big focusable tiles, full-screen game pages ---------- */
 var tvOn=false,TV={tab:"home",rows:[],r:0,c:{},sheet:null,sf:0,menu:0,drive:null,bgA:0,bgU:"",bgT:0,shotI:0},tvT=null,tvShotT=null;
-var TVTABS=[["home","Home"],["lib","Library"],["store","Store"],["friends","Friends"],["dl","Downloads"]];
+var TVTABS=[["search","Search"],["home","Home"],["lib","Library"],["store","Store"],["friends","Friends"],["dl","Downloads"]];
 function enterTV(){
   if(!S||tvOn)return;tvOn=true;hideMenu();closeForm();setFP(false);document.body.className+=" tvmode";
-  $("tv").className="on";if(S.set.tvFull!==0)T(function(){return X.SetFullscreen("1");});
-  TV.sheet=null;TV.menu=0;TV.cfg=0;TV.drive=null;tvRender();clearInterval(tvT);tvT=setInterval(tvTick,1000);tvTick();tvBattery();
+  $("tv").className="on";applyLook();if(S.set.tvFull!==0)T(function(){return X.SetFullscreen("1");});
+  TV.sheet=null;TV.menu=0;TV.cfg=0;TV.drive=null;TV.kb=null;tvRender();clearInterval(tvT);tvT=setInterval(tvTick,1000);tvTick();tvBattery();
 }
 function exitTV(){
-  if(!tvOn)return;tvOn=false;clearInterval(tvT);clearInterval(tvShotT);$("tv").className="";document.body.className=document.body.className.replace(/\s?tvmode/g,"");
-  T(function(){return X.SetFullscreen("0");});render();
+  if(!tvOn)return;tvOn=false;TV.kb=null;var kbe=$("tvkb");if(kbe)kbe.className="";$("tv").className=$("tv").className.replace(/\s?kbo/g,"");clearInterval(tvT);clearInterval(tvShotT);$("tv").className="";document.body.className=document.body.className.replace(/\s?tvmode/g,"");
+  T(function(){return X.SetFullscreen("0");});applyLook();render();
 }
 function tvItem(kind,o){return {k:kind,o:o};}
 function tvRows(){
@@ -5452,7 +5679,15 @@ function tvRows(){
   function lf(k,t,n){add(t,every.filter(function(x){return x.lf&&x.lf[k]!==undefined&&!inLib(x.id);}).sort(function(a,b){return a.lf[k]-b.lf[k];}).slice(0,n||20),"s");}
   function fr(k,t){var l=every.filter(function(x){return frOf(x)===k&&!inLib(x.id);}).slice(0,20);if(l.length>=3)add(t,l,"s");}
   var rec=lib.filter(function(g){return g.last;}).sort(function(a,b){return b.last-a.last;});
-  if(tab==="home"){
+  if(tab==="search"){
+    var q=trim(TV.q||"").toLowerCase();
+    if(!q)rows.push({t:"Search",l:[],empty:"Press "+padName("a")+" to type with the on-screen keyboard. Search your library and all of itch.io."});
+    else{
+      add("In your library",lib.filter(function(g){return g.name.toLowerCase().indexOf(q)>=0;}),"g");
+      add("In the Store",every.filter(function(x){return !inLib(x.id)&&(x.name+" "+(x.tagline||"")+" "+(x.genre||"")+" "+frOf(x)+" "+(x.devs||"")).toLowerCase().indexOf(q)>=0;}).slice(0,40),"s");
+      if(!rows.length)rows.push({t:"No results for \u201C"+TV.q+"\u201D",l:[],empty:srchBusy?"Searching itch.io\u2026":"Try another word, or fewer letters."});
+    }
+  }else if(tab==="home"){
     add("Continue playing",rec.slice(0,12),"g");
     add("Updates ready",lib.filter(function(g){return g.updAvail;}),"g");
     var fp=[];S.friends.forEach(function(f){var st=f.playing&&pstate(f)!=="offline"?storeByName(f.playing):null;if(st&&fp.indexOf(st)<0)fp.push(st);});add("Your friends are playing",fp,"s");
@@ -5554,7 +5789,7 @@ function tvFocus(){
 function tvChip(act,t){var c=el("span","tvchip");c.appendChild(padGlyph(act,"tvbt"));c.appendChild(document.createTextNode(t));return c;}
 function tvHints(){
   var h=$("tvhint");h.innerHTML="";
-  var l=TV.cfg?[["a","Select"],["lr","Change"],["b","Back"]]:TV.drive||TV.sheet||TV.menu?[["a","Select"],["b","Back"]]:[["a","Select"],["y","Details"],["tabs","Switch tab"],["b",TV.tab==="home"?"Menu":"Home"],["start","Menu"]];
+  var l=TV.kb?[]:TV.cfg?[["a","Select"],["lr","Change"],["b","Back"]]:TV.drive||TV.sheet||TV.menu?[["a","Select"],["b","Back"]]:TV.tab==="search"?[["a",tvCur()?"Select":"Type"],["x","Type"],["tabs","Switch tab"],["b","Home"],["start","Menu"]]:[["a","Select"],["y","Details"],["tabs","Switch tab"],["b",TV.tab==="home"?"Menu":"Home"],["start","Menu"]];
   l.forEach(function(x){var s=el("span");
     if(x[0]==="tabs"){s.appendChild(padGlyph("lb","tvbt"));s.appendChild(padGlyph("rb","tvbt"));}
     else if(x[0]==="lr")s.appendChild(el("i","tvbt glgr","◂▸"));else s.appendChild(padGlyph(x[0],"tvbt"));
@@ -5643,6 +5878,7 @@ function tvMenu(){
 }
 function tvInput(k){
   if(PAD.cap){padCapEnd();tvCfg();return;}
+  if(TV.kb){tvKbInput(k);return;}
   if(TV.cfg){var L=tvCfgItems(),n=L.length,x=L[TV.sf];
     if(k==="up"){TV.sf=(TV.sf+n-1)%n;tvCfgFocus();}
     else if(k==="down"){TV.sf=(TV.sf+1)%n;tvCfgFocus();}
@@ -5665,10 +5901,45 @@ function tvInput(k){
   else if(k==="down"){TV.r=Math.min(TV.rows.length-1,TV.r+1);tvFocus();}
   else if(k==="lb")tvTabStep(-1);
   else if(k==="rb")tvTabStep(1);
+  else if(k==="a"&&TV.tab==="search"&&(TV.r===0&&!tvCur()||!TV.q)){tvKbOpen();}
   else if(k==="a"){var it=tvCur();if(it&&it.k==="g"&&!run[it.o.id]){P.cur=it.o.id;playToggle();tvRender();}else tvOpen();}
+  else if(k==="x"&&TV.tab==="search")tvKbOpen();
   else if(k==="y"||k==="x")tvOpen();
   else if(k==="start"||k==="back"){TV.menu=1;TV.sf=0;tvMenu();}
   else if(k==="b"){if(TV.tab!=="home")tvTab("home");else{TV.menu=1;TV.sf=0;tvMenu();}}
+}
+/* 2.0.9: on-screen keyboard for TV mode search, like a console's. D-pad or stick to move, A to type,
+   B or X to delete, Y for a space, Menu to finish. A real keyboard still works while it's open. */
+var TVKB=[["1","2","3","4","5","6","7","8","9","0"],["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l","'"],["z","x","c","v","b","n","m","-",".","&"],[["sp","Space",4],["del","Delete",2],["clr","Clear",2],["ok","Search",2]]];
+function tvKbKeys(r){return TVKB[r].map(function(k){return typeof k==="string"?[k,k,1]:k;});}
+function tvKbOpen(){if(TV.tab!=="search")tvTab("search");TV.kb={r:1,c:0};tvKb();tvHints();}
+function tvKbClose(){TV.kb=null;var k=$("tvkb");if(k)k.className="";$("tv").className=$("tv").className.replace(/\s?kbo/g,"");tvRender();if(TV.q&&TV.rows.length&&TV.rows[0].l.length){TV.r=0;tvFocus();}}
+function tvKbType(ch){TV.q=(TV.q||"")+ch;if(TV.q.length>60)TV.q=TV.q.substr(0,60);tvKbChanged();}
+function tvKbDel(){TV.q=(TV.q||"").slice(0,-1);tvKbChanged();}
+function tvKbChanged(){TV.r=0;TV.c={};var q=trim(TV.q||"");if(q.length>=2)searchItch(q);tvRender();tvKb();}
+function tvKb(){
+  var k=$("tvkb");if(!k){k=el("div","");k.id="tvkb";$("tv").appendChild(k);}
+  k.innerHTML="";k.className="on";if(!/kbo/.test($("tv").className))$("tv").className+=" kbo";var f=el("div","tvkq"),q=TV.q||"";f.appendChild(el("span",q?"":"ph",q||"Search games"));f.appendChild(el("i","tvkc"));k.appendChild(f);
+  TVKB.forEach(function(row,r){var rw=el("div","tvkr");tvKbKeys(r).forEach(function(x,c){var b=el("button","tvkk"+(x[2]>1?" w"+x[2]:"")+(x[0]==="ok"?" main":"")+(TV.kb&&TV.kb.r===r&&TV.kb.c===c?" f":""),x[0]==="sp"||x[0]==="del"||x[0]==="clr"||x[0]==="ok"?x[1]:x[1].toUpperCase());
+    b.onclick=function(){TV.kb.r=r;TV.kb.c=c;tvKbPress();};rw.appendChild(b);});k.appendChild(rw);});
+  var h=el("div","tvkh");[["a","Type"],["b","Delete"],["y","Space"],["start","Done"]].forEach(function(x){h.appendChild(tvChip(x[0],x[1]));});k.appendChild(h);
+}
+function tvKbPress(){var x=tvKbKeys(TV.kb.r)[TV.kb.c];if(!x)return;
+  if(x[0]==="sp")tvKbType(" ");else if(x[0]==="del")tvKbDel();else if(x[0]==="clr"){TV.q="";tvKbChanged();}else if(x[0]==="ok")tvKbClose();else tvKbType(x[0]);}
+function tvKbInput(k){
+  var kb=TV.kb,row=tvKbKeys(kb.r);
+  function col(r){var from=tvKbKeys(kb.r),x=0,i;for(i=0;i<kb.c;i++)x+=from[i][2];x+=from[kb.c][2]/2;   // keep the same spot when moving between rows of different key widths
+    var to=tvKbKeys(r),acc=0;for(i=0;i<to.length;i++){acc+=to[i][2];if(acc>=x)return i;}return to.length-1;}
+  if(k==="left")kb.c=(kb.c+row.length-1)%row.length;
+  else if(k==="right")kb.c=(kb.c+1)%row.length;
+  else if(k==="up"){var r1=(kb.r+TVKB.length-1)%TVKB.length;kb.c=col(r1);kb.r=r1;}
+  else if(k==="down"){var r2=(kb.r+1)%TVKB.length;kb.c=col(r2);kb.r=r2;}
+  else if(k==="a"){tvKbPress();return;}
+  else if(k==="b"||k==="x"){if(TV.q)tvKbDel();else tvKbClose();return;}
+  else if(k==="y"){tvKbType(" ");return;}
+  else if(k==="start"){tvKbClose();return;}
+  else return;
+  tvKb();
 }
 /* TV mode: controller settings, all reachable with the controller (up/down to pick, left/right to change, A to bind) */
 function tvCfgItems(){
@@ -5857,10 +6128,53 @@ function tickOverlay(){
 function sw(on,cb){var d=el("div","sw"+(on?" on":""));d.onclick=function(){on=!on;d.className="sw"+(on?" on":"");cb(on);};return d;}
 function srow(l,s,c){var r=el("div","srow"),x=el("div","sl");x.appendChild(el("b","",l));if(s)x.appendChild(el("span","",s));r.appendChild(x);if(c)r.appendChild(c);return r;}
 function applyLayout(){document.body.className=(S&&S.set.layout==="classic")?"classic":"";}
-function applyAccent(){
-  var a=ACC[S.set.accent||0],css=".pri,.sw.on,#dlfill,.tab.on:after{background:linear-gradient(90deg,"+a[0]+","+a[1]+")}.pri.stop{background:#d9534f}#badge{background:"+a[1]+"}.sec:before{background:"+a[0]+"}";
-  var t=$("theme");if(t.styleSheet)t.styleSheet.cssText=css;else t.textContent=css;
+/* ===== 2.0.9: how Xaly looks, for everyone on this PC: light or dark, accent colour, text size, reduced motion =====
+   The light theme and accent colours are made from the one stylesheet: every colour in it is re-mixed when the look changes,
+   so nothing can be forgotten. TV mode and the in-game overlay stay dark (they're made for a TV and for sitting over a game). */
+var ACCS=[["cyan","Cyan",187],["blue","Blue",214],["purple","Purple",258],["pink","Pink",330],["red","Red",2],["orange","Orange",28],["gold","Gold",44],["green","Green",145]];
+var TEXTS=[[1,"Normal"],[1.1,"Large"],[1.22,"Larger"],[1.35,"Largest"]];
+function look(){var l=AC.look||(AC.look={});if(!l.theme)l.theme="dark";if(!l.acc)l.acc="cyan";if(!l.text)l.text=1;
+  if(l.rm===undefined){var q=null;try{q=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)");}catch(e){}l.rm=q&&q.matches?1:0;}   // Windows' "show animations" off: start with reduced motion on
+  return l;}
+function accHue(){var a=look().acc;for(var i=0;i<ACCS.length;i++)if(ACCS[i][0]===a)return ACCS[i][2];return 187;}
+function rgbOf(c){var m,h;c=c.toLowerCase();
+  if(c.charAt(0)==="#"){h=c.slice(1);if(h.length===3)h=h.charAt(0)+h.charAt(0)+h.charAt(1)+h.charAt(1)+h.charAt(2)+h.charAt(2);return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16),1];}
+  m=c.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)/);return m?[+m[1],+m[2],+m[3],m[4]===undefined?1:+m[4]]:null;}
+function hslOf(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,h=0,s=0,d=mx-mn;
+  if(d){s=l>0.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;}return [h,s,l];}
+function rgbHsl(h,s,l){function f(n){var k=(n+h/30)%12,a=s*Math.min(l,1-l);return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))));}return [f(0),f(8),f(4)];}
+function colStr(r,a){return a>=1?"#"+r.map(function(v){v=Math.max(0,Math.min(255,v));return (v<16?"0":"")+v.toString(16);}).join(""):"rgba("+r.join(",")+","+(Math.round(a*1000)/1000)+")";}
+function lookCol(c,light,prop,keepDark){
+  var v=rgbOf(c);if(!v)return c;var hsl=hslOf(v[0],v[1],v[2]),h=hsl[0],sat=hsl[1],l=hsl[2],a=v[3];
+  var isAcc=sat>0.45&&h>=172&&h<=200&&l>0.25;                 // Xaly's cyan family
+  if(isAcc){var nh=accHue();if(light&&!keepDark)l=Math.min(l,0.44);if(nh===h&&!(light&&!keepDark))return c;return colStr(rgbHsl(nh,sat,l),a);}
+  if(!light||keepDark)return c;
+  var white=v[0]>=245&&v[1]>=245&&v[2]>=245,black=v[0]<=8&&v[1]<=8&&v[2]<=8;
+  if(black&&a<1)return /shadow/.test(prop)?colStr([20,30,60],a*0.35):c;   // shadows get softer; dark veils over pictures stay
+  if(white&&a<1)return colStr([10,20,50],Math.min(1,a*0.9));                // light veils on dark become dark veils on light
+  if(sat<0.42||l<0.22||l>0.88){var nl=1-l;nl=nl>0.5?0.94+(nl-0.5)*0.11:0.09+nl*0.62;  // flip light and dark, keep a hint of the hue
+    return colStr(rgbHsl(h,Math.min(sat,0.35),nl),a);}
+  return colStr(rgbHsl(h,sat,Math.min(l,0.5)),a);                      // other colours: just make sure they read on white
 }
+var LOOK_BASE=null;
+function lookCss(light){
+  if(LOOK_BASE===null){var b=$("base");LOOK_BASE=b.styleSheet?b.styleSheet.cssText:b.textContent;}
+  var COL=/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b|rgba?\([^)]*\)/g,KEEP=/(^|[\s,>+~])(#tv|\.tv|body\.tvmode|\.tvmode|#ov\b|\.ov|body\.ovmode|\.ovmode|#padn|#intro|\.intro|\.banner)/;
+  return LOOK_BASE.replace(/([^{}]*)\{([^{}]*)\}/g,function(all,sel,body){
+    var kd=KEEP.test(sel);
+    return sel+"{"+body.replace(/([a-z-]+)\s*:([^;]*)/g,function(d,prop,val){return prop+":"+val.replace(COL,function(c){return lookCol(c,light,prop,kd);});})+"}";});
+}
+function applyLook(){
+  var l=look(),light=l.theme==="light",b=$("base"),key=l.theme+"|"+l.acc,css;
+  if(applyLook.key!==key){applyLook.key=key;css=(light||l.acc!=="cyan")?lookCss(light):LOOK_BASE===null?null:LOOK_BASE;
+    if(css!==null){if(b.styleSheet)b.styleSheet.cssText=css;else b.textContent=css;}}
+  var h=accHue(),a0=h===187?"#00b8d4":colStr(rgbHsl(h,0.9,0.44),1),a1=h===187?"#2ee6f0":colStr(rgbHsl(h,0.88,0.58),1),t=$("theme"),
+    ac=".pri,.sw.on,#dlfill,.tab.on:after{background:linear-gradient(90deg,"+a0+","+a1+")}.pri.stop{background:#d9534f}#badge{background:"+a1+"}.sec:before{background:"+a0+"}";
+  if(t.styleSheet)t.styleSheet.cssText=ac;else t.textContent=ac;
+  var c=document.documentElement;c.className=(light?"light":"dark")+(l.rm?" rm":"");
+  document.body.style.zoom=(l.text>1&&!tvOn)?l.text:"";
+}
+function applyAccent(){applyLook();}
 var SICO={account:'<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 19.5c1.2-3.4 4-5 7.2-5s6 1.6 7.2 5"/>',friends:'<circle cx="9" cy="9" r="3.2"/><path d="M3.5 18.5c.9-2.8 3-4.2 5.5-4.2s4.6 1.4 5.5 4.2M15.5 6.2a3 3 0 0 1 0 5.6M17.5 14.6c1.6.6 2.6 1.9 3 3.9"/>',
   general:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4L18 18M6 18l1.6-1.6M16.4 7.6L18 6"/>',
   appearance:'<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.9 1.6-2-.3-1.2.5-2.3 1.8-2.3h1.4a3.7 3.7 0 0 0 3.7-3.7C20.5 7.5 16.7 3.5 12 3.5z"/><circle cx="7.8" cy="11.5" r="1.1"/><circle cx="10.5" cy="7.6" r="1.1"/><circle cx="15" cy="8" r="1.1"/>',
@@ -5984,6 +6298,10 @@ function settingsTab(tab,b0){
     if(!on)b.appendChild(srow("Password",curAcc.pw?"This account asks for a password when you sign in.":"Optional. Asks for a password when you pick this account on the sign-in screen. It keeps casual users out; it does not encrypt your files.",btn(curAcc.pw?"Change password":"Set a password","btn",changePw)));
     sbAccountRow(b);
     }
+    grp("itch.io");
+    if(itchOn()){var ir=el("div","srw");ir.appendChild(btn(itchSync?"Updating\u2026":"Refresh","btn",function(){itchRefresh(true);renderSettings();}));ir.appendChild(btn("Sign out","btn",itchSignOut));
+      b.appendChild(srow("Signed in"+(S.itchUser?" as "+S.itchUser:""),(S.owned||[]).length+" games from your itch.io library are in Library \u203A itch.io, paid ones too. Xaly can only see which games you own and your public profile.",ir));}
+    else b.appendChild(srow("Sign in with itch.io","See every game you\u2019ve bought or claimed on itch.io in Library \u203A itch.io, and install them here. Xaly can only see which games you own and your public profile.",btn("Sign in with itch.io","pri",itchSignIn)));
     grp("Backup");
     var bk=el("div","srw");bk.appendChild(btn("Back up…","btn",backupAcc));bk.appendChild(btn("Restore…","btn",restoreAcc));
     b.appendChild(srow("Account backup","Save your library, play time, achievements, friends and settings to one password-protected file, and restore it on another PC."+(S.lastBackup?" Last backup: "+ago(S.lastBackup)+".":" You haven’t made a backup yet."),bk));
@@ -6033,8 +6351,14 @@ function settingsTab(tab,b0){
     grp("Look");
     var lay=el("div","seg");[["side","Sidebar"],["classic","Classic"]].forEach(function(o){lay.appendChild(btn(o[1],"sgb"+((S.set.layout||"side")===o[0]?" on":""),function(){S.set.layout=o[0];save();applyLayout();renderSettings();}));});
     b.appendChild(srow("Layout","Sidebar is the new look. Classic brings back the top bar with Store and Library tabs and the bar along the bottom.",lay));
-    var sc2=el("div");ACC.forEach(function(c,i){var s=el("span","swatch"+((S.set.accent||0)===i?" on":""));s.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";s.onclick=function(){S.set.accent=i;save();applyAccent();renderSettings();};sc2.appendChild(s);});
-    b.appendChild(srow("Accent colour",null,sc2));
+    var lk=look(),th=el("div","seg");[["dark","Dark"],["light","Light"]].forEach(function(o){th.appendChild(btn(o[1],"sgb"+(lk.theme===o[0]?" on":""),function(){lk.theme=o[0];saveAcc();applyLook();renderSettings();}));});
+    b.appendChild(srow("Theme","Light or dark. TV mode and the in-game overlay always stay dark.",th));
+    var sc2=el("div","accs");ACCS.forEach(function(c){var s=el("span","swatch"+(lk.acc===c[0]?" on":""));s.title=c[1];s.style.background=colStr(rgbHsl(c[2],0.85,0.55),1);s.onclick=function(){lk.acc=c[0];saveAcc();applyLook();renderSettings();};sc2.appendChild(s);});
+    b.appendChild(srow("Accent colour","Buttons, highlights and links.",sc2));
+    grp("Accessibility");
+    var tx=el("div","seg");TEXTS.forEach(function(o){tx.appendChild(btn(o[1],"sgb"+(lk.text===o[0]?" on":""),function(){lk.text=o[0];saveAcc();applyLook();renderSettings();}));});
+    b.appendChild(srow("Text size","Makes text, buttons and pictures bigger everywhere except TV mode, which is already made for big screens.",tx));
+    b.appendChild(srow("Reduce motion","Turns off animations: sliding cards and pop-ups, the moving background in TV mode, the opening animation and smooth scrolling.",sw(!!lk.rm,function(v){lk.rm=v?1:0;saveAcc();applyLook();})));
     b.appendChild(srow("Opening animation",null,sw(AC.intro!==0,function(v){S.set.intro=v?1:0;AC.intro=v?1:0;save();saveAcc();})));
     grp("Display engine");
     var eng=el("div","seg");[["webview2","Modern (Edge)"],["ie","Legacy (IE)"]].forEach(function(o){eng.appendChild(btn(o[1],"sgb"+(ENGINE===o[0]?" on":""),function(){
@@ -6264,7 +6588,9 @@ function fbFail(v,msg){
   var bx=$("mbox"),p0=el("div","fbm",act?"The first message to a new inbox triggers a one-time check. An email titled “FormSubmit activation” (or similar) was sent to xalify2004@gmail.com. Click its Activate button once, and from then on every message from the launcher arrives there.":"The feedback service said: "+(msg||"no answer")+". Your message was saved to feedback.txt, and you can also send it with your own email app.");
   bx.insertBefore(p0,bx.childNodes[1]);
 }
-document.onkeydown=function(e){e=e||window.event;if(PAD.cap&&e.keyCode===27){padCapEnd();return false;}if(tvOn&&!ovOn&&$("modal").className!=="open"){var km={37:"left",38:"up",39:"right",40:"down",13:"a",32:"a",27:"b",8:"b",77:"start",112:"start",9:"rb",81:"lb",69:"rb",89:"y",88:"x"},kk=km[e.keyCode];if(kk){tvInput(kk);if(e.preventDefault)e.preventDefault();return false;}}if(ovOn&&e.keyCode===27&&$("modal").className!=="open"){T(function(){return X.OverlayClose();});return false;}if(e.keyCode===27&&$("fbw")&&$("fbw").className==="on"){closeFeedback();return false;}if(e.keyCode===27){if($("modal").className==="open")closeForm();else if(P.page==="detail"||P.page==="game"||P.page==="downloads")backNav();}};
+document.onkeydown=function(e){e=e||window.event;if(PAD.cap&&e.keyCode===27){padCapEnd();return false;}if(tvOn&&!ovOn&&TV.kb&&$("modal").className!=="open"){var ch=e.key&&e.key.length===1?e.key:null;
+    if(e.keyCode===8){tvKbDel();return false;}if(e.keyCode===13||e.keyCode===27){tvKbClose();return false;}if(ch&&!e.ctrlKey&&!e.altKey){tvKbType(ch.toLowerCase());return false;}}
+  if(tvOn&&!ovOn&&$("modal").className!=="open"){var km={37:"left",38:"up",39:"right",40:"down",13:"a",32:"a",27:"b",8:"b",77:"start",112:"start",9:"rb",81:"lb",69:"rb",89:"y",88:"x"},kk=km[e.keyCode];if(kk){tvInput(kk);if(e.preventDefault)e.preventDefault();return false;}}if(ovOn&&e.keyCode===27&&$("modal").className!=="open"){T(function(){return X.OverlayClose();});return false;}if(e.keyCode===27&&$("fbw")&&$("fbw").className==="on"){closeFeedback();return false;}if(e.keyCode===27){if($("modal").className==="open")closeForm();else if(P.page==="detail"||P.page==="game"||P.page==="downloads")backNav();}};
 window.onShown=function(){if(!S)return;var a=$("app");a.className="";void a.offsetWidth;a.className="pop";syncNow();};
 window.onQuit=function(){if(!S)return;var k;for(k in run){var g=gameBy(k);if(g)g.seconds=(g.seconds||0)+Math.round((now()-run[k].t)/1000);}
   saveNow();};
@@ -6272,8 +6598,8 @@ window.onQuit=function(){if(!S)return;var k;for(k in run){var g=gameBy(k);if(g)g
 function init(){
   ENGINE=T(function(){return X.Engine();},"ie");
   document.ondragover=document.ondrop=function(e){e=e||window.event;if(e.preventDefault)e.preventDefault();return false;};
-  loadAcc();
-  var intro=AC.intro!==0,a=accBy(AC.active);
+  loadAcc();applyLook();
+  var intro=AC.intro!==0&&!look().rm,a=accBy(AC.active);
   if(a)startSession(a);else showLogin();
   if(intro){if(a)$("app").className="pop";setTimeout(function(){$("splash").className="out";},1500);setTimeout(function(){$("splash").style.display="none";},2150);}
   else{$("splash").style.display="none";}

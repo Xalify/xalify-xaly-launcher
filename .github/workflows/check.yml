@@ -22,7 +22,7 @@ jobs:
           function L($t) { Write-Host $t; $log.Add([string]$t) }
           L "commit ${{ github.sha }} on ${{ github.ref_name }}"
           $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
-          $refs = "/r:System.Windows.Forms.dll","/r:System.Drawing.dll","/r:System.Core.dll","/r:System.IO.Compression.dll","/r:System.IO.Compression.FileSystem.dll"
+          $refs = "/r:System.Windows.Forms.dll","/r:System.Drawing.dll","/r:System.Core.dll","/r:System.IO.Compression.dll","/r:System.IO.Compression.FileSystem.dll","/r:System.Security.dll"
           try { ./tools/get-webview2.ps1 *>&1 | ForEach-Object { L $_ } } catch { L "get-webview2 failed: $_" }
           if (Test-Path webview2/version.txt) { L ("WebView2 SDK " + (Get-Content webview2/version.txt)) }
           L "== tests =="

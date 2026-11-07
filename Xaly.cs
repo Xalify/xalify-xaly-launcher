@@ -1300,10 +1300,13 @@ namespace Xaly
             if (path == null) return null;
             System.Text.RegularExpressions.Match m;
             if (path == "profile") return "https://api.itch.io/profile";
-            m = System.Text.RegularExpressions.Regex.Match(path, @"^v2/games/(\d+)/uploads$");
-            if (m.Success) return "https://api.itch.io/games/" + m.Groups[1].Value + "/uploads";
-            m = System.Text.RegularExpressions.Regex.Match(path, @"^v2/uploads/(\d+)/download$");
-            if (m.Success) return "https://api.itch.io/uploads/" + m.Groups[1].Value + "/download";
+            if (path == "me/profile") return "https://api.itch.io/profile";
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^me/owned\?page=(\d{1,4})$");
+            if (m.Success) return "https://api.itch.io/profile/owned-keys?page=" + m.Groups[1].Value;
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^v2/games/(\d+)/uploads(\?download_key_id=\d+)?$");
+            if (m.Success) return "https://api.itch.io/games/" + m.Groups[1].Value + "/uploads" + m.Groups[2].Value;
+            m = System.Text.RegularExpressions.Regex.Match(path, @"^v2/uploads/(\d+)/download(\?download_key_id=\d+)?$");
+            if (m.Success) return "https://api.itch.io/uploads/" + m.Groups[1].Value + "/download" + m.Groups[2].Value;
             m = System.Text.RegularExpressions.Regex.Match(path, @"^v1/game/(\d+)/uploads$");
             if (m.Success) return "https://itch.io/api/1/" + Uri.EscapeDataString(key) + "/game/" + m.Groups[1].Value + "/uploads";
             m = System.Text.RegularExpressions.Regex.Match(path, @"^v1/upload/(\d+)/download$");
@@ -1408,11 +1411,124 @@ namespace Xaly
             });
             return "ok";
         }
+        // ---- 2.0.9: Sign in with itch.io (OAuth, implicit flow, https://itch.io/docs/api/oauth).
+        // itch.io sends the browser back to http://127.0.0.1:34719/itch with the sign-in in the address's #fragment,
+        // which only the page can read; the tiny page served here passes it to Xaly and it is kept encrypted for this Windows user.
+        const int ItchPort = 34719;
+        static System.Net.Sockets.TcpListener itchL;
+        static string itchState = "";
+        static System.Threading.Timer itchStop;
+        string ItchTokenPath() { return Path.Combine(f.DataDir, "itch-user.bin"); }
+        string ItchUserToken()
+        {
+            try
+            {
+                string p = ItchTokenPath(); if (!File.Exists(p)) return "";
+                byte[] b = ProtectedData.Unprotect(File.ReadAllBytes(p), Encoding.UTF8.GetBytes("xaly-itch"), DataProtectionScope.CurrentUser);
+                return Encoding.UTF8.GetString(b).Trim();
+            }
+            catch (Exception) { return ""; }
+        }
+        public string ItchSignedIn() { return ItchUserToken().Length > 0 ? "1" : "0"; }
+        public string ItchSignOut() { try { if (File.Exists(ItchTokenPath())) File.Delete(ItchTokenPath()); return "ok"; } catch (Exception ex) { return "ERR:" + ex.Message; } }
+        public string ItchSignIn(string clientId)
+        {
+            try
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(clientId ?? "", "^[A-Za-z0-9_.-]{6,128}$")) return "ERR:Xaly isn't set up for itch.io sign-in yet.";
+                itchState = RandHex("16");
+                if (itchL == null)
+                {
+                    try { itchL = new System.Net.Sockets.TcpListener(IPAddress.Loopback, ItchPort); itchL.Start(); }
+                    catch (Exception) { itchL = null; return "ERR:Another program is using the port Xaly signs in on (" + ItchPort + "). Close it and try again."; }
+                    System.Net.Sockets.TcpListener l = itchL;
+                    ThreadPool.QueueUserWorkItem(delegate(object st) { ItchServe(l); });
+                }
+                if (itchStop != null) itchStop.Dispose();
+                itchStop = new System.Threading.Timer(delegate(object st) { ItchStopListening(); }, null, 600000, Timeout.Infinite);   // give up after 10 minutes
+                string url = "https://itch.io/user/oauth?client_id=" + Uri.EscapeDataString(clientId) + "&scope=" + Uri.EscapeDataString("profile:me profile:owned")
+                    + "&response_type=token&redirect_uri=" + Uri.EscapeDataString("http://127.0.0.1:" + ItchPort + "/itch") + "&state=" + itchState;
+                Process.Start(url);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        static void ItchStopListening() { try { if (itchL != null) itchL.Stop(); } catch (Exception) { } itchL = null; }
+        void ItchServe(System.Net.Sockets.TcpListener l)
+        {
+            while (true)
+            {
+                System.Net.Sockets.TcpClient c;
+                try { c = l.AcceptTcpClient(); } catch (Exception) { return; }   // stopped
+                bool done = false;
+                try
+                {
+                    using (c)
+                    {
+                        c.ReceiveTimeout = 5000;
+                        System.Net.Sockets.NetworkStream ns = c.GetStream();
+                        StreamReader rd = new StreamReader(ns, Encoding.ASCII);
+                        string line = rd.ReadLine() ?? "";
+                        string[] parts = line.Split(' ');
+                        string target = parts.Length > 1 ? parts[1] : "";
+                        string body, type = "text/html; charset=utf-8"; int code = 200;
+                        if (target == "/itch" || target.StartsWith("/itch?")) body = ItchPage(target.Contains("error=") ? "deny" : "");
+                        else if (target.StartsWith("/token?"))
+                        {
+                            type = "text/plain; charset=utf-8";
+                            string tok = "", sta = "";
+                            foreach (string kv in target.Substring(7).Split('&'))
+                            {
+                                int i = kv.IndexOf('='); if (i < 0) continue;
+                                string k = kv.Substring(0, i), v = Uri.UnescapeDataString(kv.Substring(i + 1).Replace('+', ' '));
+                                if (k == "access_token") tok = v; else if (k == "state") sta = v;
+                            }
+                            if (sta.Length == 0 || sta != itchState) { body = "This sign-in didn't come from Xaly. Start again from Xaly."; code = 400; }
+                            else if (!System.Text.RegularExpressions.Regex.IsMatch(tok, "^[A-Za-z0-9_.-]{10,400}$")) { body = "itch.io didn't send a sign-in."; code = 400; }
+                            else
+                            {
+                                File.WriteAllBytes(ItchTokenPath(), ProtectedData.Protect(Encoding.UTF8.GetBytes(tok), Encoding.UTF8.GetBytes("xaly-itch"), DataProtectionScope.CurrentUser));
+                                itchState = ""; body = "ok"; done = true;
+                            }
+                        }
+                        else { body = "Not found"; code = 404; type = "text/plain"; }
+                        byte[] bb = Encoding.UTF8.GetBytes(body);
+                        byte[] head = Encoding.ASCII.GetBytes("HTTP/1.1 " + code + (code == 200 ? " OK" : code == 404 ? " Not Found" : " Bad Request") + "\r\nContent-Type: " + type
+                            + "\r\nContent-Length: " + bb.Length + "\r\nCache-Control: no-store\r\nReferrer-Policy: no-referrer\r\nConnection: close\r\n\r\n");
+                        ns.Write(head, 0, head.Length); ns.Write(bb, 0, bb.Length); ns.Flush();
+                    }
+                }
+                catch (Exception) { }
+                if (done)
+                {
+                    try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onItchSignIn", "1"); try { f.Activate(); } catch (Exception) { } })); } catch (Exception) { }
+                    ItchStopListening(); return;
+                }
+            }
+        }
+        static string ItchPage(string err)
+        {
+            return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><title>Xaly</title></head>"
+                + "<body style=\"margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b0f1a;color:#fff;text-align:center;padding-top:16vh\">"
+                + "<h1 id=\"t\" style=\"font-size:30px\">Signing you in to Xaly\u2026</h1><p id=\"p\" style=\"color:#9aa0b8;font-size:16px\"></p>"
+                + "<script>(function(){var t=document.getElementById('t'),p=document.getElementById('p'),h={};"
+                + "location.hash.replace(/^#/,'').split('&').forEach(function(kv){var i=kv.indexOf('=');if(i>0)h[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));});"
+                + "history.replaceState(null,'','/itch');"
+                + (err == "deny" ? "t.textContent='You didn\u2019t sign in';p.textContent='Nothing was shared with Xaly. You can close this tab.';return;" : "")
+                + "if(!h.access_token){t.textContent='itch.io didn\u2019t sign you in';p.textContent='Go back to Xaly and try again.';return;}"
+                + "var x=new XMLHttpRequest();x.open('GET','/token?access_token='+encodeURIComponent(h.access_token)+'&state='+encodeURIComponent(h.state||''));"
+                + "x.onload=function(){if(x.responseText==='ok'){t.textContent='You\u2019re signed in';p.textContent='You can close this tab and go back to Xaly.';}else{t.textContent='Something went wrong';p.textContent=x.responseText;}};"
+                + "x.onerror=function(){t.textContent='Something went wrong';p.textContent='Xaly stopped waiting. Go back to Xaly and try again.';};x.send();})();</script></body></html>";
+        }
+
         public string ItchApi(string id, string path)
         {
             try
             {
-                string key = ItchKey();
+                // the player's own itch.io sign-in is used for their library and for games they bought; Xaly's key for everything else
+                bool mine = path != null && (path.StartsWith("me/") || path.Contains("download_key_id="));
+                string key = mine ? ItchUserToken() : ItchKey();
+                if (mine && key.Length == 0) return "ERR:You're not signed in with itch.io.";
                 string url = ItchUrl(path, key);
                 if (url == null) return "ERR:Unsupported itch.io request.";
                 HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);

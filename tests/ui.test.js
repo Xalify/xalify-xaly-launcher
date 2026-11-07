@@ -96,6 +96,33 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     navigator.getGamepads = () => []; return out;
   });
   ok(pn.join("|") === "-|Controller connectedXbox controller|Controller connectedDualSense controller|Controller disconnectedDualSense controller|Controller disconnectedXbox controller|-", "controller connect and disconnect notices: " + pn.join("|"));
+  // 2.0.9: Sign in with itch.io: owned games are imported and install with your own download key
+  const io = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms)), E = window.external, paths = [], out = {};
+    E.ItchSignedIn = () => "1";
+    E.ItchApi = (id, path) => { paths.push(path); setTimeout(() => {
+      let body = "{}";
+      if (path === "me/profile") body = JSON.stringify({ user: { username: "noah", display_name: "Noah" } });
+      else if (path === "me/owned?page=1") body = JSON.stringify({ owned_keys: [
+        { id: 555, created_at: "2026-11-01T10:00:00Z", game: { id: 9001, title: "Paid Horror Game", url: "https://dev.itch.io/paid-horror", cover_url: "", min_price: 499, classification: "game", p_windows: true, user: { username: "dev" } } },
+        { id: 556, created_at: "2026-10-01T10:00:00Z", game: { id: 9002, title: "A Soundtrack", url: "https://dev.itch.io/ost", classification: "soundtrack" } } ] });
+      else if (path === "me/owned?page=2") body = JSON.stringify({ owned_keys: [] });
+      else if (/^v2\/games\/9001\/uploads\?download_key_id=555$/.test(path)) body = JSON.stringify({ uploads: [{ id: 77, filename: "PaidHorror.zip", p_windows: true, size: 1000, type: "default" }] });
+      else if (/^v2\/uploads\/77\/download\?download_key_id=555$/.test(path)) body = JSON.stringify({ url: "https://files.itch.zone/paid.zip" });
+      window.onHttp(id, "1", body, "200"); }, 3); return "ok"; };
+    itchRefresh(false); await wait(200);
+    out.owned = (S.owned || []).map(x => x.name + ":" + x.okid + ":" + x.paid).join(",");
+    out.user = S.itchUser;
+    out.storeHidden = storeFilter().some(x => x.owned);
+    nav("lib"); P.lt = "itch"; renderLib(); await wait(50);
+    out.tab = document.getElementById("pLib").textContent.indexOf("Paid Horror Game") > -1 && document.getElementById("pLib").textContent.indexOf("Bought") > -1;
+    let res = null; resolveAny(S.owned[0], (e, r) => { res = e || r.url; }); await wait(200);
+    out.res = res; out.used = paths.filter(x => /download_key_id/.test(x)).length;
+    P.lt = "all"; delete E.ItchApi; E.ItchSignedIn = () => "0"; S.owned = []; return out;
+  });
+  ok(io.owned === "Paid Horror Game:555:true" && io.user === "Noah", "itch.io library imported, games only (" + io.owned + ")");
+  ok(!io.storeHidden && io.tab, "owned games are in Library › itch.io, not on the Store's shelves");
+  ok(io.res === "https://files.itch.zone/paid.zip" && io.used === 2, "a bought game installs with your own itch.io download key (" + io.res + ")");
   // 2.0.4: the smallest window (1000x660) keeps the Library bar and Settings rows on screen
   await p.setViewportSize({ width: 1000, height: 660 });
   const small = await p.evaluate(async () => {

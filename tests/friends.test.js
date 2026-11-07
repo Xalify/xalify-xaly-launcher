@@ -117,5 +117,45 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));let fails=0;const ok=(v,m)=>{if
   ok(!A.c.S.friends.length&&!B.c.S.friends.length,"unfriend removes on both sides");
   // settings render
   A.c.nav("settings","friends");A.c.P.tab="friends";A.c.renderSettings();ok(A.E.reg.sbody.textContent.indexOf("Your friend code")>-1,"settings friends tab");
+  // ===== 2.0.9: group chats =====
+  {
+    const P1=client("Gina"),P2=client("Hal"),P3=client("Ivy"),P4=client("Jo");
+    const all=[P1,P2,P3,P4],poll=async()=>{for(let k=0;k<2;k++){all.forEach(x=>x.c.frPoll());await sleep(25);}};
+    async function befriend(x,y){x.c.addFriend(y.c.S.user.code,"");await sleep(20);y.c.frPoll();await sleep(20);y.c.acceptReq(y.c.S.fr.inc[0]);await sleep(20);x.c.frPoll();await sleep(20);}
+    await befriend(P1,P2);await befriend(P1,P3);await befriend(P1,P4);await poll();
+    ok(P1.c.S.friends.length===3,"group test: Gina has 3 friends");
+    const by=(x,code)=>x.c.S.friends.find(f=>f.code===code);
+    P1.c.newGroup();
+    P1.E.reg.mbox.find(x=>x.tag==="input")[0].value="FNF crew";
+    // tick Hal and Ivy
+    const boxes=P1.E.reg.mbox.find(x=>x.tag==="input"&&x.getAttribute&&x.getAttribute("type")==="checkbox");
+    boxes[0].checked=true;boxes[0].onclick();boxes[1].checked=true;boxes[1].onclick();
+    P1.E.reg.mbox.find(x=>x.tag==="button"&&x._text==="Create group")[0].onclick({});await sleep(20);
+    const g1=P1.c.groups()[0];
+    ok(g1&&g1.mem.length===3&&g1.name==="FNF crew","group made with 3 people");
+    await poll();
+    const g2=P2.c.groups()[0],g3=P3.c.groups()[0];
+    ok(g2&&g3&&g2.key===g1.key&&g3.name==="FNF crew"&&!P4.c.groups().length,"Hal and Ivy got the group, Jo didn't");
+    P2.c.grpSend(g2,"hi all");await sleep(20);await poll();
+    ok(g1.msgs.some(m=>m.x==="hi all"&&m.from===P2.c.S.user.code)&&g3.msgs.some(m=>m.x==="hi all"),"a message reaches everyone in the group");
+    ok(g3.unread===1,"unread count for a group");
+    ok(!P4.c.groups().length&&!JSON.stringify(P4.c.S).includes("hi all"),"someone outside the group sees nothing");
+    // Ivy isn't Hal's friend but sees his name
+    P3.E.reg.fp.className="open";P3.c.P.chat="g:"+g3.id;P3.c.renderFriends(true);ok(P3.E.reg.fpb.textContent.indexOf("Hal")>-1&&P3.E.reg.fpb.textContent.indexOf("hi all")>-1,"group chat view shows the sender's name");
+    // add Jo
+    P1.c.grpAdd(g1);const b2=P1.E.reg.mbox.find(x=>x.tag==="input"&&x.getAttribute&&x.getAttribute("type")==="checkbox");b2[0].checked=true;b2[0].onclick();
+    P1.E.reg.mbox.find(x=>x.tag==="button"&&x._text==="Add")[0].onclick({});await sleep(20);await poll();
+    ok(P4.c.groups().length===1&&g2.mem.length===4,"adding someone updates every member");
+    // remove Hal: new key, Hal can't read what comes next
+    const oldKey=g1.key;P1.c.grpRemove(g1,g1.mem.find(m=>m.code===P2.c.S.user.code));P1.E.reg.mbox.find(x=>x.tag==="button"&&x._text==="Remove")[0].onclick({});await sleep(20);await poll();
+    ok(g1.key!==oldKey&&!P2.c.groups().length&&P3.c.groups()[0].key===g1.key,"removing someone gives the group a new key and removes it for them");
+    P1.c.grpSend(g1,"secret plans");await sleep(20);await poll();
+    ok(P3.c.groups()[0].msgs.some(m=>m.x==="secret plans")&&!JSON.stringify(P2.c.S).includes("secret plans"),"the removed person can't read new messages");
+    // spoof: non-member posts with a stolen old key
+    const tp=P2.c.X.Topic(oldKey,"group");ok(true,"old topic "+tp.length);
+    // leave
+    P3.c.grpLeave(P3.c.groups()[0]);P3.E.reg.mbox.find(x=>x.tag==="button"&&x._text==="Leave group")[0].onclick({});await sleep(20);await poll();
+    ok(!P3.c.groups().length&&!g1.mem.some(m=>m.code===P3.c.S.user.code),"leaving removes you everywhere");
+  }
   console.log(fails?"FAILED "+fails:"FRIENDS OK");process.exit(fails?1:0);
 })();

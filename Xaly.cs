@@ -1545,7 +1545,7 @@ namespace Xaly
                 rq.UserAgent = "Mozilla/5.0 XalyLauncher";
                 rq.AllowAutoRedirect = false;
                 rq.Timeout = 30000;
-                if (url.StartsWith("https://api.itch.io/")) rq.Headers["Authorization"] = key;
+                if (url.StartsWith("https://api.itch.io/")) rq.Headers["Authorization"] = mine ? "Bearer " + key : key;   // a player's own sign-in must be sent as a Bearer token
                 rq.BeginGetResponse(delegate(IAsyncResult ar)
                 {
                     string okFlag = "0", body = "", status = "0";

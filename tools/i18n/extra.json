@@ -263,6 +263,10 @@
 "Fixed: Library › itch.io could stay on “Getting your itch.io games…” for a long time": [
 "Corregido: Biblioteca › itch.io podía quedarse mucho tiempo en “Obteniendo tus juegos de itch.io…”",
 "Corrigido: Biblioteca › itch.io podia ficar muito tempo em “Buscando seus jogos do itch.io…”"
+],
+"Library › itch.io shows your games as they arrive, instead of waiting for your whole itch.io library. Big libraries with lots of claimed free games no longer look empty while they load": [
+"Biblioteca › itch.io muestra tus juegos a medida que llegan, en vez de esperar toda tu biblioteca de itch.io. Las bibliotecas grandes con muchos juegos gratis reclamados ya no se ven vacías mientras cargan",
+"Biblioteca › itch.io mostra seus jogos conforme eles chegam, em vez de esperar sua biblioteca inteira do itch.io. Bibliotecas grandes, com muitos jogos grátis resgatados, não parecem mais vazias enquanto carregam"
 ]
 },
 "t": [
@@ -695,6 +699,11 @@
 "Getting your itch.io games… ({0})",
 "Obteniendo tus juegos de itch.io… ({0})",
 "Buscando seus jogos do itch.io… ({0})"
+],
+[
+"Still getting the rest of your itch.io library… ({0})",
+"Todavía se está obteniendo el resto de tu biblioteca de itch.io… ({0})",
+"Ainda buscando o resto da sua biblioteca do itch.io… ({0})"
 ]
 ]
 }

@@ -1423,9 +1423,27 @@ namespace Xaly
         // which only the page can read; the tiny page served here passes it to Xaly and it is kept encrypted for this Windows user.
         const int ItchPort = 34719;
         static System.Net.Sockets.TcpListener itchL;
-        static string itchState = "";
+        static string itchState = "", itchFor = "";
         static System.Threading.Timer itchStop;
-        string ItchTokenPath() { return Path.Combine(f.DataDir, "itch-user.bin"); }
+        // 2.1.1: every Xaly account on this PC has its own itch.io sign-in (itch-user-<account>.bin); the launcher says which account is signed in
+        static string itchAcc = "";
+        public string ItchUse(string acc) { itchAcc = System.Text.RegularExpressions.Regex.IsMatch(acc ?? "", "^[A-Za-z0-9_-]{1,40}$") ? acc : ""; return "ok"; }
+        string ItchTokenPath() { return ItchTokenPath(itchAcc); }
+        string ItchTokenPath(string acc) { return Path.Combine(f.DataDir, acc.Length > 0 ? "itch-user-" + acc + ".bin" : "itch-user-none.bin"); }
+        // the sign-in from 2.0.9-2.1.0 was shared by every account: the account that used it claims it, once
+        public string ItchClaimOld()
+        {
+            try
+            {
+                string old = Path.Combine(f.DataDir, "itch-user.bin");
+                if (itchAcc.Length == 0 || !File.Exists(old)) return "none";
+                string mine = ItchTokenPath();
+                if (!File.Exists(mine)) File.Move(old, mine); else File.Delete(old);
+                return "ok";
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string ItchForget(string acc) { try { if (System.Text.RegularExpressions.Regex.IsMatch(acc ?? "", "^[A-Za-z0-9_-]{1,40}$") && File.Exists(ItchTokenPath(acc))) File.Delete(ItchTokenPath(acc)); return "ok"; } catch (Exception ex) { return "ERR:" + ex.Message; } }
         string ItchUserToken()
         {
             try
@@ -1443,7 +1461,8 @@ namespace Xaly
             try
             {
                 if (!System.Text.RegularExpressions.Regex.IsMatch(clientId ?? "", "^[A-Za-z0-9_.-]{6,128}$")) return "ERR:Xaly isn't set up for itch.io sign-in yet.";
-                itchState = RandHex("16");
+                if (itchAcc.Length == 0) return "ERR:Sign in to Xaly first.";
+                itchState = RandHex("16"); itchFor = itchAcc;
                 if (itchL == null)
                 {
                     try { itchL = new System.Net.Sockets.TcpListener(IPAddress.Loopback, ItchPort); itchL.Start(); }
@@ -1494,7 +1513,7 @@ namespace Xaly
                             else if (!System.Text.RegularExpressions.Regex.IsMatch(tok, "^[A-Za-z0-9_.-]{10,400}$")) { body = "itch.io didn't send a sign-in."; code = 400; }
                             else
                             {
-                                File.WriteAllBytes(ItchTokenPath(), ProtectedData.Protect(Encoding.UTF8.GetBytes(tok), Encoding.UTF8.GetBytes("xaly-itch"), DataProtectionScope.CurrentUser));
+                                File.WriteAllBytes(ItchTokenPath(itchFor), ProtectedData.Protect(Encoding.UTF8.GetBytes(tok), Encoding.UTF8.GetBytes("xaly-itch"), DataProtectionScope.CurrentUser));
                                 itchState = ""; body = "ok"; done = true;
                             }
                         }
@@ -1508,7 +1527,8 @@ namespace Xaly
                 catch (Exception) { }
                 if (done)
                 {
-                    try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onItchSignIn", "1"); try { f.Activate(); } catch (Exception) { } })); } catch (Exception) { }
+                    string who = itchFor;
+                    try { f.BeginInvoke(new MethodInvoker(delegate { f.Js("onItchSignIn", who); try { f.Activate(); } catch (Exception) { } })); } catch (Exception) { }
                     ItchStopListening(); return;
                 }
             }

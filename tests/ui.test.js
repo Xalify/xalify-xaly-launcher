@@ -123,6 +123,20 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   ok(io.owned === "Paid Horror Game:555:true" && io.user === "Noah", "itch.io library imported, games only (" + io.owned + ")");
   ok(!io.storeHidden && io.tab, "owned games are in Library › itch.io, not on the Store's shelves");
   ok(io.res === "https://files.itch.zone/paid.zip" && io.used === 2, "a bought game installs with your own itch.io download key (" + io.res + ")");
+  // 2.1.1: an itch.io sign-in belongs to the Xaly account that made it
+  const per = await p.evaluate(async () => {
+    const E = window.external, tok = {}; let cur = "";
+    E.ItchUse = a => { cur = a; return "ok"; }; E.ItchSignedIn = () => tok[cur] ? "1" : "0"; E.ItchSignOut = () => { delete tok[cur]; return "ok"; };
+    E.ItchSignIn = () => "ok"; E.ItchForget = a => { delete tok[a]; return "ok"; }; E.ItchClaimOld = () => "none";
+    const A = curAcc.id; tok[A] = 1; const o = { a: itchOn() };
+    const B = { id: "b2test", name: "Other", color: 1, pw: "", file: "b2test.json", created: Date.now() }; AC.list.push(B);
+    curAcc = B; o.b = itchOn();
+    curAcc = AC.list.find(x => x.id === A); o.a2 = itchOn();
+    AC.list.splice(AC.list.indexOf(B), 1);
+    ["ItchUse", "ItchSignedIn", "ItchSignOut", "ItchSignIn", "ItchForget", "ItchClaimOld"].forEach(k => delete E[k]);
+    return o;
+  });
+  ok(per.a === true && per.b === false && per.a2 === true, "an itch.io sign-in only counts for the account that made it (" + JSON.stringify(per) + ")");
   // 2.0.9: languages, theme, text size, reduced motion, TV keyboard
   const lg = await p.evaluate(async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms)), o = {};

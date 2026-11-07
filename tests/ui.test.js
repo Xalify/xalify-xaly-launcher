@@ -83,6 +83,22 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     exitTV(); return out;
   });
   ok(/^([1-9]\d*)\/\1$/.test(tvVis.store) && /^[1-9]/.test(tvVis.home), "TV mode store tiles are visible: " + JSON.stringify(tvVis));
+  // 2.0.4: the smallest window (1000x660) keeps the Library bar and Settings rows on screen
+  await p.setViewportSize({ width: 1000, height: 660 });
+  const small = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms)), out = {};
+    nav("lib"); await wait(150); var h = document.querySelector("#pLib .lhd"); out.lib = h.scrollWidth + "/" + h.clientWidth + "/" + h.offsetHeight;
+    nav("settings", "controller"); P.tab = "controller"; renderSettings(); await wait(150);
+    out.squashed = [].slice.call(document.querySelectorAll("#sbody .srow .sl")).filter(function (x) { return x.offsetParent && x.offsetWidth < 150; }).length;
+    return out;
+  });
+  const lw = small.lib.split("/").map(Number);
+  ok(lw[0] <= lw[1] + 1 && lw[2] < 60, "the Library bar fits on one line in the smallest window: " + small.lib);
+  ok(small.squashed === 0, "Settings labels aren't squashed in the smallest window (" + small.squashed + " squashed)");
+  await p.setViewportSize({ width: 1400, height: 860 });
+  // 2.0.4: signing out from TV mode leaves TV mode
+  const so = await p.evaluate(async () => { enterTV(); signOut(); await new Promise(r => setTimeout(r, 100)); return [tvOn, document.getElementById("tv").className, document.getElementById("login").style.display].join(","); });
+  ok(so === "false,,block", "signing out from TV mode goes back to the sign-in screen: " + so);
   await b.close();
   console.log(fails ? "FAILED " + fails : "ALL PASSED"); process.exit(fails ? 1 : 0);
 })().catch(e => { console.log("EXC", e.stack); process.exit(1); });

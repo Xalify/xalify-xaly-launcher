@@ -719,6 +719,7 @@ namespace Xaly
         public string PadNative(string on) { f.PadNative(on == "1"); return "ok"; }
         public string PadConfig(string stick, string trig) { f.PadConfig(stick, trig); return "ok"; }
         public string PadRaw() { return f.PadRaw(); }
+        public string PadMask() { return f.PadMask(); }
 
         // ---- move a game folder to another drive (<drive>:\Xaly Games\<game>), with progress and cancel
         public string FreeSpace(string path)
@@ -2424,6 +2425,13 @@ namespace Xaly
                 bits |= PadBitsOf(st.Gamepad);
             }
             if (bits != padLast) { padLast = bits; Js("onPad", bits.ToString()); }
+        }
+        // which of the four XInput slots have a controller plugged in (bit 0 = slot 1), for connect / disconnect notices
+        public string PadMask()
+        {
+            int m = 0;
+            for (int i = 0; i < 4; i++) { XState st = new XState(); if (PadRead(i, ref st)) m |= 1 << i; else if (padApi == 0) return "0"; }
+            return m.ToString();
         }
         // the first connected controller, for the live test in Settings: "lx,ly,rx,ry,lt,rt,bits" (sticks -1..1, triggers 0..1)
         public string PadRaw()

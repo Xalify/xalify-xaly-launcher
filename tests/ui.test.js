@@ -83,6 +83,19 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     exitTV(); return out;
   });
   ok(/^([1-9]\d*)\/\1$/.test(tvVis.store) && /^[1-9]/.test(tvVis.home), "TV mode store tiles are visible: " + JSON.stringify(tvVis));
+  // 2.0.8: plugging a controller in or out shows a notice in the bottom-right corner
+  const pn = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms)), out = [], E = window.external, txt = () => { const c = document.getElementById("padn"); return c && c.className === "show" ? c.textContent : ""; };
+    let pads = [], mask = "0"; navigator.getGamepads = () => pads; E.PadMask = () => mask;
+    PADC.init = 0; padConnTick(); const c0 = document.getElementById("padn"); if (c0) c0.className = ""; out.push(txt() || "-");                                     // already plugged in at start: quiet
+    mask = "1"; padConnTick(); out.push(txt()); await wait(20);                              // Xbox controller plugged in
+    pads = [{ id: "DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)", index: 1, connected: true, buttons: [], axes: [] }]; padConnTick(); out.push(txt());
+    pads = []; padConnTick(); out.push(txt());
+    mask = "0"; padConnTick(); out.push(txt());
+    S.set.pad.notice = 0; document.getElementById("padn").className = ""; mask = "1"; padConnTick(); out.push(txt() || "-"); S.set.pad.notice = 1; mask = "0"; padConnTick();
+    navigator.getGamepads = () => []; return out;
+  });
+  ok(pn.join("|") === "-|Controller connectedXbox controller|Controller connectedDualSense controller|Controller disconnectedDualSense controller|Controller disconnectedXbox controller|-", "controller connect and disconnect notices: " + pn.join("|"));
   // 2.0.4: the smallest window (1000x660) keeps the Library bar and Settings rows on screen
   await p.setViewportSize({ width: 1000, height: 660 });
   const small = await p.evaluate(async () => {

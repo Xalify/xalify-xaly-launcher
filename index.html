@@ -342,7 +342,7 @@ button{border:0;font-family:inherit;color:inherit;cursor:pointer;outline:0}
 .ith{width:124px;height:58px;flex:0 0 124px;border-radius:6px;margin-right:18px;background-size:cover;background-position:center;background-color:#1d1d2b}.ith.ico{text-align:center;line-height:58px;font-size:26px;color:#9a9ab0}
 .itx{flex:1 1 0%;min-width:0;padding-right:16px}.inm{font-weight:700;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.isub{color:#8d8da6;font-size:11.5px;font-weight:700;letter-spacing:.6px;margin-top:4px}
 .imb{height:4px;background:#232334;border-radius:2px;margin-top:8px;overflow:hidden;max-width:360px}.imb i{display:block;height:4px;border-radius:2px}
-.isz{font-weight:800;font-size:15px;width:96px;text-align:right}.iact{width:70px;text-align:right;flex:0 0 70px}.iact .btn{padding:6px 12px}
+.isz{font-weight:800;font-size:15px;flex:0 0 96px;text-align:right;white-space:nowrap}.iact{flex:0 0 150px;display:flex;align-items:center;justify-content:flex-end;margin-left:20px}.iact>*{flex:0 0 auto}.iact>*+*{margin-left:12px}.iact .btn{padding:6px 12px}
 .chk{display:inline-block;width:24px;height:24px;border-radius:6px;background:#2a2a3d;color:#fff;text-align:center;line-height:24px;font-size:15px;font-weight:700;cursor:pointer}.chk:hover{background:#363650}.chk.on{background:#7c5cff}
 .selbar{display:flex;align-items:center;background:#241f3f;border:1px solid #3a2f73;border-radius:12px;padding:12px 18px;margin-bottom:12px}.selbar span{flex:1 1 0%}.selbar .btn{margin-left:8px}
 /* modal + toast */
@@ -949,7 +949,7 @@ html,body{overflow:hidden}
 
 .dqk{display:flex;align-items:center;flex-wrap:wrap;margin-bottom:12px}.dqk>span{color:#9aa1b8;font-size:13px;margin-right:10px}.dqk>span:nth-of-type(2){margin-left:18px}
 .ssel{width:auto!important;min-width:130px;max-width:220px;flex:0 0 auto;background:#141925;color:#e8ebf5;border:1px solid #262d40;border-radius:8px;padding:6px 10px;font-size:13px}
-.iact{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-end;width:auto!important;flex:0 0 auto!important;min-width:70px}.iact .btn.sm{margin-right:12px;white-space:nowrap}
+.iact .btn.sm{white-space:nowrap}
 
 .fgw{margin:4px 0 16px}.fgs{color:#9aa1b8;font-size:13.5px;line-height:1.5;margin-bottom:10px}
 .fgspin{width:28px;height:28px;border-radius:50%;border:3px solid #263044;border-top-color:#2ee6f0;margin:14px auto;animation:fgsp .8s linear infinite}@keyframes fgsp{to{transform:rotate(360deg)}}
@@ -1082,8 +1082,9 @@ html.rm .tvbl,html.rm #tv .tvbg{animation:none!important;transform:none!importan
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="2.1.3";
+var VER="2.1.4";
 var NOTES=[
+{v:"2.1.4",d:"10 Nov 2026",t:["Settings \u203A Storage: the Move button no longer squeezes up against the game’s size. Sizes, buttons and checkboxes now line up in neat columns"]},
 {v:"2.1.3",d:"10 Nov 2026",t:["Settings \u203A Storage looks right again: each game has a small cover picture with its name, size and last played date next to it, instead of a stretched banner squeezing the details into a narrow column"]},
 {v:"2.1.2",d:"7 Nov 2026",t:["Installing a game you bought on itch.io works now. itch.io only hands out bought games on its own website, so Xaly opens the game’s page in your browser: click Download there and Xaly installs it as soon as it’s in your Downloads folder. With your own itch.io API key in Settings › Downloads, Xaly downloads it by itself"]},
 {v:"2.1.1",d:"7 Nov 2026",t:["Signing in with itch.io now belongs to your Xaly account only. Other accounts on the same PC don’t see your itch.io games and have to sign in with their own itch.io account"]},

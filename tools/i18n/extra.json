@@ -283,6 +283,150 @@
 "Installing a game you bought on itch.io works now. itch.io only hands out bought games on its own website, so Xaly opens the game’s page in your browser: click Download there and Xaly installs it as soon as it’s in your Downloads folder. With your own itch.io API key in Settings › Downloads, Xaly downloads it by itself": [
 "Ya funciona instalar un juego que compraste en itch.io. itch.io solo entrega los juegos comprados en su propio sitio, así que Xaly abre la página del juego en tu navegador: haz clic en Download ahí y Xaly lo instala en cuanto esté en tu carpeta Descargas. Con tu propia clave de API de itch.io en Configuración › Descargas, Xaly lo descarga solo",
 "Instalar um jogo que você comprou no itch.io agora funciona. O itch.io só entrega jogos comprados no próprio site, então o Xaly abre a página do jogo no seu navegador: clique em Download lá e o Xaly instala assim que ele estiver na sua pasta Downloads. Com sua própria chave de API do itch.io em Configurações › Downloads, o Xaly baixa sozinho"
+],
+"Menu sounds": [
+"Sonidos del menú",
+"Sons do menu"
+],
+"Soft clicks when you move around TV mode, like a console menu.": [
+"Clics suaves al moverte por el modo TV, como en el menú de una consola.",
+"Cliques suaves ao navegar pelo modo TV, como no menu de um console."
+],
+"Quiet": [
+"Bajo",
+"Baixo"
+],
+"Search emoji": [
+"Buscar emoji",
+"Pesquisar emoji"
+],
+"Skin tone": [
+"Tono de piel",
+"Tom de pele"
+],
+"Recently used": [
+"Usados recientemente",
+"Usados recentemente"
+],
+"Emoji you use show up here": [
+"Aquí aparecen los emojis que usas",
+"Os emojis que você usa aparecem aqui"
+],
+"Smileys & emotion": [
+"Caritas y emociones",
+"Carinhas e emoções"
+],
+"People & body": [
+"Personas y cuerpo",
+"Pessoas e corpo"
+],
+"Animals & nature": [
+"Animales y naturaleza",
+"Animais e natureza"
+],
+"Food & drink": [
+"Comida y bebida",
+"Comida e bebida"
+],
+"Activities": [
+"Actividades",
+"Atividades"
+],
+"Travel & places": [
+"Viajes y lugares",
+"Viagens e lugares"
+],
+"Objects": [
+"Objetos",
+"Objetos"
+],
+"Symbols": [
+"Símbolos",
+"Símbolos"
+],
+"Flags": [
+"Banderas",
+"Bandeiras"
+],
+"Pick an emoji": [
+"Elige un emoji",
+"Escolha um emoji"
+],
+"No emoji found": [
+"No se encontró ningún emoji",
+"Nenhum emoji encontrado"
+],
+"More emoji": [
+"Más emojis",
+"Mais emojis"
+],
+"React": [
+"Reaccionar",
+"Reagir"
+],
+"Add reaction": [
+"Agregar reacción",
+"Adicionar reação"
+],
+"This message has as many reactions as it can hold": [
+"Este mensaje ya tiene todas las reacciones que admite",
+"Esta mensagem já tem o máximo de reações possível"
+],
+"Set a custom status": [
+"Establecer un estado personalizado",
+"Definir um status personalizado"
+],
+"What’s happening?": [
+"¿Qué estás haciendo?",
+"O que você está fazendo?"
+],
+"Like “grinding Smash, invite me”": [
+"Por ejemplo, “jugando Smash, invítame”",
+"Por exemplo, “jogando Smash, me chama”"
+],
+"Clear after": [
+"Borrar después de",
+"Limpar depois de"
+],
+"Don’t clear": [
+"No borrar",
+"Não limpar"
+],
+"30 minutes": [
+"30 minutos",
+"30 minutos"
+],
+"1 hour": [
+"1 hora",
+"1 hora"
+],
+"4 hours": [
+"4 horas",
+"4 horas"
+],
+"Change your status": [
+"Cambiar tu estado",
+"Alterar seu status"
+],
+"Friends see it under your name": [
+"Tus amigos lo ven debajo de tu nombre",
+"Seus amigos veem isso abaixo do seu nome"
+],
+"Status set": [
+"Estado guardado",
+"Status definido"
+],
+"Status cleared": [
+"Estado borrado",
+"Status removido"
+],
+"Show it on Discord": [
+"Mostrarlo en Discord",
+"Mostrar no Discord"
+],
+"When the Discord app is open on this PC, your Discord profile shows the game you’re playing in Xaly. Hidden while you’re Invisible.": [
+"Cuando la app de Discord está abierta en esta PC, tu perfil de Discord muestra el juego al que estás jugando en Xaly. Se oculta mientras estás Invisible.",
+"Quando o app do Discord está aberto neste PC, seu perfil do Discord mostra o jogo que você está jogando no Xaly. Fica oculto enquanto você está Invisível."
 ]
 },
 "t": [
@@ -720,6 +864,16 @@
 "Still getting the rest of your itch.io library… ({0})",
 "Todavía se está obteniendo el resto de tu biblioteca de itch.io… ({0})",
 "Ainda buscando o resto da sua biblioteca do itch.io… ({0})"
+],
+[
+"{0} reacted {1} to “{2}”",
+"{0} reaccionó con {1} a “{2}”",
+"{0} reagiu com {1} a “{2}”"
+],
+[
+"{0} reacted {1}",
+"{0} reaccionó con {1}",
+"{0} reagiu com {1}"
 ]
 ]
 }

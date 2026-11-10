@@ -10,7 +10,7 @@ def blank(js, start, end):
     j = js.find(end, i)
     if j < 0: return js
     return js[:i] + re.sub(r'[^\n]', ' ', js[i:j]) + js[j:]
-for st, en in (('/*I18N*/', '/*/I18N*/'), ('var NOTES=[', '\n];'), ('  var L=[\n', '\n  return L.map('), ('var ACC=[', '\n'), ('var AV=[', '\n'), ('var PAL=[', '\n'), ('var TVKB=[', '\n'), ('var FAN=', '\n')):
+for st, en in (('/*I18N*/', '/*/I18N*/'), ('var NOTES=[', '\n];'), ('  var L=[\n', '\n  return L.map('), ('var ACC=[', '\n'), ('var AV=[', '\n'), ('var PAL=[', '\n'), ('var TVKB=[', '\n'), ('var FAN=', '\n'), ('/*EMOJI*/', '/*/EMOJI*/')):
     js = blank(js, st, en)
 
 def tokens(s):

@@ -93,6 +93,38 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
   ok(stCols.cols === 1 && stCols.gap >= 16, "Storage sizes line up in one column with room before the Move button: " + JSON.stringify(stCols));
   const itchHd = await p.evaluate(() => { var s = [].slice.call(document.styleSheets).some(function (ss) { try { return [].slice.call(ss.cssRules).some(function (r) { return r.selectorText === ".ith" && /flex: 1 1 100%/.test(r.cssText); }); } catch (e) { return false; } }); return !s; });
   ok(itchHd, "no other screen restyles the Storage thumbnail class");
+  // 2.2.0: emoji picker, TV menu sounds, Discord Rich Presence
+  const v22 = await p.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms)), o = {}, E = window.external;
+    o.count = emoList().reduce((a, c) => a + c.length, 0);
+    var a = document.createElement("button"); document.body.appendChild(a); var got = "";
+    emojiPick(a, function (e) { got = e; }); o.open = !!document.querySelector(".emp .emg .emc");
+    var q = document.querySelector(".emq"); q.value = "fire"; q.onkeyup({ keyCode: 0 }); o.first = document.querySelector(".emp .emc").textContent;
+    q.onkeyup({ keyCode: 13 }); o.got = got; o.closed = !document.querySelector(".emp"); o.recent = (S.emoR || [])[0];
+    S.set.emoTone = 3; o.tone = emoTone({ e: "\uD83D\uDC4D", t: true }) === "\uD83D\uDC4D\uD83C\uDFFD" && emoTone({ e: "\u261D\uFE0F", t: true }) === "\u261D\uD83C\uDFFD"; S.set.emoTone = 0;
+    var r = a.getBoundingClientRect(); emojiPick(a, function () { }); var pr = document.querySelector(".emp").getBoundingClientRect();
+    o.inView = pr.left >= 0 && pr.top >= 0 && pr.right <= innerWidth && pr.bottom <= innerHeight; emoClose(); a.remove();
+    const played = []; window.uiSnd0 = uiSnd; uiSnd = n => played.push(n);
+    enterTV(); played.length = 0; tvInput("right"); tvInput("lb"); tvInput("b"); tvInput("start"); tvInput("b"); exitTV();
+    o.snd = played.join(","); uiSnd = window.uiSnd0; o.edge = tvSndFor("right", "x", "x") === "" && tvSndFor("right", "x", "y") === "nav" && tvSndFor("lb", "x", "x") === "no";
+    padCfg().snd = 0; o.mute = uiVol() === 0; delete padCfg().snd;
+    const sent = []; E.DiscordSet = (app, act) => { sent.push([app, act]); return "ok"; }; E.DiscordStatus = () => "1";
+    AC.discordApp = "123456789012345678"; S.games.push({ id: "dcg", name: "Sonic Smackdown", path: "C:\\g\\s.exe", image: "https://img.itch.zone/abc.png" });
+    run.dcg = { t: Date.now() - 60000 }; dcTick(true);
+    const act = JSON.parse(sent[sent.length - 1][1] || "null");
+    o.dc = act && act.details === "Sonic Smackdown" && act.assets.large_image === "https://img.itch.zone/abc.png" && act.timestamps.start > 0 ? "ok" : JSON.stringify(sent);
+    S.user.status = "invisible"; dcTick(true); o.dcInv = sent[sent.length - 1][1] === ""; S.user.status = "online";
+    delete run.dcg; dcTick(true); o.dcStop = sent[sent.length - 1][1] === "";
+    S.games = S.games.filter(g => g.id !== "dcg"); delete AC.discordApp; delete E.DiscordSet; delete E.DiscordStatus;
+    return o;
+  });
+  ok(v22.count > 1800, "the emoji picker has every emoji (" + v22.count + ")");
+  ok(v22.open && v22.first === "\uD83D\uDD25" && v22.got === "\uD83D\uDD25" && v22.closed && v22.recent === "\uD83D\uDD25", "emoji search puts the best match first, Enter picks it and it goes to Recently used (" + v22.first + ")");
+  ok(v22.tone, "skin tones apply to emoji that have them");
+  ok(v22.inView, "the emoji picker stays inside the window");
+  ok(v22.snd === "tab,back,menu,back" && v22.edge, "TV mode plays menu sounds for moving, tabs, back and the menu, and stays quiet at the edge: " + v22.snd);
+  ok(v22.mute, "menu sounds can be turned off");
+  ok(v22.dc === "ok" && v22.dcInv && v22.dcStop, "Discord shows the game being played, hides it when Invisible and clears it when the game closes (" + v22.dc + ")");
   // TV mode: every kind of tile must actually be visible (1.8.10: store tiles were see-through)
   const tvVis = await p.evaluate(() => {
     var out = {}; enterTV();

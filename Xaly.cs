@@ -2135,6 +2135,94 @@ namespace Xaly
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
 
+        // ---- Discord Rich Presence: talks to the Discord app on this PC through its local pipe (discord-ipc-0..9).
+        // Nothing goes over the internet from here; Discord shows the activity to the person's friends.
+        static readonly object dcLock = new object();
+        static System.IO.Pipes.NamedPipeClientStream dcPipe;
+        static string dcApp = "", dcWant = null, dcSent = null;
+        static bool dcBusy;
+        // activity = a JSON object (built by the page) or "" to clear. Returns at once; the work happens in the background.
+        public string DiscordSet(string appId, string activity)
+        {
+            if (appId == null || !System.Text.RegularExpressions.Regex.IsMatch(appId, "^[0-9]{15,22}$")) return "ERR:bad app id";
+            activity = activity ?? "";
+            if (activity.Length > 4000 || (activity.Length > 0 && !activity.StartsWith("{"))) return "ERR:bad activity";
+            lock (dcLock)
+            {
+                if (dcApp != appId) { DcClose(); dcApp = appId; dcSent = null; }
+                if (dcPipe == null || !dcPipe.IsConnected) dcSent = null;   // not connected yet: let this call try again
+                dcWant = activity;
+                if (dcBusy) return "ok";
+                dcBusy = true;
+            }
+            ThreadPool.QueueUserWorkItem(delegate(object st)
+            {
+                while (true)
+                {
+                    string want;
+                    lock (dcLock) { if (dcWant == dcSent) { dcBusy = false; return; } want = dcWant; }
+                    bool ok = false;
+                    try { ok = DcSend(want); } catch (Exception) { ok = false; }
+                    lock (dcLock)
+                    {
+                        if (ok) dcSent = want;
+                        else { DcClose(); dcSent = want; }   // Discord isn't running: try again the next time something changes
+                    }
+                }
+            });
+            return "ok";
+        }
+        public string DiscordStatus() { lock (dcLock) { return dcPipe != null && dcPipe.IsConnected ? "1" : "0"; } }
+        static void DcClose()
+        {
+            try { if (dcPipe != null) dcPipe.Dispose(); } catch (Exception) { }
+            dcPipe = null;
+        }
+        static void DcWrite(int op, string json)
+        {
+            byte[] body = Encoding.UTF8.GetBytes(json), head = new byte[8];
+            BitConverter.GetBytes(op).CopyTo(head, 0); BitConverter.GetBytes(body.Length).CopyTo(head, 4);
+            dcPipe.Write(head, 0, 8); dcPipe.Write(body, 0, body.Length); dcPipe.Flush();
+        }
+        static string DcRead()
+        {
+            byte[] head = new byte[8]; int got = 0;
+            while (got < 8) { int n = dcPipe.Read(head, got, 8 - got); if (n <= 0) throw new IOException("closed"); got += n; }
+            int op = BitConverter.ToInt32(head, 0), len = BitConverter.ToInt32(head, 4);
+            if (len < 0 || len > 1 << 20) throw new IOException("bad frame");
+            byte[] body = new byte[len]; got = 0;
+            while (got < len) { int n = dcPipe.Read(body, got, len - got); if (n <= 0) throw new IOException("closed"); got += n; }
+            if (op == 2) throw new IOException("closed by Discord");
+            return Encoding.UTF8.GetString(body);
+        }
+        static bool DcSend(string activity)
+        {
+            if (dcPipe == null || !dcPipe.IsConnected)
+            {
+                if (activity.Length == 0) return true;   // nothing to clear
+                DcClose();
+                for (int i = 0; i < 10 && dcPipe == null; i++)
+                {
+                    var p = new System.IO.Pipes.NamedPipeClientStream(".", "discord-ipc-" + i, System.IO.Pipes.PipeDirection.InOut);
+                    try { p.Connect(250); dcPipe = p; } catch (Exception) { try { p.Dispose(); } catch (Exception) { } }
+                }
+                if (dcPipe == null) return false;
+                DcWrite(0, "{\"v\":1,\"client_id\":\"" + dcApp + "\"}");
+                string ready = DcRead();
+                if (ready.IndexOf("\"READY\"") < 0) { DcClose(); return false; }
+            }
+            string nonce = Guid.NewGuid().ToString("N");
+            DcWrite(1, "{\"cmd\":\"SET_ACTIVITY\",\"args\":{\"pid\":" + System.Diagnostics.Process.GetCurrentProcess().Id + ",\"activity\":" + (activity.Length == 0 ? "null" : activity) + "},\"nonce\":\"" + nonce + "\"}");
+            string resp = DcRead();
+            if (resp.IndexOf("\"evt\":\"ERROR\"") >= 0 && activity.IndexOf("\"large_image\":\"http") >= 0)
+            {   // older Discord versions only take uploaded art names, so retry with the Xaly logo
+                string plain = System.Text.RegularExpressions.Regex.Replace(activity, "\"large_image\":\"http[^\"]*\"", "\"large_image\":\"xaly\"");
+                DcWrite(1, "{\"cmd\":\"SET_ACTIVITY\",\"args\":{\"pid\":" + System.Diagnostics.Process.GetCurrentProcess().Id + ",\"activity\":" + plain + "},\"nonce\":\"" + nonce + "b\"}");
+                DcRead();
+            }
+            return true;
+        }
+
         // ---- display engine
         public string Engine() { return f.Modern ? "webview2" : "ie"; }
         public string UseEngine(string name)

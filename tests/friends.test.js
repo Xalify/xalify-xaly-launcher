@@ -58,6 +58,22 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));let fails=0;const ok=(v,m)=>{if
   B.c.frPoll();await sleep(20);ok(bf.msgs.length===2,"tampered message dropped");
   // dedupe
   B.c.frPoll();await sleep(20);ok(bf.msgs.length===2,"no duplicates on re-poll");
+  // ===== 2.2.0: reactions and custom status =====
+  A.c.rxToggle({f:af},af.msgs[0],"👍");await sleep(20);B.c.frPoll();await sleep(20);
+  ok(bf.msgs[0].rx&&bf.msgs[0].rx["👍"]&&bf.msgs[0].rx["👍"][0]===A.c.S.user.code,"a reaction reaches the sender's copy of the message");
+  B.c.rxToggle({f:bf},bf.msgs[0],"👍");await sleep(20);A.c.frPoll();await sleep(20);
+  ok(af.msgs[0].rx["👍"].length===2&&bf.msgs[0].rx["👍"].length===2,"both people can react with the same emoji");
+  A.c.rxToggle({f:af},af.msgs[0],"👍");await sleep(20);B.c.frPoll();await sleep(20);
+  ok(bf.msgs[0].rx["👍"].length===1&&af.msgs[0].rx["👍"].length===1,"tapping a reaction again takes it back");
+  B.E.reg.fp.className="open";B.c.P.chat=bf.code;B.c.renderFriends(true);ok(B.E.reg.fpb.textContent.indexOf("👍1")>-1,"reaction chips show in the chat ("+B.E.reg.fpb.textContent.slice(0,0)+")");
+  const tp2=Object.keys(relay).find(k=>k.indexOf("xaly-p-")===0),forged=B.X.Seal(bf.key,JSON.stringify({t:"rx",mid:bf.msgs[0].mid,e:"<img src=x>",on:1,f:A.c.S.user.code}));relay[tp2].push({id:"rxbad",time:Math.floor(Date.now()/1000),event:"message",topic:tp2,message:forged});
+  B.c.frPoll();await sleep(20);ok(!bf.msgs[0].rx["<img src=x>"],"a reaction that isn't an emoji is ignored");
+  B.c.S.user.cs={e:"🎮",x:"grinding Smash, invite me",u:0};B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
+  ok(af.cs&&af.cs.x==="grinding Smash, invite me"&&A.c.fline(af)==="🎮 grinding Smash, invite me","a custom status shows under a friend's name: "+A.c.fline(af));
+  B.c.S.user.cs={e:"",x:"brb",u:Date.now()-1000};B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
+  ok(!af.cs&&!B.c.S.user.cs,"an expired custom status clears itself");
+  B.c.S.user.cs={e:"😴",x:"zz",u:0};B.c.S.user.status="invisible";B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
+  ok(!af.cs,"nobody sees your status while you're Invisible");B.c.S.user.status="online";delete B.c.S.user.cs;B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
   // ---- 1.6.3 compare, challenges, alerts
   {const t=Date.now();
   A.c.S.games.push({id:"ga",name:"FNAF World",storeId:"zz1",seconds:600,plays:1,last:t,ach:{first:t}});
@@ -139,6 +155,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));let fails=0;const ok=(v,m)=>{if
     P2.c.grpSend(g2,"hi all");await sleep(20);await poll();
     ok(g1.msgs.some(m=>m.x==="hi all"&&m.from===P2.c.S.user.code)&&g3.msgs.some(m=>m.x==="hi all"),"a message reaches everyone in the group");
     ok(g3.unread===1,"unread count for a group");
+    const gm3=g3.msgs.find(m=>m.x==="hi all");P3.c.rxToggle({g:g3},gm3,"😂");await sleep(20);await poll();
+    const gm2=g2.msgs.find(m=>m.x==="hi all"),gm1=g1.msgs.find(m=>m.x==="hi all");
+    ok(gm2.rx&&gm2.rx["😂"]&&gm2.rx["😂"][0]===P3.c.S.user.code&&gm1.rx["😂"].length===1,"a group reaction reaches everyone");
     ok(!P4.c.groups().length&&!JSON.stringify(P4.c.S).includes("hi all"),"someone outside the group sees nothing");
     // Ivy isn't Hal's friend but sees his name
     P3.E.reg.fp.className="open";P3.c.P.chat="g:"+g3.id;P3.c.renderFriends(true);ok(P3.E.reg.fpb.textContent.indexOf("Hal")>-1&&P3.E.reg.fpb.textContent.indexOf("hi all")>-1,"group chat view shows the sender's name");

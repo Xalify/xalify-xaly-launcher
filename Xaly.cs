@@ -2365,6 +2365,232 @@ namespace Xaly
             }
             catch (Exception ex) { return "ERR:" + ex.Message; }
         }
+        // ---- 2.2.0: photos in chat. A picture is shrunk here, locked with its own random key and uploaded to Xaly's storage.
+        // Only people who get that key inside an end-to-end encrypted chat message can open it; storage only ever sees locked bytes.
+        static readonly Dictionary<string, byte[]> photoPrep = new Dictionary<string, byte[]>();
+        static readonly System.Text.RegularExpressions.Regex PhotoPath = new System.Text.RegularExpressions.Regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9a-f]{32}$");
+        static byte[] SealBytes(byte[] k, byte[] pt)
+        {
+            byte[] ek = Hm(k, "xaly-enc"), mk = Hm(k, "xaly-mac"), iv, ct;
+            using (RijndaelManaged a = new RijndaelManaged())
+            {
+                a.BlockSize = 128; a.KeySize = 256; a.Mode = CipherMode.CBC; a.Padding = PaddingMode.PKCS7; a.Key = ek; a.GenerateIV(); iv = a.IV;
+                using (ICryptoTransform e = a.CreateEncryptor()) ct = e.TransformFinalBlock(pt, 0, pt.Length);
+            }
+            byte[] body = new byte[16 + ct.Length + 16];
+            Buffer.BlockCopy(iv, 0, body, 0, 16); Buffer.BlockCopy(ct, 0, body, 16, ct.Length);
+            byte[] mac; using (HMACSHA256 h = new HMACSHA256(mk)) mac = h.ComputeHash(body, 0, 16 + ct.Length);
+            Buffer.BlockCopy(mac, 0, body, 16 + ct.Length, 16);
+            return body;
+        }
+        static byte[] UnsealBytes(byte[] k, byte[] all)
+        {
+            byte[] ek = Hm(k, "xaly-enc"), mk = Hm(k, "xaly-mac");
+            if (all.Length < 48) throw new Exception("too short");
+            int bl = all.Length - 16;
+            byte[] mac; using (HMACSHA256 h = new HMACSHA256(mk)) mac = h.ComputeHash(all, 0, bl);
+            int diff = 0; for (int i = 0; i < 16; i++) diff |= mac[i] ^ all[bl + i];
+            if (diff != 0) throw new Exception("bad signature");
+            byte[] iv = new byte[16]; Buffer.BlockCopy(all, 0, iv, 0, 16);
+            using (RijndaelManaged a = new RijndaelManaged())
+            {
+                a.BlockSize = 128; a.KeySize = 256; a.Mode = CipherMode.CBC; a.Padding = PaddingMode.PKCS7; a.Key = ek; a.IV = iv;
+                using (ICryptoTransform d = a.CreateDecryptor()) return d.TransformFinalBlock(all, 16, bl - 16);
+            }
+        }
+        static byte[] PhotoJpeg(Image src, int maxSide, long quality, out int w, out int h)
+        {
+            double sc = Math.Min(1.0, (double)maxSide / Math.Max(src.Width, src.Height));
+            w = Math.Max(1, (int)Math.Round(src.Width * sc)); h = Math.Max(1, (int)Math.Round(src.Height * sc));
+            using (Bitmap bm = new Bitmap(w, h))
+            {
+                using (Graphics g = Graphics.FromImage(bm))
+                {
+                    g.Clear(Color.White);   // see-through PNGs get a white background, like most chat apps
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(src, 0, 0, w, h);
+                }
+                ImageCodecInfo jc = null; foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders()) if (c.MimeType == "image/jpeg") jc = c;
+                EncoderParameters ep = new EncoderParameters(1); ep.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
+                using (MemoryStream ms = new MemoryStream()) { bm.Save(ms, jc, ep); return ms.ToArray(); }
+            }
+        }
+        static void PhotoTurn(Image img)
+        {   // phone photos keep their rotation in a tag; turn the picture the right way up
+            try
+            {
+                foreach (int pid in img.PropertyIdList) if (pid == 0x0112)
+                {
+                    int o = img.GetPropertyItem(0x0112).Value[0];
+                    RotateFlipType t = o == 3 ? RotateFlipType.Rotate180FlipNone : o == 6 ? RotateFlipType.Rotate90FlipNone : o == 8 ? RotateFlipType.Rotate270FlipNone : RotateFlipType.RotateNoneFlipNone;
+                    if (t != RotateFlipType.RotateNoneFlipNone) img.RotateFlip(t);
+                }
+            }
+            catch (Exception) { }
+        }
+        // src = a file path, or "clip" for a picture on the clipboard. Returns id|width|height|kind|preview|tiny blurred preview
+        public string PhotoPrep(string src)
+        {
+            try
+            {
+                Image img; byte[] raw = null; bool gif = false;
+                if (src == "clip") { if (!Clipboard.ContainsImage()) return "ERR:none"; img = Clipboard.GetImage(); if (img == null) return "ERR:none"; }
+                else
+                {
+                    if (string.IsNullOrEmpty(src) || !File.Exists(src)) return "ERR:missing";
+                    if (new FileInfo(src).Length > (40L << 20)) return "ERR:too big";
+                    raw = File.ReadAllBytes(src);
+                    img = Image.FromStream(new MemoryStream(raw));
+                    try { gif = raw.Length <= 3000000 && raw.Length > 6 && raw[0] == 'G' && raw[1] == 'I' && raw[2] == 'F' && img.GetFrameCount(FrameDimension.Time) > 1; } catch (Exception) { gif = false; }
+                    if (!gif) PhotoTurn(img);
+                }
+                using (img)
+                {
+                    int w, h, pw, ph, tw, th; byte[] full;
+                    if (gif) { full = raw; w = img.Width; h = img.Height; }
+                    else { full = PhotoJpeg(img, 1600, 82, out w, out h); if (full.Length > 900000) full = PhotoJpeg(img, 1280, 70, out w, out h); }
+                    byte[] prev = PhotoJpeg(img, 480, 76, out pw, out ph), tiny = PhotoJpeg(img, 20, 50, out tw, out th);
+                    string id = Guid.NewGuid().ToString("N");
+                    lock (photoPrep) { photoPrep.Clear(); photoPrep[id] = full; }
+                    return id + "|" + w + "|" + h + "|" + (gif ? "gif" : "jpg") + "|data:image/jpeg;base64," + Convert.ToBase64String(prev) + "|data:image/jpeg;base64," + Convert.ToBase64String(tiny);
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        public string PhotoClipReady() { try { return Clipboard.ContainsImage() ? "1" : "0"; } catch (Exception) { return "0"; } }
+        public string PhotoUpload(string id, string prepId, string keyHex, string objPath, string bearer)
+        {
+            if (objPath == null || !PhotoPath.IsMatch(objPath)) return "ERR:bad path";
+            if (string.IsNullOrEmpty(bearer)) return "ERR:no token";
+            byte[] full;
+            lock (photoPrep) { if (!photoPrep.TryGetValue(prepId ?? "", out full)) return "ERR:gone"; photoPrep.Remove(prepId); }
+            byte[] key;
+            try { key = FromHex(keyHex); if (key.Length != 32) return "ERR:bad key"; } catch (Exception) { return "ERR:bad key"; }
+            Thread t = new Thread(delegate()
+            {
+                string ok = "0", text = "", code = "0";
+                try
+                {
+                    byte[] body = SealBytes(key, full);
+                    try { File.WriteAllBytes(PhotoCache(objPath), body); } catch (Exception) { }
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(SupaUrl + "/storage/v1/object/chat-media/" + objPath);
+                    rq.Method = "POST"; rq.Timeout = 60000; rq.ReadWriteTimeout = 60000; rq.UserAgent = "XalyLauncher";
+                    rq.Headers["apikey"] = SupaKey; rq.Headers["Authorization"] = "Bearer " + bearer; rq.Headers["x-upsert"] = "false";
+                    rq.ContentType = "application/octet-stream"; rq.ContentLength = body.Length;
+                    using (Stream st = rq.GetRequestStream()) st.Write(body, 0, body.Length);
+                    using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                    using (StreamReader sr = new StreamReader(rs.GetResponseStream(), Encoding.UTF8))
+                    { text = sr.ReadToEnd(); code = ((int)rs.StatusCode).ToString(); ok = "1"; }
+                }
+                catch (WebException we)
+                {
+                    HttpWebResponse er = we.Response as HttpWebResponse;
+                    if (er != null) { code = ((int)er.StatusCode).ToString(); try { using (StreamReader sr = new StreamReader(er.GetResponseStream(), Encoding.UTF8)) text = sr.ReadToEnd(); } catch (Exception) { } try { er.Close(); } catch (Exception) { } }
+                    else text = we.Message;
+                }
+                catch (Exception ex) { text = ex.Message; }
+                f.Js("onHttp", id, ok, text, code);
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+        string PhotoCache(string objPath)
+        {
+            string d = Path.Combine(f.DataDir, "photos"); Directory.CreateDirectory(d);
+            return Path.Combine(d, objPath.Replace("/", "_") + ".bin");
+        }
+        // fetches a photo (from the local cache when it's there), unlocks it and hands it to the page as a data: URL
+        public string PhotoGet(string id, string objPath, string keyHex)
+        {
+            if (objPath == null || !PhotoPath.IsMatch(objPath)) return "ERR:bad path";
+            byte[] key;
+            try { key = FromHex(keyHex); if (key.Length != 32) return "ERR:bad key"; } catch (Exception) { return "ERR:bad key"; }
+            Thread t = new Thread(delegate()
+            {
+                string ok = "0", text = "", code = "0";
+                try
+                {
+                    string cache = PhotoCache(objPath); byte[] locked = null;
+                    if (File.Exists(cache)) locked = File.ReadAllBytes(cache);
+                    else
+                    {
+                        try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                        HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(SupaUrl + "/storage/v1/object/public/chat-media/" + objPath);
+                        rq.Timeout = 60000; rq.ReadWriteTimeout = 60000; rq.UserAgent = "XalyLauncher";
+                        using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse())
+                        using (Stream st = rs.GetResponseStream())
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            byte[] buf = new byte[65536]; int n;
+                            while ((n = st.Read(buf, 0, buf.Length)) > 0) { ms.Write(buf, 0, n); if (ms.Length > (8L << 20)) throw new Exception("too big"); }
+                            locked = ms.ToArray();
+                        }
+                        try { File.WriteAllBytes(cache, locked); } catch (Exception) { }
+                    }
+                    byte[] pic = UnsealBytes(key, locked);
+                    bool gif = pic.Length > 3 && pic[0] == 'G' && pic[1] == 'I' && pic[2] == 'F';
+                    text = "data:image/" + (gif ? "gif" : "jpeg") + ";base64," + Convert.ToBase64String(pic); ok = "1"; code = "200";
+                }
+                catch (WebException we)
+                {
+                    HttpWebResponse er = we.Response as HttpWebResponse;
+                    if (er != null) { code = ((int)er.StatusCode).ToString(); try { er.Close(); } catch (Exception) { } }
+                    text = we.Message;
+                }
+                catch (Exception ex) { text = ex.Message; code = "500"; }
+                f.Js("onHttp", id, ok, text, code);
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
+        public string PhotoSave(string objPath, string keyHex, string name)
+        {
+            try
+            {
+                if (objPath == null || !PhotoPath.IsMatch(objPath)) return "ERR:bad path";
+                string cache = PhotoCache(objPath); if (!File.Exists(cache)) return "ERR:not downloaded";
+                byte[] pic = UnsealBytes(FromHex(keyHex), File.ReadAllBytes(cache));
+                bool gif = pic.Length > 3 && pic[0] == 'G' && pic[1] == 'I' && pic[2] == 'F';
+                using (SaveFileDialog d = new SaveFileDialog())
+                {
+                    string safe = System.Text.RegularExpressions.Regex.Replace(name ?? "", "[^A-Za-z0-9 _-]", "").Trim();
+                    d.FileName = (safe.Length > 0 ? safe : "Xaly photo") + (gif ? ".gif" : ".jpg");
+                    d.Filter = gif ? "GIF picture|*.gif" : "JPEG picture|*.jpg";
+                    if (d.ShowDialog(f) != DialogResult.OK) return "cancel";
+                    File.WriteAllBytes(d.FileName, pic); return "ok";
+                }
+            }
+            catch (Exception ex) { return "ERR:" + ex.Message; }
+        }
+        // deletes your own uploaded photos (used for old ones), through storage's own API so the files really go
+        public string PhotoDelete(string id, string pathsCsv, string bearer)
+        {
+            string[] ps = (pathsCsv ?? "").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if (ps.Length == 0 || ps.Length > 100 || string.IsNullOrEmpty(bearer)) return "ERR:bad";
+            StringBuilder sb = new StringBuilder("{\"prefixes\":[");
+            for (int i = 0; i < ps.Length; i++) { if (!PhotoPath.IsMatch(ps[i])) return "ERR:bad path"; sb.Append(i > 0 ? "," : "").Append("\"").Append(ps[i]).Append("\""); }
+            sb.Append("]}");
+            Thread t = new Thread(delegate()
+            {
+                string ok = "0", code = "0";
+                try
+                {
+                    try { ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)768 | SecurityProtocolType.Tls; } catch (Exception) { }
+                    HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(SupaUrl + "/storage/v1/object/chat-media");
+                    rq.Method = "DELETE"; rq.Timeout = 30000; rq.UserAgent = "XalyLauncher";
+                    rq.Headers["apikey"] = SupaKey; rq.Headers["Authorization"] = "Bearer " + bearer;
+                    byte[] b = Encoding.UTF8.GetBytes(sb.ToString()); rq.ContentType = "application/json"; rq.ContentLength = b.Length;
+                    using (Stream st = rq.GetRequestStream()) st.Write(b, 0, b.Length);
+                    using (HttpWebResponse rs = (HttpWebResponse)rq.GetResponse()) { code = ((int)rs.StatusCode).ToString(); ok = "1"; }
+                }
+                catch (WebException we) { HttpWebResponse er = we.Response as HttpWebResponse; if (er != null) { code = ((int)er.StatusCode).ToString(); try { er.Close(); } catch (Exception) { } } }
+                catch (Exception) { }
+                f.Js("onHttp", id, ok, "", code);
+            });
+            t.IsBackground = true; t.Start();
+            return "ok";
+        }
         public string Unseal(string keyHex, string b64)
         {
             try

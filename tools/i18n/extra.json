@@ -427,6 +427,98 @@
 "When the Discord app is open on this PC, your Discord profile shows the game you’re playing in Xaly. Hidden while you’re Invisible.": [
 "Cuando la app de Discord está abierta en esta PC, tu perfil de Discord muestra el juego al que estás jugando en Xaly. Se oculta mientras estás Invisible.",
 "Quando o app do Discord está aberto neste PC, seu perfil do Discord mostra o jogo que você está jogando no Xaly. Fica oculto enquanto você está Invisível."
+],
+"Photo": [
+"Foto",
+"Foto"
+],
+"GIF unavailable": [
+"GIF no disponible",
+"GIF indisponível"
+],
+"Photo no longer available": [
+"La foto ya no está disponible",
+"A foto não está mais disponível"
+],
+"Couldn’t load the photo. Click to try again.": [
+"No se pudo cargar la foto. Haz clic para intentarlo de nuevo.",
+"Não foi possível carregar a foto. Clique para tentar de novo."
+],
+"Save photo": [
+"Guardar foto",
+"Salvar foto"
+],
+"Photo saved": [
+"Foto guardada",
+"Foto salva"
+],
+"Couldn’t save the photo": [
+"No se pudo guardar la foto",
+"Não foi possível salvar a foto"
+],
+"That picture is too big": [
+"Esa imagen es demasiado grande",
+"Essa imagem é grande demais"
+],
+"Couldn’t open that picture": [
+"No se pudo abrir esa imagen",
+"Não foi possível abrir essa imagem"
+],
+"Photo ready. Press Enter to send": [
+"Foto lista. Presiona Enter para enviarla",
+"Foto pronta. Pressione Enter para enviar"
+],
+"Sending photos needs an online Xaly account. Link one in Settings › Account.": [
+"Para enviar fotos necesitas una cuenta de Xaly en línea. Vincula una en Configuración › Cuenta.",
+"Para enviar fotos, você precisa de uma conta on-line do Xaly. Vincule uma em Configurações › Conta."
+],
+"Couldn’t send the photo": [
+"No se pudo enviar la foto",
+"Não foi possível enviar a foto"
+],
+"Sign in to your online account again to send photos": [
+"Vuelve a iniciar sesión en tu cuenta en línea para enviar fotos",
+"Entre de novo na sua conta on-line para enviar fotos"
+],
+"Couldn’t reach Xaly’s servers. Try again in a moment.": [
+"No se pudo conectar con los servidores de Xaly. Inténtalo de nuevo en un momento.",
+"Não foi possível conectar aos servidores do Xaly. Tente de novo daqui a pouco."
+],
+"That photo is too big to send": [
+"Esa foto es demasiado grande para enviarla",
+"Essa foto é grande demais para enviar"
+],
+"Couldn’t upload the photo. Try again.": [
+"No se pudo subir la foto. Inténtalo de nuevo.",
+"Não foi possível enviar a foto. Tente de novo."
+],
+"Pick the photo again": [
+"Vuelve a elegir la foto",
+"Escolha a foto de novo"
+],
+"GIFs aren’t available right now": [
+"Los GIFs no están disponibles en este momento",
+"Os GIFs não estão disponíveis agora"
+],
+"Search GIPHY": [
+"Buscar en GIPHY",
+"Pesquisar no GIPHY"
+],
+"No GIFs found": [
+"No se encontraron GIFs",
+"Nenhum GIF encontrado"
+],
+"Couldn’t reach GIPHY": [
+"No se pudo conectar con GIPHY",
+"Não foi possível conectar ao GIPHY"
+],
+"Send a photo": [
+"Enviar una foto",
+"Enviar uma foto"
+],
+"Send a GIF": [
+"Enviar un GIF",
+"Enviar um GIF"
 ]
 },
 "t": [

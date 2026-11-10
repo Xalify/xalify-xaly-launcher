@@ -73,7 +73,29 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));let fails=0;const ok=(v,m)=>{if
   B.c.S.user.cs={e:"",x:"brb",u:Date.now()-1000};B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
   ok(!af.cs&&!B.c.S.user.cs,"an expired custom status clears itself");
   B.c.S.user.cs={e:"😴",x:"zz",u:0};B.c.S.user.status="invisible";B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
-  ok(!af.cs,"nobody sees your status while you're Invisible");B.c.S.user.status="online";delete B.c.S.user.cs;B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
+  ok(!af.cs,"nobody sees your status while you're Invisible");
+  // photos and GIFs
+  const UID="11111111-2222-3333-4444-555555555555";let up=null,del=null;
+  A.X.PhotoPrep=()=>"pid1|800|600|jpg|data:image/jpeg;base64,AAAA|data:image/jpeg;base64,AAAAAAAAAAAA";
+  A.X.PhotoUpload=(id,pid,k,path,tok)=>{up={pid,k,path,tok};setTimeout(()=>A.c.onHttp(id,"1","{}","200"),2);return "ok";};
+  A.X.PhotoDelete=(id,paths,tok)=>{del=paths;setTimeout(()=>A.c.onHttp(id,"1","","200"),2);return "ok";};
+  A.c.ONLINE_ACCOUNTS=1;A.c.curAcc.sb={uid:UID,at:"tok1",exp:Date.now()+1e7};
+  A.c.P.chat=af.code;A.c.photoPick({f:af},"C:\\pic.jpg");ok(A.c.P.photo&&A.c.P.photo.w===800,"a picked photo waits above the message box");
+  A.c.photoSend({f:af},"sunset");await sleep(30);
+  ok(up&&up.pid==="pid1"&&/^[0-9a-f]{64}$/.test(up.k)&&up.path.indexOf(UID+"/")===0&&up.tok==="tok1","the photo is uploaded locked, into your own folder");
+  B.c.frPoll();await sleep(20);const bm=bf.msgs[bf.msgs.length-1];
+  ok(bm.img&&bm.img.p===up.path&&bm.img.k===up.k&&bm.x==="sunset"&&bm.img.w===800,"the friend gets the photo's name and key inside the encrypted message");
+  ok(!JSON.stringify(relay).includes(up.k),"the photo's key never appears on the relay unencrypted");
+  ok(A.c.S.upl.some(x=>x.p===up.path),"your upload is remembered so it can be cleaned up");
+  A.c.S.upl[0].t=Date.now()-31*86400000;A.c.photoCleanup();await sleep(20);ok(del===up.path&&!A.c.S.upl.length,"photos older than 30 days are deleted from storage");
+  A.c.sendRich({f:af},"",{gif:{u:"https://media2.giphy.com/media/abc123/200.gif",w:356,h:200,t:"dance"}});await sleep(20);B.c.frPoll();await sleep(20);
+  const bg=bf.msgs[bf.msgs.length-1];ok(bg.gif&&bg.gif.u==="https://media2.giphy.com/media/abc123/200.gif","a GIF arrives");
+  const n0=bf.msgs.length,tp3=Object.keys(relay).find(k=>k.indexOf("xaly-p-")===0);
+  relay[tp3].push({id:"gbad",time:Math.floor(Date.now()/1000),event:"message",topic:tp3,message:A.X.Seal(af.key,JSON.stringify({t:"msg",mid:"zz1",gif:{u:"https://evil.example.com/x.gif"},f:A.c.S.user.code}))});
+  relay[tp3].push({id:"ibad",time:Math.floor(Date.now()/1000),event:"message",topic:tp3,message:A.X.Seal(af.key,JSON.stringify({t:"msg",mid:"zz2",img:{p:"../../etc",k:"x"},f:A.c.S.user.code}))});
+  B.c.frPoll();await sleep(20);ok(bf.msgs.length===n0,"GIFs from other sites and bad photo links are dropped");
+  B.E.reg.fp.className="open";B.c.P.chat=bf.code;B.c.renderFriends(true);ok(B.E.reg.fpb.textContent.indexOf("GIF")>-1,"photos and GIFs render in the chat");
+  A.c.ONLINE_ACCOUNTS=0;B.c.S.user.status="online";delete B.c.S.user.cs;B.c.pubStatus(true);await sleep(20);A.c.frPoll();await sleep(20);
   // ---- 1.6.3 compare, challenges, alerts
   {const t=Date.now();
   A.c.S.games.push({id:"ga",name:"FNAF World",storeId:"zz1",seconds:600,plays:1,last:t,ach:{first:t}});

@@ -726,7 +726,7 @@ select::-ms-expand{display:none}
 #tv{position:fixed;left:0;top:0;right:0;bottom:0;z-index:140;display:none;background:#04060b;overflow:hidden;color:#fff;font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif}
 #tv.on{display:block;animation:fade2 .35s both}
 .msg.itm b{display:block;font-size:20px;color:#fff;margin-bottom:8px}.msg.itm div{max-width:460px;margin:0 auto;line-height:1.5}
-.ith{display:flex;flex:1 1 100%;width:100%;box-sizing:border-box;padding:0 4px;align-items:center;justify-content:space-between;color:#9aa0b8;font-size:13px;margin:4px 0 16px}.ithg{margin-right:-16px}.ithg .gc{display:inline-block;vertical-align:top;width:210px;margin:0 16px 18px 0}
+.itchd{display:flex;flex:1 1 100%;width:100%;box-sizing:border-box;padding:0 4px;align-items:center;justify-content:space-between;color:#9aa0b8;font-size:13px;margin:4px 0 16px}.ithg{margin-right:-16px}.ithg .gc{display:inline-block;vertical-align:top;width:210px;margin:0 16px 18px 0}
 .gav{position:relative;flex:0 0 auto}.gav .av{position:absolute;border:2px solid #10141d}.gav .av.g0{left:0;top:0}.gav .av.g1{right:0;bottom:0}
 .fr .gav{margin-right:12px}.ichm .gav{margin-right:10px}.chempty .gav{margin:0 auto 10px}
 .gh.ghg{display:flex;align-items:center;justify-content:space-between}.ghb{background:none;border:0;color:#2ee6f0;font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0;text-transform:none;letter-spacing:0}
@@ -1082,8 +1082,9 @@ html.rm .tvbl,html.rm #tv .tvbg{animation:none!important;transform:none!importan
 <div id="ovl"><div id="ovbg"></div><div class="ovtop"><div class="ovbr" id="ovbr"></div><div class="ovgame" id="ovgame"></div><div class="ovclk" id="ovclk"></div><div class="ovhint"><kbd>Shift</kbd>+<kbd>Tab</kbd> or <kbd>Esc</kbd></div><button class="btn" id="ovx">Back to game</button></div><div class="ovbody"><div class="ovl" id="ovleft"></div><div class="ovr" id="ovright"></div></div></div>
 <script>
 var X=(window.chrome&&window.chrome.webview&&window.chrome.webview.hostObjects)?window.chrome.webview.hostObjects.sync.external:window.external, S=null, AC=null, curAcc=null, run={}, dl=null, covQ=[], covBusy=0, cbs={}, peers=[], syncMsg="", syncT=null, st=null, sizeQ={}, pmA=null;
-var VER="2.1.2";
+var VER="2.1.3";
 var NOTES=[
+{v:"2.1.3",d:"10 Nov 2026",t:["Settings \u203A Storage looks right again: each game has a small cover picture with its name, size and last played date next to it, instead of a stretched banner squeezing the details into a narrow column"]},
 {v:"2.1.2",d:"7 Nov 2026",t:["Installing a game you bought on itch.io works now. itch.io only hands out bought games on its own website, so Xaly opens the game’s page in your browser: click Download there and Xaly installs it as soon as it’s in your Downloads folder. With your own itch.io API key in Settings › Downloads, Xaly downloads it by itself"]},
 {v:"2.1.1",d:"7 Nov 2026",t:["Signing in with itch.io now belongs to your Xaly account only. Other accounts on the same PC don’t see your itch.io games and have to sign in with their own itch.io account"]},
 {v:"2.1.0",d:"7 Nov 2026",t:["Library › itch.io shows your games as they arrive, instead of waiting for your whole itch.io library. Big libraries with lots of claimed free games no longer look empty while they load"]},
@@ -3723,7 +3724,7 @@ function renderItchLib(pg){
     var b=btn("Sign in with itch.io","pri",itchSignIn);b.style.cssText="display:block;margin:16px auto 0";m.appendChild(b);pg.appendChild(m);return;}
   var q=P.lq.toLowerCase(),l=(S.owned||[]).filter(function(x){return x.name.toLowerCase().indexOf(q)>=0;});
   if(S.itchErr)pg.appendChild(el("div","fnote ferr","Couldn't get your itch.io games: "+S.itchErr));
-  var hd=el("div","ith");hd.appendChild(el("span","",(S.itchUser?S.itchUser+" \u00B7 ":"")+(S.owned||[]).length+" games on itch.io"+(S.ownedT?" \u00B7 updated "+ago(S.ownedT):"")));
+  var hd=el("div","itchd");hd.appendChild(el("span","",(S.itchUser?S.itchUser+" \u00B7 ":"")+(S.owned||[]).length+" games on itch.io"+(S.ownedT?" \u00B7 updated "+ago(S.ownedT):"")));
   hd.appendChild(btn(itchSync?"Updating\u2026":"Refresh","btn sm",function(){itchRefresh(true);renderLib();}));pg.appendChild(hd);
   if(itchSync&&l.length)pg.appendChild(el("div","fnote","Still getting the rest of your itch.io library\u2026 ("+(S.itchPg||1)+")"));
   if(!l.length){pg.appendChild(el("div","msg",itchSync?"Getting your itch.io games\u2026"+(S.itchPg>1?" ("+S.itchPg+")":""):(S.owned||[]).length?"No games match your search.":"No games in your itch.io library yet. Games you buy or claim on itch.io show up here."));return;}

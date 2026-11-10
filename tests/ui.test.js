@@ -75,6 +75,18 @@ let fails = 0; const ok = (c, m) => { if (!c) { fails++; console.log("FAIL:", m)
     closeOverlay(); delete run.gt; return r;
   });
   ok(ovq === "ok", "overlay quit asks inside the overlay (" + ovq + ")");
+  // 2.1.3: Storage thumbnails were stretched by an itch.io header that reused the .ith class
+  const stl = await p.evaluate(() => {
+    nav("settings", "storage"); P.tab = "storage"; renderSettings();
+    onScan("1000|3000|10|10|Big Game|1890000000|C:\\DL\\Games\\Big Game\nSmall Game|423000000|C:\\DL\\Games\\Small Game");
+    var th = document.querySelector(".irow .ith"), tx = document.querySelector(".irow .itx");
+    var r = th && th.getBoundingClientRect(), t = tx && tx.getBoundingClientRect();
+    var out = r ? Math.round(r.width) + "x" + Math.round(r.height) + " text " + Math.round(t.width) : "no rows";
+    SC = null; scanning = false; return out;
+  });
+  ok(/^124x58 text (\d+)$/.test(stl) && +stl.split(" ")[2] > 250, "Storage rows keep a small thumbnail with room for the name and details (" + stl + ")");
+  const itchHd = await p.evaluate(() => { var s = [].slice.call(document.styleSheets).some(function (ss) { try { return [].slice.call(ss.cssRules).some(function (r) { return r.selectorText === ".ith" && /flex: 1 1 100%/.test(r.cssText); }); } catch (e) { return false; } }); return !s; });
+  ok(itchHd, "no other screen restyles the Storage thumbnail class");
   // TV mode: every kind of tile must actually be visible (1.8.10: store tiles were see-through)
   const tvVis = await p.evaluate(() => {
     var out = {}; enterTV();
